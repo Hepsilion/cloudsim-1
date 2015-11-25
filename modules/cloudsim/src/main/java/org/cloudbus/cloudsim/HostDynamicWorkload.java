@@ -77,6 +77,9 @@ public class HostDynamicWorkload extends Host {
 
 		for (Vm vm : getVmList()) {
 			double totalRequestedMips = vm.getCurrentRequestedTotalMips();
+				if(totalRequestedMips > vm.getMips())
+	                totalRequestedMips = vm.getMips();
+			
 			double totalAllocatedMips = getVmScheduler().getTotalAllocatedMipsForVm(vm);
 
 			if (!Log.isDisabled()) {
@@ -138,6 +141,64 @@ public class HostDynamicWorkload extends Host {
 
 		return smallerTime;
 	}
+	
+		/**
+		 * 
+		 * Check if DVFS is active on the Host. If yes, dvfs method is called.
+		 * 
+		 * 
+		 */
+		public void isDvfsActivatedOnHost() {
+			// dvfs call
+			if (isEnableDVFS())
+				applyDvfsOnHost();
+		}
+	
+		/**
+		 * 
+		 * 
+		 * DVFS method
+		 * 
+		 * for each Pe , 'changeFrequency' methode is called
+		 * 
+		 * then this method check if VM size has to be Decrease or Increase
+		 * regarding the Pe.changeFrequency return value.
+		 * 
+		 * 
+		 */
+		private void applyDvfsOnHost() {
+			for (Pe pe : this.<Pe> getPeList()) {
+				double utilPe = pe.getPeProvisioner().getUtilization() * 100;
+				int cur_mips = pe.getMips();
+				// System.out.println("PE " + pe.getId() + " Utilization == " +
+				// utilPe);
+	
+				int res = pe.changeFrequency();
+				// System.out.println("PE " + pe.getId() +" New frequency =" +
+				// pe.getMips());
+				double new_AvailableMips = getAvailableMips()
+						+ (pe.getMips() - cur_mips);
+	
+				/*
+				 * it means that the CPU frequency change caused an overflow of Host
+				 * Capacity (Available Mips of Host < 0 ! ) All VM of that Host will
+				 * be reduce in order to fit them on the Host
+				 */
+				if (new_AvailableMips < 0)
+					decreaseVmMips();
+	
+				setAvailableMips(new_AvailableMips);
+				// System.out.println("Available mips  = " + getAvailableMips());
+				/*
+				 * 
+				 * if the cpu frequency has been increased , we can regrow the VMs
+				 * size.
+				 */
+				if (res == 1 || res == 2)
+					regrowVmMips();
+	
+			}
+		}
 
 	/**
 	 * Gets the completed vms.

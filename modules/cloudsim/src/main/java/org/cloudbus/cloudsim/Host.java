@@ -9,6 +9,7 @@ package org.cloudbus.cloudsim;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.PeList;
@@ -56,6 +57,9 @@ public class Host {
 	/** The datacenter where the host is placed. */
 	private Datacenter datacenter;
 
+		private boolean enableDVFS = false;
+	    private boolean enableONOFF = false;
+    
 	/**
 	 * Instantiates a new host.
 	 * 
@@ -191,6 +195,220 @@ public class Host {
 				&& getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) && getBwProvisioner()
 				.isSuitableForVm(vm, vm.getCurrentRequestedBw()));
 	}
+	
+		public boolean MakeSuitableHostForVm(Vm vm) {
+			// IF DVFS ENABLE
+			// IT'S POSSIBLE THAT THE FIRST VM ASK MORE THAN THE START CAPACITY OF
+			// THE PE (depending of the dvfs mode)
+			// IN THIS CASE WE HAVE TO INCREASE DIRECTLY PE CAPACITY !
+			// BUT IT'S not POSSIBLE WITH ALL GOVERNOR
+			if (this.getVmList().isEmpty()
+					&& this.isEnableDVFS()
+					&& getVmScheduler().getAvailableMips() < vm
+							.getCurrentRequestedTotalMips()) {
+				for (Pe pe : getPeList()) {
+					if (pe.changeToMaxFrequency()) // if the Freq has been set to
+													// MAX , return true
+					{
+						setAvailableMips(getTotalMips());
+						return true;
+					}
+				}
+				return false;
+			} else
+				return false;
+	
+		}
+	
+		/**
+		 * 
+		 * This methode modifies VMs size to fit them into one Host
+		 * 
+		 * The VMs size have to be modified when at the same time there is : - their
+		 * size (sum) is > than the Host capacity - a new VM has to be fitted into
+		 * this Host
+		 * 
+		 * 
+		 * @param new_vm
+		 *            (the VM that has to be to added into the Host)
+		 * @return true (false will be implemented next)
+		 */
+	
+		public boolean decreaseVMMipsToHostNewVm(Vm new_vm) {
+	
+			double NewTotalVmMips = 0;
+			double HostCapacity = getTotalMips();
+			double percent;
+	
+			percent = reducePercentVmMips(new_vm, true);
+			NewTotalVmMips = reduceAllVmMips(percent);
+	
+			new_vm.setMips(new_vm.getMaxMips() - (new_vm.getMaxMips() * percent));
+	
+			System.out.println("Nouveaux total = " + NewTotalVmMips);
+			System.out.println("HostCapacity = " + HostCapacity);
+	
+			setAvailableMips(HostCapacity - NewTotalVmMips);
+			System.out.println("Mips New VM = " + new_vm.getMips());
+			System.out.println("Mips libre = " + getAvailableMips());
+			return true;
+		}
+	
+		/**
+		 * This method modifies VMs size.
+		 * 
+		 * Called after CPU frequency decrease To avoid Host Capacity OverFlow (
+		 * theoritical "CPU utilization > 100%")
+		 * 
+		 * 
+		 */
+		public void decreaseVmMips() {
+			double NewTotalVmMips = 0;
+			double HostCapacity = getTotalMips();
+			double percent;
+			percent = reducePercentVmMips(null, false);
+			NewTotalVmMips = reduceAllVmMips(percent);
+			// System.out.println("News Total = " +NewTotalVmMips);
+			setAvailableMips(HostCapacity - NewTotalVmMips);
+			// System.out.println("Free Mips = " +getAvailableMips());
+		}
+	
+		/**
+		 * 
+		 * Compute the percentage of size reduction to apply on ALL Vms
+		 * 
+		 * @param new_vm
+		 * @param isNewVmToHost
+		 * @return percent
+		 */
+		private double reducePercentVmMips(Vm new_vm, boolean isNewVmToHost) {
+			double HostCapacity = getTotalMips();
+			double SumVmMaxMips = 0;
+			for (Vm vm : getVmList())
+				SumVmMaxMips += vm.getMaxMips();
+			if (isNewVmToHost)
+				SumVmMaxMips += new_vm.getMaxMips();
+	
+			double percent = ((SumVmMaxMips - HostCapacity) / SumVmMaxMips);
+			percent += percent * 0.002;
+			return percent;
+		}
+	
+		/**
+		 * Function that really modify the VM Mips relating to the percentage
+		 * 
+		 * @param percent
+		 * @return
+		 */
+		private double reduceAllVmMips(double percent) {
+			double NewTotalVmMips = 0;
+			for (Vm vm : getVmList()) {
+	
+				double new_mips;
+				new_mips = vm.getMaxMips() - (vm.getMaxMips() * percent);
+				vm.setMips(new_mips);
+	
+				List<Double> updatedMipsVm = new ArrayList<>();
+				Map<String, List<Double>> tmp_Map = getVmScheduler().getMipsMap();
+				tmp_Map.put(vm.getUid(), updatedMipsVm);
+				tmp_Map.get(vm.getUid()).add(new_mips);
+	
+				NewTotalVmMips += new_mips;
+			}
+			return NewTotalVmMips;
+		}
+	
+		/**
+		 * 
+		 * This method regrow VM size (maximum to their initial capacity) To use the
+		 * Host at its maximum potential regarding the CPU frequency.
+		 * 
+		 * Function called when a VM finished its execution
+		 * 
+		 * 
+		 * 
+		 * @return void
+		 */
+	
+		public void regrowVmMipsAfterVmEnd(Vm vmFinished) {
+			// System.out.println("Regrow VM mips : after VM end");
+			double FreeMips;
+			List<Vm> ListVMRunning = getVmList();
+	
+			// remove the VM finished from the tmp VM list before the increase %
+			FreeMips = vmFinished.getMips();
+			ListVMRunning.remove(vmFinished);
+			double percent = increasePercentVmMips(FreeMips);
+			increaseVmMips(ListVMRunning, percent);
+		}
+	
+		/**
+		 * 
+		 * This method regrow VM size (maximum to their initial capacity) To use the
+		 * Host at its maximum potential regarding the CPU frequency.
+		 * 
+		 * Function called when the CPU frequency is increased.
+		 * 
+		 */
+		public void regrowVmMips() {
+			// System.out.println("Regrow VM mips : after Frequency Increase");
+			increaseVmMips(getVmList(), increasePercentVmMips(0));
+		}
+	
+		/**
+		 * 
+		 * 
+		 * Compute the percentage of size increase to apply on all VM
+		 * 
+		 * @param double freeMips : free mips on host
+		 * @return percentage
+		 * 
+		 */
+		private double increasePercentVmMips(double FreeMips) {
+			double availableMips = this.getAvailableMips() + FreeMips;
+			// System.out.println("Available mips = " + availableMips);
+			double maxMipsHost = this.getTotalMips();
+			// System.out.println("Max mips host = " + maxMipsHost);
+			double Percent = (maxMipsHost / (maxMipsHost - availableMips));
+			// System.out.println("Increase percent = " + Percent);
+	
+			return Percent;
+		}
+	
+		/**
+		 * 
+		 * Function that really modify the VM size.
+		 * 
+		 * 
+		 * @param ListVMRunning
+		 * @param Percent
+		 */
+		private void increaseVmMips(List<Vm> ListVMRunning, double Percent) {
+			double NewSumVmMips = 0;
+			for (Vm vm : ListVMRunning) {
+				// System.out.println("Current VM MIPS =  " + vm.getMips() +
+				// "  / percent = " + Percent);
+				double TmpNewVmMips = vm.getMips() * Percent * 0.998;
+	
+				if (TmpNewVmMips > vm.getMaxMips())
+					TmpNewVmMips = vm.getMaxMips();
+	
+				vm.setMips(TmpNewVmMips);
+				vm.setSizeHasBeenModified(true);
+	
+				List<Double> updatedMipsVm = new ArrayList<>();
+				Map<String, List<Double>> tmp_Map = getVmScheduler().getMipsMap();
+				tmp_Map.put(vm.getUid(), updatedMipsVm);
+				tmp_Map.get(vm.getUid()).add(TmpNewVmMips);
+				// System.out.println("New MIPS on VM #" + vm.getId()+ " = " +
+				// vm.getMips());
+				NewSumVmMips += TmpNewVmMips;
+				// System.out.println("New Sum VMs MIPS =  " + new_som_vm_mips);
+			}
+			// System.out.println("New Total Sum = " + NewSumVmMips);
+			// System.out.println("Available Mips on HOST = " + getAvailableMips());
+	
+		}
 
 	/**
 	 * Allocates PEs and memory to a new VM in the Host.
@@ -329,6 +547,15 @@ public class Host {
 	public int getTotalMips() {
 		return PeList.getTotalMips(getPeList());
 	}
+	
+		/**
+		 * Gets the total Max mips.
+		 * 
+		 * @return the total mips
+		 */
+		public int getTotalMaxMips() {
+			return PeList.getTotalMips(getPeList());
+		}
 
 	/**
 	 * Allocates PEs for a VM.
@@ -393,6 +620,10 @@ public class Host {
 	public double getAvailableMips() {
 		return getVmScheduler().getAvailableMips();
 	}
+	
+		public void setAvailableMips(double AvailableMips) {
+			getVmScheduler().setAvailableMips(AvailableMips);
+		}
 
 	/**
 	 * Gets the machine bw.
@@ -619,4 +850,19 @@ public class Host {
 		this.datacenter = datacenter;
 	}
 
+		public boolean isEnableDVFS() {
+	        return enableDVFS;
+	    }
+	
+	    protected void setEnableDVFS(boolean enableDVFS) {
+	        this.enableDVFS = enableDVFS;
+	    }
+	    
+	    public boolean isEnableONOFF() {
+	        return enableONOFF;
+	    }
+	
+	    public void setEnableONOFF(boolean enableONOFF) {
+	        this.enableONOFF = enableONOFF;
+	    }
 }

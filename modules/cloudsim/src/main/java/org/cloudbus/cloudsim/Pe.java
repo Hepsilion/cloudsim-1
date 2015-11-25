@@ -8,7 +8,17 @@
 
 package org.cloudbus.cloudsim;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.cloudbus.cloudsim.power.dvfs.AbstractGovernor;
+import org.cloudbus.cloudsim.power.dvfs.ConservativeGovernor;
+import org.cloudbus.cloudsim.power.dvfs.OnDemandGovernor;
+import org.cloudbus.cloudsim.power.dvfs.PerformanceGovernor;
+import org.cloudbus.cloudsim.power.dvfs.PowerSaveGovernor;
+import org.cloudbus.cloudsim.power.dvfs.UserSpaceGovernor;
 import org.cloudbus.cloudsim.provisioners.PeProvisioner;
+import org.cloudbus.cloudsim.xml.DvfsDatas;
 
 /**
  * CloudSim Pe (Processing Element) class represents CPU unit, defined in terms of Millions
@@ -43,6 +53,18 @@ public class Pe {
 	/** The pe provisioner. */
 	private PeProvisioner peProvisioner;
 
+		AbstractGovernor gov;
+	    /**
+	     * Pe frequencies (%) available
+	     */
+	    private ArrayList<Double> frequencies; 
+	    
+	    private int nbFreq;
+	    /** Frequency current index
+	     * index of the frequency Array.
+	     */
+	    private int indexFreq=0;
+    
 	/**
 	 * Allocates a new Pe object.
 	 * 
@@ -59,6 +81,63 @@ public class Pe {
 		// when created it should be set to FREE, i.e. available for use.
 		status = FREE;
 	}
+	
+		public Pe(int id, PeProvisioner peProvisioner,
+				ArrayList<Double> frequencies_, String gov_, DvfsDatas configDvfs) {
+			setId(id);
+			setPeProvisioner(peProvisioner);
+			gov = setGovernorMode(gov_, configDvfs);
+			frequencies = frequencies_;
+			nbFreq = frequencies.size();
+			System.out.println("CPU num " + id + " , Freq Admises :");
+			Iterator it_f = frequencies.iterator();
+			while (it_f.hasNext()) {
+				double d = (Double) it_f.next();
+				System.out.println(d);
+			}
+	
+			gov.setDefautIndexFreq(nbFreq - 1);
+			setIndexFreq(gov.getDefautIndexFreq());
+			setDefautStartFrequency();
+	
+			// when created it should be set to FREE, i.e. available for use.
+			status = FREE;
+		}
+
+        
+        private void setDefautStartFrequency() {
+          //  Log.printLine("getindexfreq = " + getIndexFreq());
+            if(getIndexFreq()>=0 && getIndexFreq() < nbFreq) {
+                double new_Frequency = getPercentStep()/100*peProvisioner.getMaxMips(); 
+                setMips(new_Frequency);
+                System.out.println("For " + gov.getName() + " mode , the defaut start Frequency is : " + getMips());
+            }
+            else {
+                setIndexFreq(0);
+                Log.printLine("Error while setting the Start Frequency. Please verify your Dvfs configuration. ");
+                Log.printLine("The Frequency has been set to the Minimum available. ");
+            }   
+        }
+        
+        
+         private  AbstractGovernor setGovernorMode(String mode_ , DvfsDatas configDvfs) {
+            System.out.println("govv = " + mode_);
+            
+            if(mode_.equalsIgnoreCase("OnDemand"))
+                 return new OnDemandGovernor(configDvfs.getHashMapOnDemand());
+            else if(mode_.equalsIgnoreCase("PowerSave"))
+                 return new PowerSaveGovernor();
+            else if(mode_.equalsIgnoreCase("Performance"))
+                 return new PerformanceGovernor();
+            else if(mode_.equalsIgnoreCase("Conservative"))
+                 return new ConservativeGovernor(configDvfs.getHashMapConservative());
+            else if(mode_.equalsIgnoreCase("UserSpace"))
+                 return new UserSpaceGovernor(configDvfs.getHashMapUserSpace());
+            else {
+                Log.printLine("Error while loading DVFS governor. Performance governor has been loaded !");
+                return new PerformanceGovernor();  // par défaut Performande
+            }
+        }
 
 	/**
 	 * Sets the id.
@@ -99,6 +178,10 @@ public class Pe {
 	public int getMips() {
 		return (int) getPeProvisioner().getMips();
 	}
+	
+		public int getMaxMips() {
+			return (int) getPeProvisioner().getMaxMips();
+		}
 
 	/**
 	 * Gets the status of this Pe.
@@ -172,4 +255,81 @@ public class Pe {
 		return peProvisioner;
 	}
 
+		private void setNewFrequency(int desc) {
+			switch (desc) {
+			case -1:
+				decrIndexFreq();
+				break;
+			case 1:
+				incrIndexFreq();
+				break;
+			case 2:
+				setIndexFreqMax();
+				break;
+			}
+			// System.out.println("In Function \"Set_NewFrequency\" , desc =  " +
+			// desc + " / index freq =" + getIndexFreq() + " freq%="
+			// +getPercentStep());
+			// System.out.println("New MIPS will be = " +
+			// (getPercentStep()/100*peProvisioner.getMaxMips()));
+	
+			double new_Frequency = getPercentStep() / 100
+					* peProvisioner.getMaxMips();
+			setMips(new_Frequency);
+			// System.out.println("After Update Pe MIPS : " +
+			// peProvisioner.getMips());
+		}
+	
+		public int getIndexFreq() {
+			return indexFreq;
+		}
+	
+		private void setIndexFreqMax() {
+			indexFreq = nbFreq - 1;
+		}
+	
+		private void incrIndexFreq() {
+			if (indexFreq < nbFreq - 1)
+				indexFreq++;
+		}
+	
+		private void decrIndexFreq() {
+			if (indexFreq > 0)
+				indexFreq--;
+		}
+	
+		private void setIndexFreq(int index_freq) {
+			this.indexFreq = index_freq;
+		}
+	
+		protected boolean changeToMaxFrequency() {
+			if (gov.getName().equalsIgnoreCase("OnDemand")) {
+				Log.printLine("lllllllllllllllllllllllll");
+				setNewFrequency(2);
+				return true;
+			} else
+				return false;
+		}
+	
+		protected int changeFrequency() {
+			int desc = gov.SpecificDecision(peProvisioner.getUtilization() * 100);
+			// System.out.println("In \"ChangeFrequency\" function, desc = " +
+			// desc);
+			if (desc == 2 && getIndexFreq() == (nbFreq - 1))
+				return 0;
+			else if (desc == -1 && getIndexFreq() == 0)
+				return 0;
+			else if (desc != 0)
+				setNewFrequency(desc);
+			return desc;
+		}
+	
+		/**
+		 * 
+		 * 
+		 * @return the actual percent step
+		 */
+		private double getPercentStep() {
+			return frequencies.get(indexFreq);
+		}
 }

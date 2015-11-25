@@ -11,6 +11,7 @@ package org.cloudbus.cloudsim.power;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.core.EventPostBroker;
 import org.cloudbus.cloudsim.core.SimEvent;
 
 /**
@@ -38,6 +39,19 @@ public class PowerDatacenterBroker extends DatacenterBroker {
 	public PowerDatacenterBroker(String name) throws Exception {
 		super(name);
 	}
+	
+		/**
+	     * 
+	     * Instanciate a new datacenter broker that have a POST ACTION (post event)
+	     * Dynamically launch at the end of this broker;
+	     * 
+	     * @param name
+	     * @param evt_
+	     * @throws Exception 
+	     */
+	    public PowerDatacenterBroker(String name, EventPostBroker evt_) throws Exception {
+			super(name,evt_);
+		}
 
 	/*
 	 * (non-Javadoc)

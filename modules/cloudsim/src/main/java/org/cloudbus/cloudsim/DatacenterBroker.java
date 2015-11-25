@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.core.EventPostBroker;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.lists.CloudletList;
@@ -70,6 +71,8 @@ public class DatacenterBroker extends SimEntity {
 	/** The datacenter characteristics list. */
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
 
+		protected EventPostBroker Postevt=null;
+	
 	/**
 	 * Created a new DatacenterBroker object.
 	 * 
@@ -98,6 +101,42 @@ public class DatacenterBroker extends SimEntity {
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 	}
+	
+		/**
+	     * 
+	     * Constructor like Datacenterbroker(name)  +  POST EVENT
+	     * This constructor is used when a broker need to launch another broker
+	     * at the end of its execution.
+	     * 
+	     * In the case where low frequency CPU is used (due to DVFS), an execution delay can appear in some broker,
+	     * This constructor allow to keep the right execution order of a broker.
+	     * 
+	     * 
+	     * @param name
+	     * @param evt_
+	     * @throws Exception 
+	     */
+		public DatacenterBroker(String name, EventPostBroker evt_) throws Exception {
+			super(name);
+		
+			setVmList(new ArrayList<Vm>());
+			setVmsCreatedList(new ArrayList<Vm>());
+			setCloudletList(new ArrayList<Cloudlet>());
+			setCloudletSubmittedList(new ArrayList<Cloudlet>());
+			setCloudletReceivedList(new ArrayList<Cloudlet>());
+		
+			cloudletsSubmitted = 0;
+			setVmsRequested(0);
+			setVmsAcks(0);
+			setVmsDestroyed(0);
+		
+			setDatacenterIdsList(new LinkedList<Integer>());
+			setDatacenterRequestedIdsList(new ArrayList<Integer>());
+			setVmsToDatacentersMap(new HashMap<Integer, Integer>());
+			setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+		            
+		            setPostevt(evt_);
+		}
 
 	/**
 	 * This method is used to send to the broker the list with virtual machines that must be
@@ -277,6 +316,8 @@ public class DatacenterBroker extends SimEntity {
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": All Cloudlets executed. Finishing...");
 			clearDatacenters();
 			finishExecution();
+				processPostEvent();
+	            // Maybe create an "Broker End Event" ?
 		} else { // some cloudlets haven't finished yet
 			if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
 				// all the cloudlets sent finished. It means that some bount
@@ -287,6 +328,21 @@ public class DatacenterBroker extends SimEntity {
 
 		}
 	}
+	
+		/**
+		 * 
+		 * Schedule the PostEvent of a broker. This method is called by
+		 * "processCloudletReturn" when all Cloudlet of a Broker are ended
+		 * 
+		 */
+		protected void processPostEvent() {
+	
+			if (getPostevt() != null) {
+				// Log.printLine("Broker " + getId() +
+				// "execution has finished,  postEvent is starting... ");
+				scheduleNow(Postevt.getDest(), Postevt.getTag());
+			}
+		}
 
 	/**
 	 * Overrides this method when making a new and different type of Broker. This method is called
@@ -656,4 +712,11 @@ public class DatacenterBroker extends SimEntity {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
 	}
 
+		public EventPostBroker getPostevt() {
+	        return Postevt;
+	    }
+	
+	    public void setPostevt(EventPostBroker Postevt) {
+	        this.Postevt = Postevt;
+	    }
 }

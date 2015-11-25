@@ -468,6 +468,10 @@ public class Datacenter extends SimEntity {
 	 */
 	protected void processVmDestroy(SimEvent ev, boolean ack) {
 		Vm vm = (Vm) ev.getData();
+			Host h = vm.getHost();
+	        //h.ReGrowVMMips(vm);
+	        if(h.isEnableDVFS())
+	            h.regrowVmMipsAfterVmEnd(vm);
 		getVmAllocationPolicy().deallocateHostForVm(vm);
 
 		if (ack) {
@@ -1038,6 +1042,14 @@ public class Datacenter extends SimEntity {
 		// Below method is for a child class to override
 		registerOtherEntity();
 	}
+	
+		/*public void UpdateVmMipsAfterDVFS(Host host, double percent) {
+	        double totalVmMips = 0;
+	        for (Vm vm : host.getVmList()) 
+	            totalVmMips+=vm.getMax_mips();
+	        
+	        
+	    }*/
 
 	/**
 	 * Gets the host list.

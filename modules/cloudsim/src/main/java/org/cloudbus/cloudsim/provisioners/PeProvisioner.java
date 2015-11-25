@@ -19,7 +19,8 @@ import org.cloudbus.cloudsim.Vm;
  * @since CloudSim Toolkit 2.0
  */
 public abstract class PeProvisioner {
-
+		private double maxMips;
+		
 	/** The mips. */
 	private double mips;
 
@@ -36,6 +37,7 @@ public abstract class PeProvisioner {
 	 */
 	public PeProvisioner(double mips) {
 		setMips(mips);
+			setMaxMips(mips);
 		setAvailableMips(mips);
 	}
 
@@ -196,4 +198,25 @@ public abstract class PeProvisioner {
 		return getTotalAllocatedMips() / getMips();
 	}
 
+		/**
+		 * get the maximum mips of the Pe
+		 * 
+		 * @return
+		 */
+		public double getMaxMips() {
+			return maxMips;
+		}
+	
+		/**
+		 * 
+		 * set the maximum mips of the Pe
+		 * 
+		 * @param max_mips
+		 */
+	
+		public void setMaxMips(double max_mips) {
+			this.maxMips = max_mips;
+		}
+	
+		public abstract void updateAvailableMips(double availableMips);
 }

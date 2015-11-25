@@ -185,4 +185,7 @@ public class PeProvisionerSimple extends PeProvisioner {
 		this.peTable = (Map<String, List<Double>>) peTable;
 	}
 
+		public void updateAvailableMips(double availableMips) {
+			setAvailableMips(availableMips);
+		}
 }

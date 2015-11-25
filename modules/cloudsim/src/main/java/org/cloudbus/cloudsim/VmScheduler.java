@@ -90,7 +90,7 @@ public abstract class VmScheduler {
 		for (Pe pe : getPeList()) {
 			pe.getPeProvisioner().deallocateMipsForAllVms();
 		}
-	}
+	} // setSizeHasBeenModified(false);  // if set false here, seems to generate bug (because , this method is called more than 1 time after vm size change (?) )
 
 	/**
 	 * Gets the pes allocated for vm.
@@ -118,7 +118,7 @@ public abstract class VmScheduler {
 	 * Gets the total allocated MIPS for a VM over all the PEs.
 	 * 
 	 * @param vm the vm
-	 * @return the allocated mips for vm
+	 * @return the allocated mips for vm // setSizeHasBeenModified(false);  // if set false here, seems to generate bug (because , this method is called more than 1 time after vm size change (?) )
 	 */
 	public double getTotalAllocatedMipsForVm(Vm vm) {
 		double allocated = 0;
@@ -164,7 +164,20 @@ public abstract class VmScheduler {
 			return 0;
 		}
 		return getPeList().get(0).getMips();
-	}
+	} // setSizeHasBeenModified(false);  // if set false here, seems to generate bug (because , this method is called more than 1 time after vm size change (?) )
+	
+		/**
+		 * Returns PE MAXIMUM capacity in MIPS.
+		 * 
+		 * @return mips
+		 */
+		public double getMaxPeCapacity() {
+			if (getPeList() == null) {
+				Log.printLine("Pe list is empty");
+				return 0;
+			}
+			return getPeList().get(0).getMaxMips();
+		}
 
 	/**
 	 * Gets the vm list.

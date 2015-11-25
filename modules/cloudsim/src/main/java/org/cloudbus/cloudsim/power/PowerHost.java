@@ -14,6 +14,7 @@ import org.cloudbus.cloudsim.HostDynamicWorkload;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.power.models.PowerModel;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerDVFS;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;
 import org.cloudbus.cloudsim.provisioners.RamProvisioner;
 
@@ -57,6 +58,14 @@ public class PowerHost extends HostDynamicWorkload {
 		super(id, ramProvisioner, bwProvisioner, storage, peList, vmScheduler);
 		setPowerModel(powerModel);
 	}
+	
+		public PowerHost(int id, RamProvisioner ramProvisioner, BwProvisioner bwProvisioner, long storage, List<? extends Pe> peList, VmScheduler vmScheduler, PowerModel powerModel, boolean enableOnOff, boolean enableDvfs) {
+	        super(id, ramProvisioner, bwProvisioner, storage, peList, vmScheduler);
+	
+	        setPowerModel(powerModel);
+	        setEnableDVFS(enableDvfs);
+	        setEnableONOFF(enableOnOff);
+	    }
 
 	/**
 	 * Gets the power. For this moment only consumed by all PEs.
@@ -109,9 +118,13 @@ public class PowerHost extends HostDynamicWorkload {
 	 * @return the energy
 	 */
 	public double getEnergyLinearInterpolation(double fromUtilization, double toUtilization, double time) {
-		if (fromUtilization == 0) {
-			return 0;
-		}
+//		if (fromUtilization == 0) {
+//			return 0;
+//		}
+			if (fromUtilization == 0 && isEnableONOFF()) {
+	            //    if (isEnableONOFF()) {
+				return 0;
+			}
 		double fromPower = getPower(fromUtilization);
 		double toPower = getPower(toUtilization);
 		return (fromPower + (toPower - fromPower) / 2) * time;
@@ -135,4 +148,42 @@ public class PowerHost extends HostDynamicWorkload {
 		return powerModel;
 	}
 
+		/**
+		 * 
+		 * return the Max Power consume by the host regarding its current frequency
+		 *
+		 * We do a 'if' on the enableDVFS value because we have to be sure that we
+		 * use the PowerModelSpecDVFS powermodel
+		 * 
+		 * Methods getPMax and getPMin didn't have been add to the Interface
+		 * PowerModel because in this case it would impact all other models, even
+		 * those that not use multiple power value in relation with the CPU
+		 * frequency
+		 * 
+		 * @param frequency
+		 * @return
+		 */
+		public double getPMax(int frequency) {
+			if (isEnableDVFS()) {
+				PowerModelSpecPowerDVFS tmp_model = (PowerModelSpecPowerDVFS) getPowerModel();
+				return tmp_model.getPMax(frequency);
+			} else
+				return 0;
+		}
+	
+		/**
+		 * return the Min Power consume by the host regarding its current frequency
+		 * 
+		 * same comment as the getPMax() method.
+		 * 
+		 * @param frequency
+		 * @return
+		 */
+		public double getPMin(int frequency) {
+			if (isEnableDVFS()) {
+				PowerModelSpecPowerDVFS tmp_model = (PowerModelSpecPowerDVFS) getPowerModel();
+				return tmp_model.getPMin(frequency);
+			} else
+				return 0;
+		}
 }

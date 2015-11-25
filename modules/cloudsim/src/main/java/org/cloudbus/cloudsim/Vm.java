@@ -36,6 +36,9 @@ public class Vm {
 
 	/** The MIPS. */
 	private double mips;
+		
+		/** Maximum available Mips */
+	    private double maxMips;
 
 	/** The number of PEs. */
 	private int numberOfPes;
@@ -72,6 +75,8 @@ public class Vm {
 
 	/** The VM is being instantiated. */
 	private boolean beingInstantiated;
+	
+		private boolean sizeHasBeenModified;
 
 	/** The mips allocation history. */
 	private final List<VmStateHistoryEntry> stateHistory = new LinkedList<VmStateHistoryEntry>();
@@ -112,6 +117,7 @@ public class Vm {
 		setUserId(userId);
 		setUid(getUid(userId, id));
 		setMips(mips);
+			setMaxMips(mips);
 		setNumberOfPes(numberOfPes);
 		setRam(ram);
 		setBw(bw);
@@ -127,6 +133,10 @@ public class Vm {
 		setCurrentAllocatedRam(0);
 		setCurrentAllocatedSize(0);
 	}
+	
+		public Vm() {
+			setId(-1);
+		}
 
 	/**
 	 * Updates the processing of cloudlets running on this VM.
@@ -605,5 +615,22 @@ public class Vm {
 		}
 		getStateHistory().add(newState);
 	}
+	
+		public double getMaxMips() {
+	        return maxMips;
+	    }
+	
+	    private void setMaxMips(double Max_mips) {
+	        this.maxMips = Max_mips;
+	    }
+	    
+	    
+	    protected boolean isSizeHasBeenModified() {
+	        return sizeHasBeenModified;
+	    }
+	
+	    protected void setSizeHasBeenModified(boolean SizeHasBeenModified_) {
+	        sizeHasBeenModified = SizeHasBeenModified_;
+	    }
 
 }
