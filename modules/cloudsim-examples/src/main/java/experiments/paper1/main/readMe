@@ -1,0 +1,10 @@
+1.Base Algorithm
+(1)解注释RealtimeConstants中iqr，ENABLE_DVFS和ENABLE_ONOFF设置为false
+(2)RealtimeHelper中govs设置为UserSpace
+
+2.Dvfs Algorithm
+(1)解注释RealtimeConstants中dvfs，ENABLE_DVFS和ENABLE_ONOFF设置为true
+(2)RealtimeHelper中govs设置为OnDemand
+
+3.Ga Algorithm
+(1)解注释RealtimeConstants中ga，ENABLE_DVFS和ENABLE_ONOFF设置为false

@@ -55,7 +55,19 @@ public class PowerHostUtilizationHistory extends PowerHost {
 			PowerModel powerModel) {
 		super(id, ramProvisioner, bwProvisioner, storage, peList, vmScheduler, powerModel);
 	}
-
+	
+	public PowerHostUtilizationHistory(
+			int id,
+			RamProvisioner ramProvisioner,
+			BwProvisioner bwProvisioner,
+			long storage,
+			List<? extends Pe> peList,
+			VmScheduler vmScheduler,
+			PowerModel powerModel,
+			boolean enableOnOff, 
+			boolean enableDvfs) {
+		super(id, ramProvisioner, bwProvisioner, storage, peList, vmScheduler, powerModel, enableOnOff, enableDvfs);
+	}
 	/**
 	 * Gets the host utilization history.
 	 * 

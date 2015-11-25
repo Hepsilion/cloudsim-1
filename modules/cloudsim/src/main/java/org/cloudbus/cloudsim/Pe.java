@@ -332,4 +332,10 @@ public class Pe {
 		private double getPercentStep() {
 			return frequencies.get(indexFreq);
 		}
+		
+		public void setFrequency(int frequency) {
+            setIndexFreq(frequency);
+            double newMips = getPercentStep() / 100 * peProvisioner.getMaxMips();
+            setMips(newMips);
+        }
 }
