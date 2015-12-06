@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -11,10 +12,12 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.power.PowerDatacenterBroker;
+import org.cloudbus.cloudsim.power.PowerVm;
 import org.cloudbus.cloudsim.power.lists.PowerVmList;
 
 public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 	int vmIndex;
+	ArrayList<Vm> declinedVms = new ArrayList<Vm>();
 
 	public RealtimeDatacenterBroker(String name) throws Exception {
 		super(name);
@@ -22,6 +25,10 @@ public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 
 	public void processEvent(SimEvent ev) {
 		switch (ev.getTag()) {
+		// Resource characteristics answer
+		case CloudSimTags.RESOURCE_CHARACTERISTICS:
+			processResourceCharacteristics(ev);
+			break;
 		case CloudSimTags.VM_CREATE_ACK:
 			processVmCreate(ev);
 			break;
@@ -35,6 +42,21 @@ public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 			super.processEvent(ev);
 		}
 	}
+	
+	protected void createVmsInDatacenter(int datacenterId) {
+		int requestedVms = 0; // 记录请求的虚拟机数量
+		for (Vm vm : getVmList()) {
+			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
+				// 向数据中心发送创建虚拟机的消息
+				send(datacenterId, ((RealtimeVm)vm).getCloudlet().getStartTime()-CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, vm);
+				requestedVms++;
+			}
+		}
+		getDatacenterRequestedIdsList().add(datacenterId);
+
+		setVmsRequested(requestedVms);
+		setVmsAcks(0); //初始化请求虚拟机请求消息的确认消息数量为0
+	}
 
 	protected void processVmCreate(SimEvent ev) {
 		int[] data = (int[]) ev.getData();
@@ -45,43 +67,69 @@ public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 		if (result == CloudSimTags.TRUE) {
 			getVmsToDatacentersMap().put(vmId, datacenterId);
 			getVmsCreatedList().add(VmList.getById(getVmList(), vmId));
+			
+			RealtimeVm rvm = (RealtimeVm) PowerVmList.getById(getVmsCreatedList(), vmId);
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": VM #", vmId, " has been created in Datacenter #",
 					datacenterId, ", Host #", VmList.getById(getVmsCreatedList(), vmId).getHost().getId());
+			submitCloudlet(rvm.getCloudlet());
 		} else {
-			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Creation of VM #", vmId,
-					" failed in Datacenter #", datacenterId);
+			getDeclinedVms().add(PowerVmList.getById(getVmList(), vmId));
+			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Creation of VM #", vmId, " failed in Datacenter #", datacenterId);
 		}
 
 		incrementVmsAcks();
-
-		// all the requested VMs have been created
-		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
-			submitCloudlets();
-			// createCloudlets();
-		} else {
-			// all the acks received, but some VMs were not created
-			if (getVmsRequested() == getVmsAcks()) {
-				// find id of the next datacenter that has not been tried
-				for (int nextDatacenterId : getDatacenterIdsList()) {
-					if (!getDatacenterRequestedIdsList().contains(nextDatacenterId)) {
-						createVmsInDatacenter(nextDatacenterId);
-						return;
-					}
-				}
-
-				// all datacenters already queried
-				if (getVmsCreatedList().size() > 0) { // if some vm were created
-					submitCloudlets();
-					// createCloudlets();
-				} else { // no vms created. abort
-					Log.printLine(CloudSim.clock() + ": " + getName()
-							+ ": none of the required VMs could be created. Aborting");
-					finishExecution();
-				}
-			}
-		}
 	}
 
+	protected void submitCloudlet(RealtimeCloudlet cloudlet) {
+		if (cloudlet.getStartTime() <= CloudSim.clock()) {
+			Vm vm = null;
+			if (cloudlet.getVmId() == -1) {
+				vm = getVmsCreatedList().get(vmIndex);
+				((RealtimeVm)vm).setCloudlet(cloudlet);
+			} else {// submit to the specific vm
+				vm = PowerVmList.getById(getVmsCreatedList(), cloudlet.getVmId());
+			}
+			cloudlet.setVmId(vm.getId());
+			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet " + cloudlet.getCloudletId() + " to VM #" + vm.getId());
+			cloudletsSubmitted++;
+			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
+			getCloudletSubmittedList().add(cloudlet);
+		} else {
+			send(getId(), cloudlet.getStartTime() - CloudSim.clock(), CloudSimTags.CREATE_CLOUDLET, cloudlet);
+		}
+
+		for (Cloudlet cl : getCloudletSubmittedList()) {
+			getCloudletList().remove(cl);
+		}
+	}
+	
+	private void submitCloudlet(SimEvent ev) {
+		RealtimeCloudlet rc = (RealtimeCloudlet) ev.getData();
+		Vm vm = null;
+
+		if (rc.getVmId() == -1) {
+			vm = getVmsCreatedList().get(vmIndex);
+		} else {
+			vm = VmList.getById(getVmsCreatedList(), rc.getVmId());
+			if (vm == null) {
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
+						+ rc.getCloudletId() + ": bount VM not available");
+				return;
+			}
+		}
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": Create clodlet " + rc.getCloudletId()
+				+ "(request start time:" + rc.getStartTime() + ")");
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet " + rc.getCloudletId() + " to VM #"
+				+ vm.getId());
+		rc.setVmId(vm.getId());
+		sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, rc);
+		cloudletsSubmitted++;
+		vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
+		getCloudletSubmittedList().add(rc);
+		getCloudletList().remove(rc);
+	}
+	
 	protected void submitCloudlets() {
 		vmIndex = 0;
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
@@ -124,41 +172,14 @@ public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 		getCloudletList().removeAll(successfullySubmitted);
 	}
 
-	/*
+	
 	private void createCloudlets() {
 		for (Cloudlet cloudlet : getCloudletList()) {
 			RealtimeCloudlet rc = (RealtimeCloudlet) cloudlet;
-			send(getId(), rc.getStartTime(), CloudSimTags.CREATE_CLOUDLET, rc);
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Create clodlet " + rc.getCloudletId() + " at:"
+			send(getId(), rc.getStartTime()-1, CloudSimTags.CREATE_CLOUDLET, rc);
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": will create clodlet " + rc.getCloudletId() + " at:"
 					+ rc.getStartTime());
 		}
-	}
-	*/
-
-	private void submitCloudlet(SimEvent ev) {
-		RealtimeCloudlet rc = (RealtimeCloudlet) ev.getData();
-		Vm vm = null;
-
-		if (rc.getVmId() == -1) {
-			vm = getVmsCreatedList().get(vmIndex);
-		} else {
-			vm = VmList.getById(getVmsCreatedList(), rc.getVmId());
-			if (vm == null) {
-				Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
-						+ rc.getCloudletId() + ": bount VM not available");
-				return;
-			}
-		}
-		Log.printLine(CloudSim.clock() + ": " + getName() + ": Create clodlet " + rc.getCloudletId()
-				+ "(request start time:" + rc.getStartTime() + ")");
-		Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet " + rc.getCloudletId() + " to VM #"
-				+ vm.getId());
-		rc.setVmId(vm.getId());
-		sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, rc);
-		cloudletsSubmitted++;
-		vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
-		getCloudletSubmittedList().add(rc);
-		getCloudletList().remove(rc);
 	}
 
 	protected void processCloudletReturn(SimEvent ev) {
@@ -188,5 +209,13 @@ public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 				// createVmsInDatacenter(0);
 			}
 		}
+	}
+
+	public ArrayList<Vm> getDeclinedVms() {
+		return declinedVms;
+	}
+
+	public void setDeclinedVms(ArrayList<Vm> declinedVms) {
+		this.declinedVms = declinedVms;
 	}
 }

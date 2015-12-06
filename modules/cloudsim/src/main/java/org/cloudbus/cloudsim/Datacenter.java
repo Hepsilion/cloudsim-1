@@ -729,7 +729,8 @@ public class Datacenter extends SimEntity {
 			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
-
+			scheduler.setPreviousTime(CloudSim.clock()); // TODO 如果任务不是从0时刻到达，那么首次更新任务时，利用的previous time有误，故这里增加
+			
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {
 				estimatedFinishTime += fileTransferTime;

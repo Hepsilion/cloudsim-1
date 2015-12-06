@@ -3,6 +3,8 @@ package experiments.paper1.ga;
 
 public class ChromTaskScheduling extends Chromosome {
 	protected GeneTaskScheduling[] genes;
+	protected double tdr;
+	protected double dmr;
 	protected double energy;
 	
 	public ChromTaskScheduling(int numTasks) {
@@ -49,7 +51,10 @@ public class ChromTaskScheduling extends Chromosome {
 		for(int i=0; i<genes.length; i++) {
 			this.genes[i] = chromTaskScheduling.genes[i];
 		}
-		this.fitness = chromosome.fitness;
+		this.fitness = chromTaskScheduling.fitness;
+		this.tdr = chromTaskScheduling.tdr;
+		this.dmr = chromTaskScheduling.dmr;
+		this.energy = chromTaskScheduling.energy;
 	}
 
 	@Override

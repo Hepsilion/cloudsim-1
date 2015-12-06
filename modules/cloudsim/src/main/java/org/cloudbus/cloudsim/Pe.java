@@ -54,9 +54,8 @@ public class Pe {
 	private PeProvisioner peProvisioner;
 
 		AbstractGovernor gov;
-	    /**
-	     * Pe frequencies (%) available
-	     */
+		
+	    // Pe frequencies (%) available
 	    private ArrayList<Double> frequencies; 
 	    
 	    private int nbFreq;
@@ -82,19 +81,12 @@ public class Pe {
 		status = FREE;
 	}
 	
-		public Pe(int id, PeProvisioner peProvisioner,
-				ArrayList<Double> frequencies_, String gov_, DvfsDatas configDvfs) {
+		public Pe(int id, PeProvisioner peProvisioner, ArrayList<Double> frequencies_, String gov_, DvfsDatas configDvfs) {
 			setId(id);
 			setPeProvisioner(peProvisioner);
 			gov = setGovernorMode(gov_, configDvfs);
 			frequencies = frequencies_;
 			nbFreq = frequencies.size();
-			System.out.println("CPU num " + id + " , Freq Admises :");
-			Iterator it_f = frequencies.iterator();
-			while (it_f.hasNext()) {
-				double d = (Double) it_f.next();
-				System.out.println(d);
-			}
 	
 			gov.setDefautIndexFreq(nbFreq - 1);
 			setIndexFreq(gov.getDefautIndexFreq());
@@ -104,13 +96,12 @@ public class Pe {
 			status = FREE;
 		}
 
-        
         private void setDefautStartFrequency() {
-          //  Log.printLine("getindexfreq = " + getIndexFreq());
+            Log.printLine("getindexfreq = " + getIndexFreq());
             if(getIndexFreq()>=0 && getIndexFreq() < nbFreq) {
-                double new_Frequency = getPercentStep()/100*peProvisioner.getMaxMips(); 
-                setMips(new_Frequency);
-                System.out.println("For " + gov.getName() + " mode , the defaut start Frequency is : " + getMips());
+                double new_mips = getPercentStep()/100*peProvisioner.getMaxMips(); 
+                setMips(new_mips);
+                Log.printLine("For " + gov.getName() + " mode , the defaut start Frequency is : " + getMips());
             }
             else {
                 setIndexFreq(0);
@@ -119,10 +110,8 @@ public class Pe {
             }   
         }
         
-        
          private  AbstractGovernor setGovernorMode(String mode_ , DvfsDatas configDvfs) {
-            System.out.println("govv = " + mode_);
-            
+            Log.printLine("govv = " + mode_);
             if(mode_.equalsIgnoreCase("OnDemand"))
                  return new OnDemandGovernor(configDvfs.getHashMapOnDemand());
             else if(mode_.equalsIgnoreCase("PowerSave"))
@@ -135,7 +124,7 @@ public class Pe {
                  return new UserSpaceGovernor(configDvfs.getHashMapUserSpace());
             else {
                 Log.printLine("Error while loading DVFS governor. Performance governor has been loaded !");
-                return new PerformanceGovernor();  // par défaut Performande
+                return new PerformanceGovernor();  
             }
         }
 
@@ -288,12 +277,12 @@ public class Pe {
 			indexFreq = nbFreq - 1;
 		}
 	
-		private void incrIndexFreq() {
+		protected void incrIndexFreq() {
 			if (indexFreq < nbFreq - 1)
 				indexFreq++;
 		}
 	
-		private void decrIndexFreq() {
+		protected void decrIndexFreq() {
 			if (indexFreq > 0)
 				indexFreq--;
 		}
@@ -313,8 +302,6 @@ public class Pe {
 	
 		protected int changeFrequency() {
 			int desc = gov.SpecificDecision(peProvisioner.getUtilization() * 100);
-			// System.out.println("In \"ChangeFrequency\" function, desc = " +
-			// desc);
 			if (desc == 2 && getIndexFreq() == (nbFreq - 1))
 				return 0;
 			else if (desc == -1 && getIndexFreq() == 0)
@@ -325,8 +312,6 @@ public class Pe {
 		}
 	
 		/**
-		 * 
-		 * 
 		 * @return the actual percent step
 		 */
 		private double getPercentStep() {

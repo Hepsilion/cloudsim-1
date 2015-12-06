@@ -77,7 +77,7 @@ public class RealtimeHelper {
 		return broker;
 	}
 
-	public static List<Cloudlet> createRealtimeCloudlet(int userId, int num_cloudlets) {
+	public static List<Cloudlet> createRealtimeCloudlet(int userId, List<Vm> vmlist, int num_cloudlets) {
 		// Creates a container to store Cloudlets
 		List<Cloudlet> cloudlets = new LinkedList<Cloudlet>();
 
@@ -87,14 +87,13 @@ public class RealtimeHelper {
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
 		// length, start time and deadline
-		int[] length = getRandomIntegers(num_cloudlets, RealtimeConstants.CLOUDLET_LENGTH, RealtimeConstants.CLOUDLET_LENGTH);
+		int[] length = getRandomIntegers(num_cloudlets, RealtimeConstants.CLOUDLET_LENGTH, RealtimeConstants.CLOUDLET_LENGTH*10);
 		int[] startTime = getRandomIntegers(num_cloudlets, 0, 10000);
-		int[] deadline = getRandomIntegers(num_cloudlets, 10000, 20000);
 
 		Log.printLine("My all cloudlets time information is as follow :");
-		RealtimeCloudlet[] cloudlet = new RealtimeCloudlet[num_cloudlets];
+		RealtimeCloudlet cloudlet= null;
 		for (int i = 0; i < num_cloudlets; i++) {
-			cloudlet[i] = new RealtimeCloudlet(
+			cloudlet = new RealtimeCloudlet(
 					i, 
 					length[i],
 					RealtimeConstants.CLOUDLET_PES,
@@ -104,18 +103,20 @@ public class RealtimeHelper {
 					utilizationModel, 
 					utilizationModel, 
 					startTime[i],
-					deadline[i]);
+					startTime[i]+length[i]/500+length[i]/RealtimeConstants.CLOUDLET_LENGTH*50);
 			// setting the owner of these Cloudlets
-			cloudlet[i].setVmId(i);
-			cloudlet[i].setUserId(userId);
-			cloudlets.add(cloudlet[i]);
-			Log.printLine("MyCloudlet #" + cloudlet[i].getCloudletId() + "   $Length:" + cloudlet[i].getCloudletLength() + ";$request start time:" + cloudlet[i].getStartTime() + ";$request deadline:" + cloudlet[i].getDeadline());
+			cloudlet.setVmId(i);
+			cloudlet.setUserId(userId);
+			cloudlets.add(cloudlet);
+			((RealtimeVm)(vmlist.get(i))).setCloudlet(cloudlet);
+			Log.printLine("MyCloudlet #" + cloudlet.getCloudletId() + "   $Length:" + cloudlet.getCloudletLength() + ";$request start time:" + cloudlet.getStartTime() + ";$request deadline:" + cloudlet.getDeadline());
 		}
 
 		return cloudlets;
 	}
 
 	public static int[] getRandomIntegers(int length, int min, int max) {
+		Random rand = new Random(RealtimeConstants.RANDOM_SEED);
 		int[] numbers = new int[length];
 		// System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
@@ -206,13 +207,13 @@ public class RealtimeHelper {
 
 		// Define wich governor is used by each CPU
 		HashMap<Integer, String> govs = new HashMap<Integer, String>(); 
-		govs.put(0, "UserSpace"); // CPU 0 use UserSpace(Performance、Conservative、OnDemand) Dvfs mode 
+		govs.put(0, "OnDemand"); // CPU 0 use UserSpace(Performance、Conservative、OnDemand) Dvfs mode 
 
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
 		for (int i = 0; i < hostsNumber; i++) {
 			HashMap<String, Integer> tmp_HM_OnDemand = new HashMap<String, Integer>();
-			tmp_HM_OnDemand.put("up_threshold", 95);
-			tmp_HM_OnDemand.put("sampling_down_factor", 100);
+			tmp_HM_OnDemand.put("up_threshold", 80);
+			tmp_HM_OnDemand.put("sampling_down_factor", 10);
 			HashMap<String, Integer> tmp_HM_Conservative = new HashMap<String, Integer>();
 			tmp_HM_Conservative.put("up_threshold", 95);
 			tmp_HM_Conservative.put("down_threshold", 40);
@@ -226,7 +227,7 @@ public class RealtimeHelper {
 			ConfigDvfs.setHashMapConservative(tmp_HM_Conservative);
 			ConfigDvfs.setHashMapUserSpace(tmp_HM_UserSpace);
 
-			int hostType = i % RealtimeConstants.HOST_TYPES;
+			int hostType = (i+1) % RealtimeConstants.HOST_TYPES;
 			List<Pe> peList = new ArrayList<Pe>();
 			for (int j = 0; j < RealtimeConstants.HOST_PES[hostType]; j++) {
 				peList.add(new Pe(
@@ -328,7 +329,7 @@ public class RealtimeHelper {
 			parameter = Double.valueOf(parameterName);
 		}
 		if (vmAllocationPolicyName.equals("iqr")) {
-			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 0.9);//TODO 我把过载阈值从0.7改成了0.9
+			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 1);//TODO 我把过载阈值从0.7改成了0.9
 			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationInterQuartileRange(hostList, vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
 		} else if (vmAllocationPolicyName.equals("mad")) {
 			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 0.9);
@@ -382,7 +383,6 @@ public class RealtimeHelper {
 		RealtimeCloudlet cloudlet = null;
 
 		String indent = "\t";
-		Log.printLine();
 		Log.printLine("========== OUTPUT ==========");
 		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + indent + "ResourceID" + indent + "VmID" + indent
 				+ "Length" + indent + "CPUTime" + indent + "StartExecTime" + indent + "FinishTime" + indent
@@ -431,24 +431,36 @@ public class RealtimeHelper {
 	 * @param outputFolder
 	 *            the output folder
 	 */
-	public static double printResults(PowerDatacenter datacenter, List<Vm> vms, List<Cloudlet> cloudlets, List<Cloudlet> received_cloudlets, double lastClock, boolean outputInCsv) {
+	public static double[] printResults(PowerDatacenter datacenter, List<Vm> vms, List<Cloudlet> cloudlets, double[][] result, int index, List<Cloudlet> received_cloudlets, double lastClock, boolean outputInCsv) {
 		Log.enable();
 
 		List<Host> hosts = datacenter.getHostList();
-		Log.printLine("Received " + cloudlets.size() + " cloudlets");
-		//printCloudletList(received_cloudlets, hosts);
-
+		Log.printLine("Received " + received_cloudlets.size() + " cloudlets of " + cloudlets.size()+ " submitted cloudlets");
+		printCloudletList(received_cloudlets, hosts);
+		
 		int numberOfHosts = hosts.size();
 		int numberOfVms = vms.size();
 
 		double totalSimulationTime = lastClock;
 		double energy = datacenter.getPower() / (3600 * 1000);
 		int numberOfMigrations = datacenter.getMigrationCount();
+		
+		double tdr = (cloudlets.size()-received_cloudlets.size()) * 1.0 / cloudlets.size();
+		double dmr = getDeadlineMissingRate(received_cloudlets);
+		double overall_sla = (1-tdr)*(1-dmr)*(1-dmr);
 
-		double declinedCloudletRate = (cloudlets.size()-received_cloudlets.size()) * 1.0 / cloudlets.size();
-		double deadlineMissingRate = getDeadlineMissingRate(received_cloudlets);
-		double our_sla = -energy- 5 * deadlineMissingRate - 10 * declinedCloudletRate;
-
+		double[] ga_result = new double[4];
+		ga_result[0]=tdr;
+		ga_result[1]=dmr;
+		ga_result[2]=energy;
+		ga_result[3]=overall_sla;
+		
+		if(result != null) {
+			result[index][0] = tdr;
+			result[index][1] = dmr;
+			result[index][2] = energy;
+		}
+		
 		Map<String, Double> slaMetrics = getSlaMetrics(vms);
 
 		double slaOverall = slaMetrics.get("overall");
@@ -586,8 +598,8 @@ public class RealtimeHelper {
 			Log.printLine(String.format("SLA time per active host: %.2f%%", slaTimePerActiveHost * 100));
 			Log.printLine(String.format("Overall SLA violation: %.2f%%", slaOverall * 100));
 			Log.printLine(String.format("Average SLA violation: %.2f%%", slaAverage * 100));
-			Log.printLine(String.format("Deadline Missing Rate: %.2f%%", deadlineMissingRate * 100));
-			Log.printLine(String.format("Declined Clouelet Rate: %.2f%%", declinedCloudletRate * 100));
+			Log.printLine(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
+			Log.printLine(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));
 			// Log.printLine(String.format("SLA time per VM with migration:
 			// %.2f%%", slaTimePerVmWithMigration * 100));
 			// Log.printLine(String.format("SLA time per VM without migration:
@@ -639,7 +651,7 @@ public class RealtimeHelper {
 
 		// Log.setDisabled(true);
 
-		return our_sla;
+		return ga_result;
 	}
 
 	/**
@@ -994,6 +1006,7 @@ public class RealtimeHelper {
 			boolean enableOutput, 
 			boolean outputToFile, 
 			String outputFolder,
+			String resultFile,
 			String vmAllocationPolicy, 
 			String vmSelectionPolicy, 
 			String parameter) throws IOException, FileNotFoundException {
@@ -1008,10 +1021,18 @@ public class RealtimeHelper {
 			if (!folder2.exists()) {
 				folder2.mkdir();
 			}
+			
+			File folder3 = new File(outputFolder + "/result");
+			if (!folder3.exists()) {
+				folder3.mkdir();
+			}
 
 			File file = new File(outputFolder + "/log/" + getExperimentName(vmAllocationPolicy, vmSelectionPolicy, parameter) + ".txt");
 			file.createNewFile();
 			Log.setOutput(new FileOutputStream(file));
+			
+			File result = new File(outputFolder + "/result/" + resultFile + ".txt");
+			result.createNewFile();
 		}
 	}
 }

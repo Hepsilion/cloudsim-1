@@ -6,6 +6,7 @@ import org.cloudbus.cloudsim.power.PowerVm;
 public class RealtimeVm extends PowerVm {
 	private int hostId;
 	private int frequency;
+	private RealtimeCloudlet cloudlet;
 
 	public RealtimeVm(int id, int userId, double mips, int pesNumber, int ram, long bw, long size, int priority,
 			String vmm, CloudletScheduler cloudletScheduler, double schedulingInterval, int hostId, int frequency) {
@@ -33,5 +34,13 @@ public class RealtimeVm extends PowerVm {
 
 	public void setFrequency(int frequency) {
 		this.frequency = frequency;
+	}
+
+	public RealtimeCloudlet getCloudlet() {
+		return cloudlet;
+	}
+
+	public void setCloudlet(RealtimeCloudlet cloudlet) {
+		this.cloudlet = cloudlet;
 	}
 }

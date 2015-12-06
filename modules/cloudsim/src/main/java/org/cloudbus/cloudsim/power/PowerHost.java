@@ -121,6 +121,7 @@ public class PowerHost extends HostDynamicWorkload {
 //		if (fromUtilization == 0) {
 //			return 0;
 //		}
+			//TODO 这里可能考虑了主机睡眠技术
 			if (fromUtilization == 0 && isEnableONOFF()) {
 	            //    if (isEnableONOFF()) {
 				return 0;

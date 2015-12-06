@@ -37,32 +37,6 @@ public class DvfsPowerVmAllocation extends PowerVmAllocationPolicyAbstract {
                 }
             }
         }
-//        if (allocatedHost == null) {
-//            Log.printLine("No host available for VM " + vm.getId() + " can be found without modifications");
-//            // if we are here, it means that no Host are suitable...
-//            // HOST that used DVFS can be modified to host a new VM OR Vm size has to be decrease
-//
-//            PowerHost moreAvailHost = null;
-//            double maxAvailMips = -1;
-//            // so we take the host with the higher FREE mips
-//            for (int i = 0; i < getHostList().size(); i++) {
-//                if (maxAvailMips < getHostList().get(i).getAvailableMips()) {
-//                    maxAvailMips = getHostList().get(i).getAvailableMips();
-//                    moreAvailHost = (PowerHost) getHostList().get(i);
-//                }
-//            }
-//
-//            // Normally, there is no case where moreAvailHost can be NULL
-//            // moreAvailHost is NOT NULL
-//            if (moreAvailHost.MakeSuitableHostForVm(vm)) // change Pe frequency
-//                return moreAvailHost;
-//            else {
-//                if (moreAvailHost.decreaseVMMipsToHostNewVm(vm))
-//                    return moreAvailHost;
-//            }
-//            Log.printLine("CHOSEN HOST for VM " + vm.getId() + " is : Host #" + moreAvailHost.getId());
-//        }
-
         return allocatedHost;
     }
     

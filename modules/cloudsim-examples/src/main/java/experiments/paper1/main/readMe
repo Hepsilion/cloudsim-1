@@ -8,3 +8,4 @@
 
 3.Ga Algorithm
 (1)解注释RealtimeConstants中ga，ENABLE_DVFS和ENABLE_ONOFF设置为false
+(2)RealtimeHelper中govs设置为OnDemand

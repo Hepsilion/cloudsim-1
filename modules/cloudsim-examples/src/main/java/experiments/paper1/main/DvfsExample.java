@@ -3,6 +3,7 @@ package experiments.paper1.main;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,63 +33,68 @@ public class DvfsExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) {
-	    File outputFile = new File("/home/hepsilion/Workspace/Temp/dvfs_result.txt");
-        try {
-            os = new FileOutputStream(outputFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } 
+		int numExes = 30;
+		double result[][] = new double[numExes+1][3];
+        for(int i=0; i<=numExes; i++) {
+        	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
+        	String resultFile = "dvfs_"+ temp_numCloudlets;
+    		try {
+    			RealtimeHelper.initLogOutput(
+    					RealtimeConstants.ENABLE_OUTPUT,
+    					RealtimeConstants.OUTPUT_TO_FILE,
+    					RealtimeConstants.OutputFolder,
+    					resultFile,
+    					RealtimeConstants.VmAllocationPolicy,
+    					RealtimeConstants.VmSelectionPolicy,
+    					RealtimeConstants.Parameter);
+    			os = new FileOutputStream(RealtimeConstants.OutputFolder+"/result/" + resultFile + ".txt");
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    			System.exit(0);
+    		} 
+    		
+    		OutputStream origional_output = Log.getOutput();
+            Log.setOutput(os);
+            
+            Log.printLine("Dvfs Example start time: " + new Date().toString());
+            Log.setOutput(origional_output);
+    		Log.printLine("Dvfs Example Simulation started!");
+    		try {
+    			CloudSim.init(1, Calendar.getInstance(), false);
+
+    			broker = (RealtimeDatacenterBroker) RealtimeHelper.createBroker();
+    			int brokerId = broker.getId();
+
+    			vmlist = RealtimeHelper.createVmList(brokerId, temp_numCloudlets);
+    			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, temp_numCloudlets);
+    			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
+
+    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", DvfsPowerDatacenter.class, hostList);
+    			datacenter.setDisableMigrations(true);
+    			broker.submitVmList(vmlist);
+    			broker.submitCloudletList(cloudletList);
+    			
+    			CloudSim.terminateSimulation(RealtimeConstants.SIMULATION_LIMIT);
+    			
+    			double lastClock = CloudSim.startSimulation();
+    			List<Cloudlet> received_cloudlets = broker.getCloudletReceivedList();
+    			Log.printLine("Received " + received_cloudlets.size() + " cloudlets");
+    			CloudSim.stopSimulation();
+
+    			Log.setOutput(os);
+    			Log.printLine("Dvfs Example end time: " + new Date().toString());
+    			RealtimeHelper.printResults(datacenter, vmlist, cloudletList, result, i, received_cloudlets, lastClock, RealtimeConstants.OUTPUT_CSV);
+    			Log.setOutput(origional_output);
+    			
+    			Log.printLine("Dvfs Example Simulation finished!");
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    			Log.printLine("Unwanted errors happen");
+    		}
+        }
         
-		try {
-			RealtimeHelper.initLogOutput(
-					RealtimeConstants.ENABLE_OUTPUT,
-					RealtimeConstants.OUTPUT_TO_FILE,
-					RealtimeConstants.OutputFolder,
-					RealtimeConstants.VmAllocationPolicy,
-					RealtimeConstants.VmSelectionPolicy,
-					RealtimeConstants.Parameter);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		} 
-		
-		OutputStream origional_output = Log.getOutput();
-        Log.setOutput(os);
-        
-        Log.printLine("Dvfs Example start time: " + new Date().toString());
-        Log.setOutput(origional_output);
-		Log.printLine("Dvfs Example Simulation started!");
-		try {
-			CloudSim.init(1, Calendar.getInstance(), false);
-
-			broker = (RealtimeDatacenterBroker) RealtimeHelper.createBroker();
-			int brokerId = broker.getId();
-
-			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, RealtimeConstants.NUMBER_OF_CLOUDLETS);
-			vmlist = RealtimeHelper.createVmList(brokerId, cloudletList.size());
-			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
-
-			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", DvfsPowerDatacenter.class, hostList);
-			datacenter.setDisableMigrations(true);
-			broker.submitVmList(vmlist);
-			broker.submitCloudletList(cloudletList);
-			
-			CloudSim.terminateSimulation(RealtimeConstants.SIMULATION_LIMIT);
-			
-			double lastClock = CloudSim.startSimulation();
-			List<Cloudlet> received_cloudlets = broker.getCloudletReceivedList();
-			Log.printLine("Received " + received_cloudlets.size() + " cloudlets");
-			CloudSim.stopSimulation();
-
-			Log.setOutput(os);
-			Log.printLine("Dvfs Example end time: " + new Date().toString());
-			RealtimeHelper.printResults(datacenter, vmlist, cloudletList, received_cloudlets, lastClock, RealtimeConstants.OUTPUT_CSV);
-			Log.setOutput(origional_output);
-			
-			Log.printLine("Dvfs Example Simulation finished!");
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.printLine("Unwanted errors happen");
-		}
+        for(int i=0; i<=numExes; i++) {
+        	System.out.println(result[i][0]+"  "+result[i][1]+"  "+result[i][2]);
+        }
 	}
 }

@@ -143,10 +143,7 @@ public class HostDynamicWorkload extends Host {
 	}
 	
 		/**
-		 * 
 		 * Check if DVFS is active on the Host. If yes, dvfs method is called.
-		 * 
-		 * 
 		 */
 		public void isDvfsActivatedOnHost() {
 			// dvfs call
@@ -155,48 +152,34 @@ public class HostDynamicWorkload extends Host {
 		}
 	
 		/**
-		 * 
-		 * 
 		 * DVFS method
 		 * 
 		 * for each Pe , 'changeFrequency' methode is called
-		 * 
 		 * then this method check if VM size has to be Decrease or Increase
 		 * regarding the Pe.changeFrequency return value.
-		 * 
-		 * 
 		 */
 		private void applyDvfsOnHost() {
 			for (Pe pe : this.<Pe> getPeList()) {
 				double utilPe = pe.getPeProvisioner().getUtilization() * 100;
 				int cur_mips = pe.getMips();
-				// System.out.println("PE " + pe.getId() + " Utilization == " +
-				// utilPe);
+				// System.out.println("PE " + pe.getId() + " Utilization == " + utilPe);
 	
 				int res = pe.changeFrequency();
-				// System.out.println("PE " + pe.getId() +" New frequency =" +
-				// pe.getMips());
-				double new_AvailableMips = getAvailableMips()
-						+ (pe.getMips() - cur_mips);
+				// System.out.println("PE " + pe.getId() +" New frequency =" + pe.getMips());
+				double new_AvailableMips = getAvailableMips() + (pe.getMips() - cur_mips);
 	
 				/*
-				 * it means that the CPU frequency change caused an overflow of Host
-				 * Capacity (Available Mips of Host < 0 ! ) All VM of that Host will
-				 * be reduce in order to fit them on the Host
+				 * it means that the CPU frequency change caused an overflow of Host* Capacity (Available Mips of Host < 0 ! ) 
+				 * All VM of that Host will be reduce in order to fit them on the Host
 				 */
 				if (new_AvailableMips < 0)
 					decreaseVmMips();
-	
-				setAvailableMips(new_AvailableMips);
+				else // TODO 这里原来没有else，似乎错了，我在这里加了一个else,使其成为分支选择结构
+					setAvailableMips(new_AvailableMips);
 				// System.out.println("Available mips  = " + getAvailableMips());
-				/*
-				 * 
-				 * if the cpu frequency has been increased , we can regrow the VMs
-				 * size.
-				 */
+				// if the cpu frequency has been increased, we can regrow the VMs size.
 				if (res == 1 || res == 2)
 					regrowVmMips();
-	
 			}
 		}
 
@@ -343,17 +326,14 @@ public class HostDynamicWorkload extends Host {
 	 * @param requestedMips the requested mips
 	 * @param isActive the is active
 	 */
-	public
-			void
-			addStateHistoryEntry(double time, double allocatedMips, double requestedMips, boolean isActive) {
+	public void addStateHistoryEntry(double time, double allocatedMips,
+			double requestedMips, boolean isActive) {
 
-		HostStateHistoryEntry newState = new HostStateHistoryEntry(
-				time,
-				allocatedMips,
-				requestedMips,
-				isActive);
+		HostStateHistoryEntry newState = new HostStateHistoryEntry(time,
+				allocatedMips, requestedMips, isActive);
 		if (!getStateHistory().isEmpty()) {
-			HostStateHistoryEntry previousState = getStateHistory().get(getStateHistory().size() - 1);
+			HostStateHistoryEntry previousState = getStateHistory().get(
+					getStateHistory().size() - 1);
 			if (previousState.getTime() == time) {
 				getStateHistory().set(getStateHistory().size() - 1, newState);
 				return;

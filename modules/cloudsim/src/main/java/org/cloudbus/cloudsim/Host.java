@@ -192,32 +192,51 @@ public class Host {
 	public boolean isSuitableForVm(Vm vm) {
 		return (getVmScheduler().getPeCapacity() >= vm.getCurrentRequestedMaxMips()
 				&& getVmScheduler().getAvailableMips() >= vm.getCurrentRequestedTotalMips()
-				&& getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) && getBwProvisioner()
-				.isSuitableForVm(vm, vm.getCurrentRequestedBw()));
+				&& getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
+				&& getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw()));
 	}
 	
 		public boolean MakeSuitableHostForVm(Vm vm) {
-			// IF DVFS ENABLE
-			// IT'S POSSIBLE THAT THE FIRST VM ASK MORE THAN THE START CAPACITY OF
-			// THE PE (depending of the dvfs mode)
-			// IN THIS CASE WE HAVE TO INCREASE DIRECTLY PE CAPACITY !
-			// BUT IT'S not POSSIBLE WITH ALL GOVERNOR
-			if (this.getVmList().isEmpty()
-					&& this.isEnableDVFS()
-					&& getVmScheduler().getAvailableMips() < vm
-							.getCurrentRequestedTotalMips()) {
+			// If DVFS Enabled, it's possible that the first vm ask more than the start capacity of the PE(depending of the dvfs mode),
+			// in this case, we have to increase directly PE capacity! But it's not possible with all governor.
+			if (this.getVmList().isEmpty() && this.isEnableDVFS() && getVmScheduler().getAvailableMips() < vm.getCurrentRequestedTotalMips()) {
 				for (Pe pe : getPeList()) {
-					if (pe.changeToMaxFrequency()) // if the Freq has been set to
-													// MAX , return true
-					{
+					if (pe.changeToMaxFrequency()){ // if the Freq has been set to MAX , return true
 						setAvailableMips(getTotalMips());
+						System.out.println("Current Total Mips: "+getTotalMips());
 						return true;
 					}
 				}
 				return false;
 			} else
 				return false;
-	
+		}
+		
+		/**
+		 * @author Hepsilion
+		 */
+		public boolean increaseHostMipsForNewVm(Vm vm) {
+	    	if(this.isEnableDVFS() && getVmScheduler().getAvailableMips()<vm.getCurrentRequestedTotalMips()) {
+	    		int[] frequencies = new int[getPeList().size()];
+	    		double oldTotalMips = this.getTotalMips();
+	    		System.out.println("Before,Available Mips:"+this.getAvailableMips());
+	    		for(int i=0; i<getPeList().size(); i++) {
+	    			frequencies[i]=getPeList().get(i).getIndexFreq();
+	    			getPeList().get(i).changeToMaxFrequency();
+	    		}
+	    		double totalMips = this.getTotalMips();
+	    		if(totalMips-oldTotalMips+this.getAvailableMips() > vm.getCurrentRequestedTotalMips()) {
+	    			this.setAvailableMips(totalMips-oldTotalMips+this.getAvailableMips());
+		    		System.out.println("After,Available Mips:"+this.getAvailableMips());
+	    			return true;
+	    		}else{
+	    			for(int i=0; i<getPeList().size(); i++) {
+	    				getPeList().get(i).setFrequency(frequencies[i]);
+	    			}
+	    			return false;
+	    		}
+	    	}
+	    	return false;
 		}
 	
 		/**
@@ -235,7 +254,6 @@ public class Host {
 		 */
 	
 		public boolean decreaseVMMipsToHostNewVm(Vm new_vm) {
-	
 			double NewTotalVmMips = 0;
 			double HostCapacity = getTotalMips();
 			double percent;

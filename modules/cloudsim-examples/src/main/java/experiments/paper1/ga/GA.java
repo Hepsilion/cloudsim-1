@@ -288,11 +288,11 @@ public abstract class GA implements Runnable {
 		this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[this.bestFitnessChromIndex]);
 		this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[this.bestFitnessChromIndex]);
 		
-//		for (int i = 0; i < populationDim; i++){
-//            if (this.chromosomes[i].fitnessRank >= 16) {
-//                this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[i]);
-//            }
-//        }
+		for (int i = 0; i < populationDim; i++){
+            if (this.chromosomes[i].fitnessRank>=15 && this.chromosomes[i].fitnessRank!=populationDim - 1) {
+                this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[i]);
+            }
+        }
 
 		Chrom1 = new ChromTaskScheduling(chromosomeDim);
 		Chrom2 = new ChromTaskScheduling(chromosomeDim);
@@ -392,19 +392,13 @@ public abstract class GA implements Runnable {
 	void copyNextGenToThisGen() {
 		for (int i = 0; i < populationDim; i++) {
 			this.chromosomes[i].copyChromGenes(this.chromNextGen[i]);
-
-			if (i>3) {
-                // always mutate the chromosome with the lowest fitness
-                if (getRandom(1.0) < mutationProb)
-                    doRandomMutation(i);
-            }
 			
 			// only mutate chromosomes if it is NOT the best
-//			if (i != this.bestFitnessChromIndex) {
-//				// always mutate the chromosome with the lowest fitness
-//				if ((i == this.worstFitnessChromIndex) || (getRandom(1.0) < mutationProb))
-//					doRandomMutation(i);
-//			}
+			if (i != this.bestFitnessChromIndex) {
+				// always mutate the chromosome with the lowest fitness
+				if ((i == this.worstFitnessChromIndex) || (getRandom(1.0) < mutationProb))
+					doRandomMutation(i);
+			}
 		}
 	}
 	
