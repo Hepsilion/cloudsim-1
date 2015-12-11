@@ -33,9 +33,10 @@ public class DvfsExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) {
-		int numExes = 30;
+		int numExes = 25;
 		double result[][] = new double[numExes+1][3];
         for(int i=0; i<=numExes; i++) {
+        	System.out.println("#Cloudlet="+i);
         	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
         	String resultFile = "dvfs_"+ temp_numCloudlets;
     		try {
@@ -69,7 +70,7 @@ public class DvfsExample {
     			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", DvfsPowerDatacenter.class, hostList);
+    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", DvfsPowerDatacenter.class, hostList, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);

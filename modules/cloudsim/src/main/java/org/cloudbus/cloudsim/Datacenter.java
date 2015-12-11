@@ -469,7 +469,6 @@ public class Datacenter extends SimEntity {
 	protected void processVmDestroy(SimEvent ev, boolean ack) {
 		Vm vm = (Vm) ev.getData();
 			Host h = vm.getHost();
-	        //h.ReGrowVMMips(vm);
 	        if(h.isEnableDVFS())
 	            h.regrowVmMipsAfterVmEnd(vm);
 		getVmAllocationPolicy().deallocateHostForVm(vm);
@@ -716,8 +715,7 @@ public class Datacenter extends SimEntity {
 			}
 
 			// process this Cloudlet to this CloudResource
-			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(), getCharacteristics()
-					.getCostPerBw());
+			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(), getCharacteristics().getCostPerBw());
 
 			int userId = cl.getUserId();
 			int vmId = cl.getVmId();
@@ -729,7 +727,7 @@ public class Datacenter extends SimEntity {
 			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
-			scheduler.setPreviousTime(CloudSim.clock()); // TODO 如果任务不是从0时刻到达，那么首次更新任务时，利用的previous time有误，故这里增加
+			scheduler.setPreviousTime(CloudSim.clock()); // TODO 添加：添加这行代码，否则如果任务不是从0时刻到达，那么首次更新任务时，利用的previous time有误
 			
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {

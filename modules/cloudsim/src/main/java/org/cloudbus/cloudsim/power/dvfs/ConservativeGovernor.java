@@ -44,14 +44,12 @@ public class ConservativeGovernor extends AbstractGovernor {
 		if (configConservative.containsKey("up_threshold")) {
 			Object o = configConservative.get("up_threshold");
 			setUpThreshold((int) o);
-			System.out.println("Conservative UP_Threshold new value : "
-					+ (int) o);
+			//System.out.println("Conservative UP_Threshold new value : " + (int) o);
 		}
 		if (configConservative.containsKey("down_threshold")) {
 			Object o = configConservative.get("down_threshold");
 			setDownThreshold((int) o);
-			System.out.println("Conservative DOWN_Threshold new value : "
-					+ (int) o);
+			//System.out.println("Conservative DOWN_Threshold new value : " + (int) o);
 		}
 		if (configConservative.containsKey("enablefreqstep")) {
 			Object o = configConservative.get("enablefreqstep");
@@ -60,13 +58,12 @@ public class ConservativeGovernor extends AbstractGovernor {
 				enableFreqStep = false;
 			else if (tmp_enablefreqstep == 1)
 				enableFreqStep = true;
-			System.out.println("Conservative ENABLEFREQSTEP new value : "
-					+ enableFreqStep);
+			//System.out.println("Conservative ENABLEFREQSTEP new value : " + enableFreqStep);
 		}
 		if (configConservative.containsKey("freqstep")) {
 			Object o = configConservative.get("freqstep");
 			freqStep = (int) o;
-			System.out.println("Conservative FREQSTEP new value : " + freqStep);
+			//System.out.println("Conservative FREQSTEP new value : " + freqStep);
 		}
 	}
 

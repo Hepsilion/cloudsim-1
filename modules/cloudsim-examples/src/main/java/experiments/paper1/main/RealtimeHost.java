@@ -20,7 +20,7 @@ public class RealtimeHost extends PowerHostUtilizationHistory {
 		super(id, ramProvisioner, bwProvisioner, storage, peList, vmScheduler, powerModel, enableOnOff, enableDvfs);
 	}
 	
-	public void setFrequency(int frequency) {
+	public void setPeFrequency(int frequency) {
 	    this.frequency = frequency;
 	    int oldTotalMips = getTotalMips();
 		for(Pe pe : getPeList()) {
@@ -31,6 +31,10 @@ public class RealtimeHost extends PowerHostUtilizationHistory {
 		setAvailableMips(availableMips);
 	}
 	
+	public void setFrequency(int frequency) {
+	    this.frequency = frequency;
+	}
+	
     public int getFrequency() {
         return frequency;
     }
@@ -38,7 +42,7 @@ public class RealtimeHost extends PowerHostUtilizationHistory {
     @Override
 	public double updateVmsProcessing(double currentTime) {
 		double time = super.updateVmsProcessing(currentTime);
-		isDvfsActivatedOnHost();
+		//isDvfsActivatedOnHost();
 		return time;
-	}
+    }
 }

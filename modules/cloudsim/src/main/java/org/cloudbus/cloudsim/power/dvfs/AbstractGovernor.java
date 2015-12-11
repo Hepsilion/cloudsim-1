@@ -44,10 +44,10 @@ public abstract class AbstractGovernor {
 	 * @return 0/-1/1 , the decision : increase/decrease or no the frequency
 	 */
 	protected int decision(double util) {
-		System.out.println("decision abstract governor :");
-		System.out.println("util = " + util);
-		System.out.println("down thresh = " + downThreshold);
-		System.out.println("up thresh = " + upThreshold);
+		// System.out.println("decision abstract governor :");
+		// System.out.println("util = " + util);
+		// System.out.println("down thresh = " + downThreshold);
+		// System.out.println("up thresh = " + upThreshold);
 		 
 		// -1 step_bw
 		// 0 no change

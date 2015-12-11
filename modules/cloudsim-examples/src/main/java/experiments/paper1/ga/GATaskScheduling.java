@@ -15,6 +15,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
+import org.cloudbus.cloudsim.power.lists.PowerVmList;
 
 import experiments.paper1.main.RealtimeConstants;
 import experiments.paper1.main.RealtimeDatacenterBroker;
@@ -42,7 +43,7 @@ public class GATaskScheduling extends GA {
 		super(chromosomeDim, populationDim, crossoverProb, randomSelectionChance, maxGenerations, numPrelimRuns, maxPrelimGenerations, mutationProb, crossoverType, computeStatistics);
 		
 		String logFile = "ga_"+chromosomeDim;
-		String resultFile = "ga_result";
+		String resultFile = "ga_result_"+chromosomeDim;
 		try {
 			ga_log = new FileOutputStream(RealtimeConstants.OutputFolder+"/result/" + logFile + ".txt");
 			result_log = new FileOutputStream(RealtimeConstants.OutputFolder+"/result/" + resultFile + ".txt");
@@ -71,9 +72,9 @@ public class GATaskScheduling extends GA {
 	protected void initPopulation() {
 		for(int i=0; i<populationDim; i++) {
 			//random hosts for vms
-			int[] rn = RealtimeHelper.getRandomIntegers(chromosomeDim, 0, RealtimeConstants.NUMBER_OF_HOSTS-1);
+			int[] rn = RealtimeHelper.getRandomHosts(chromosomeDim, 0, RealtimeConstants.NUMBER_OF_HOSTS-1);
 			//random frequency level for vms
-			int[] fl = RealtimeHelper.getRandomIntegers(chromosomeDim, 0, 4);
+			int[] fl = RealtimeHelper.getRandomFrequencies(chromosomeDim, 0, 4);
 			
 			ChromTaskScheduling cs = ((ChromTaskScheduling)chromosomes[i]);
 			for(int j=0; j<chromosomeDim; j++) {
@@ -98,17 +99,21 @@ public class GATaskScheduling extends GA {
 	
 	//TODO 暂时替换成这个
 	protected void doRandomMutation(int iChromIndex) {
-        for (int i=0; i < chromosomeDim; i++) {
-            if (getRandom(100) > 50) {
-                int vmId = ((ChromTaskScheduling)this.chromosomes[iChromIndex]).getGene(i).getVm();
+		ChromTaskScheduling chrom = (ChromTaskScheduling)this.chromosomes[iChromIndex];
+		boolean mutated = false;
+        for (int i=0; i<chromosomeDim; i++) {
+            if (getRandom(100)>70) {//TODO 暂时50->70
+                int vmId = chrom.getGene(i).getVm();
                 int hostId = RealtimeHelper.getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1);
                 int frequency = RealtimeHelper.getRandomInteger(0, 4);
                 GeneTaskScheduling gene = new GeneTaskScheduling(vmId, hostId, frequency);
 
                 setGeneValue(iChromIndex, i, gene);
+                mutated = true;
             }
         }
-        this.chromosomes[iChromIndex].fitness = 0.0;
+        if(mutated)
+        	this.chromosomes[iChromIndex].fitness = 0.0;
     }
 	
 	/**
@@ -191,19 +196,24 @@ public class GATaskScheduling extends GA {
 	@Override
 	protected void doUniformCrossover(Chromosome Chrom1, Chromosome Chrom2) {
 		int iGeneToSwap;
+		boolean crossovered = false;
 
         for (int i=0; i < chromosomeDim; i++) {
-            if (getRandom(100) > 50) {
+            if (getRandom(1.0) < this.crossoverProb) {
                 iGeneToSwap = getRandom(chromosomeDim);
                 GeneTaskScheduling gene1 = ((ChromTaskScheduling)Chrom1).getGene(iGeneToSwap);
                 GeneTaskScheduling gene2 = ((ChromTaskScheduling)Chrom2).getGene(iGeneToSwap);
             
                 ((ChromTaskScheduling)Chrom1).setGene(gene2, iGeneToSwap);
                 ((ChromTaskScheduling)Chrom2).setGene(gene1, iGeneToSwap);
+                
+                crossovered = true;
             }
         }
-        Chrom1.fitness = 0.0;
-        Chrom2.fitness = 0.0;
+        if(crossovered){
+        	Chrom1.fitness = 0.0;
+        	Chrom2.fitness = 0.0;
+        }
 	}
 	
 	@Override
@@ -254,18 +264,6 @@ public class GATaskScheduling extends GA {
         } else {
             Log.printLine("INITIAL POPULATION (NO PRELIM RUNS):");
         }
-        //Add Preliminary Chromosomes to list box
-        addChromosomesToLog(0, 10);
-
-        
-        Log.setOutput(result_log);
-        Log.printLine("Initial Population:");
-        for(int i=0; i<populationDim; i++) {
-        	ChromTaskScheduling chrom = (ChromTaskScheduling) this.chromosomes[i];
-        	Log.printLine(chrom.tdr+"	"+chrom.dmr+"	"+chrom.energy);
-        }
-        Log.setOutput(origional_output);
-        
         
         // 正式处理
         iGen = 0;
@@ -282,11 +280,10 @@ public class GATaskScheduling extends GA {
             Log.setOutput(origional_output);
             
             computeFitnessRankings();//计算适应度值排序
-            
             Log.setOutput(result_log);
             for(int i=0; i<populationDim; i++) {
             	ChromTaskScheduling chrom = (ChromTaskScheduling) this.chromosomes[i];
-            	Log.printLine(chrom.tdr+"	"+chrom.dmr+"	"+chrom.energy);
+            	Log.printLine(chrom.fitness+" "+chrom.tdr+"	"+chrom.dmr+"	"+chrom.energy);
             }
             Log.setOutput(origional_output);
             
@@ -298,14 +295,32 @@ public class GATaskScheduling extends GA {
                 this.genAvgFitness[iGen] = getAvgFitness();
             }
             iGen++;
-        }
-
-        //Log.printLine("GEN " + (iGen + 1) + " AVG FITNESS = " + this.genAvgFitness[iGen-1] + " AVG DEV = " + this.genAvgDeviation[iGen-1]);
-        addChromosomesToLog(iGen, 10); //display Chromosomes to system.out
-
+        }       
+        
+        Log.setOutput(result_log);
+		Log.printLine("****************************************************************************************");
+        Log.printLine("                               "+iGen+"th Generation Chromsome                          ");
+        System.out.println("                               "+iGen+"th Generation Chromsome                          ");
+        Log.printLine("****************************************************************************************");
+        Log.setOutput(origional_output);
+        
         computeFitnessRankings();
         
-        
+        Log.setOutput(result_log);
+        for(int i=0; i<populationDim; i++) {
+        	ChromTaskScheduling chrom = (ChromTaskScheduling) this.chromosomes[i];
+        	Log.printLine(chrom.fitness+" "+chrom.tdr+"	"+chrom.dmr+"	"+chrom.energy);
+        }
+		Log.printLine("######################################Final Result######################################");
+		Log.printLine("GA start  time: " + startTime);
+        Log.printLine("GA finish time: " + new Date().toString());
+        Log.printLine("Best Chromosome Found: " + this.bestFitnessChromIndex + "th chromosome");
+        Log.printLine(this.chromosomes[this.bestFitnessChromIndex].getGenesAsStr());
+        Log.printLine("Fitness= " + this.chromosomes[this.bestFitnessChromIndex].fitness);
+        Log.printLine("Task Declined Rate  = " + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).tdr);
+        Log.printLine("Deadline Missing Rate = " + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).dmr);
+        Log.printLine("Energy = " + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).energy);
+        Log.printLine("######################################Final Result######################################");
         Log.setOutput(ga_log);
 		Log.printLine("######################################Final Result######################################");
 		Log.printLine("GA start  time: " + startTime);
@@ -317,20 +332,59 @@ public class GATaskScheduling extends GA {
         Log.printLine("Deadline Missing Rate=" + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).dmr);
         Log.printLine("       Energy        =" + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).energy);
         Log.printLine("######################################Final Result######################################");
-		Log.setOutput(result_log);
-		Log.printLine("######################################Final Result######################################");
-		Log.printLine("GA start  time: " + startTime);
-        Log.printLine("GA finish time: " + new Date().toString());
-        Log.printLine("Best Chromosome Found: " + this.bestFitnessChromIndex + "th chromosome");
-        Log.printLine(this.chromosomes[this.bestFitnessChromIndex].getGenesAsStr());
-        Log.printLine("Fitness= " + this.chromosomes[this.bestFitnessChromIndex].fitness);
-        Log.printLine("Task Declined Rate  = " + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).tdr);
-        Log.printLine("Deadline Missing Rate = " + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).dmr);
-        Log.printLine("Energy = " + ((ChromTaskScheduling)(this.chromosomes[this.bestFitnessChromIndex])).energy);
-        Log.printLine("######################################Final Result######################################");
         Log.setOutput(origional_output);
         
         return (iGen);
+	}
+	
+	void computeFitnessRankings() {
+		for (int i=0; i<populationDim; i++) {
+			if(this.chromosomes[i].fitness == 0.0){
+				double[] ga_result=getGaFitness(i);
+				this.chromosomes[i].fitness = ga_result[3];
+				((ChromTaskScheduling)(this.chromosomes[i])).tdr=ga_result[0];
+				((ChromTaskScheduling)(this.chromosomes[i])).dmr=ga_result[1];
+				((ChromTaskScheduling)(this.chromosomes[i])).energy=ga_result[2];
+			}
+		}
+
+		for (int i=0; i<populationDim; i++)
+			this.chromosomes[i].fitnessRank = getFitnessRank(this.chromosomes[i].fitness, i);
+		
+		for (int i=0; i<populationDim; i++) {
+			if (this.chromosomes[i].fitnessRank == populationDim - 1) {
+				this.bestFitnessChromIndex = i;
+			}
+			if (this.chromosomes[i].fitnessRank == 0) {
+				this.worstFitnessChromIndex = i;
+			}
+		}
+	}
+	
+	//TODO 修改原遗传算法中，存在相同元素时的错误
+	int getFitnessRank(double fitness, int index) {
+		int fitnessRank = -1;
+		int preEqual=0;
+		for (int i = 0; i < populationDim; i++) {
+			if (fitness >= this.chromosomes[i].fitness) {
+				if(fitness==this.chromosomes[i].fitness && i<index) {
+					preEqual++;
+				}
+				fitnessRank++;
+			}
+		}
+		fitnessRank-=preEqual;
+		return fitnessRank;
+	}
+	
+	protected double[] getGaFitness(int iChromIndex) {
+		return simulation(iChromIndex);
+	}
+
+	@Override
+	protected double getFitness(int iChromIndex) {
+		//return simulation(iChromIndex);
+		return 0;
 	}
 
 	public double[] simulation(int iChromIndex) {
@@ -347,7 +401,8 @@ public class GATaskScheduling extends GA {
 			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, chromosomeDim);
 			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
 	
-			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", GADatacenter.class, hostList);
+			//TODO 沿着这条线改了
+			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", GADatacenter.class, hostList, this.chromosomes[iChromIndex]);
 			datacenter.setDisableMigrations(true);
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);
@@ -376,39 +431,5 @@ public class GATaskScheduling extends GA {
 		}
 		
 		return ga_result;
-	}
-	
-	void computeFitnessRankings() {
-		for (int i=0; i<populationDim; i++) {
-			if(this.chromosomes[i].fitness == 0.0){
-				double[] ga_result=getGaFitness(i);
-				this.chromosomes[i].fitness = ga_result[3];
-				((ChromTaskScheduling)(this.chromosomes[i])).tdr=ga_result[0];
-				((ChromTaskScheduling)(this.chromosomes[i])).dmr=ga_result[1];
-				((ChromTaskScheduling)(this.chromosomes[i])).energy=ga_result[2];
-			}
-		}
-
-		for (int i=0; i<populationDim; i++)
-			this.chromosomes[i].fitnessRank = getFitnessRank(this.chromosomes[i].fitness);
-
-		for (int i=0; i<populationDim; i++) {
-			if (this.chromosomes[i].fitnessRank == populationDim - 1) {
-				this.bestFitnessChromIndex = i;
-			}
-			if (this.chromosomes[i].fitnessRank == 0) {
-				this.worstFitnessChromIndex = i;
-			}
-		}
-	}
-	
-	protected double[] getGaFitness(int iChromIndex) {
-		return simulation(iChromIndex);
-	}
-
-	@Override
-	protected double getFitness(int iChromIndex) {
-		//return simulation(iChromIndex);
-		return 0;
 	}
 }

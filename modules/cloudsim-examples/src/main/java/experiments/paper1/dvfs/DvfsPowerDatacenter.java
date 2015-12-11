@@ -48,9 +48,9 @@ public class DvfsPowerDatacenter extends PowerDatacenter {
                     .getAllocatedMipsForVm(vm));
             
             //TODO 添加 虚拟机创建成功之后，调节主机频率的代码XXXDVFS
-//            for(PowerHost host : this.<PowerHost>getHostList()) {
-//                host.isDvfsActivatedOnHost();
-//            }
+            for(PowerHost host : this.<PowerHost>getHostList()) {
+                host.isDvfsActivatedOnHost();
+            }
         }
     }
 }

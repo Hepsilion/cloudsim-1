@@ -31,7 +31,7 @@ public class BaseExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) {
-		int numExes = 30;
+		int numExes = 25;
         double result[][] = new double[numExes+1][3];
         for(int i=0; i<=numExes; i++) {
         	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
@@ -67,7 +67,7 @@ public class BaseExample {
     			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList);
+    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);

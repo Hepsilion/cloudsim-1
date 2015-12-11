@@ -30,6 +30,7 @@ import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
+import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.VmStateHistoryEntry;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
@@ -41,6 +42,7 @@ import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLocalRegressi
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLocalRegressionRobust;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationMedianAbsoluteDeviation;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationStaticThreshold;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicySimpleWattPerMipsMetric;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicy;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelation;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumMigrationTime;
@@ -115,8 +117,8 @@ public class RealtimeHelper {
 		return cloudlets;
 	}
 
-	public static int[] getRandomIntegers(int length, int min, int max) {
-		Random rand = new Random(RealtimeConstants.RANDOM_SEED);
+	public static int[] getRandomHosts(int length, int min, int max) {
+		Random rand = new Random(new Random().nextInt());
 		int[] numbers = new int[length];
 		// System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
@@ -126,7 +128,31 @@ public class RealtimeHelper {
 		// System.out.println();
 		return numbers;
 	}
-
+	
+	public static int[] getRandomFrequencies(int length, int min, int max) {
+		Random rand = new Random(new Random().nextInt());
+		int[] numbers = new int[length];
+		//System.out.println("Generate some random numbers");
+		for (int i = 0; i < length; i++) {
+			numbers[i] = rand.nextInt(max)%(max-min+1)+min;
+			//System.out.print(numbers[i]+" ");
+		}
+		//System.out.println();
+		return numbers;
+	}
+	
+	public static int[] getRandomIntegers(int length, int min, int max) {
+		Random rand = new Random(RealtimeConstants.RANDOM_SEED);
+		int[] numbers = new int[length];
+		//System.out.println("Generate some random numbers");
+		for (int i = 0; i < length; i++) {
+			numbers[i] = rand.nextInt(max)%(max-min+1)+min;
+			//System.out.print(numbers[i]+" ");
+		}
+		//System.out.println();
+		return numbers;
+	}
+	
 	public static int getRandomInteger(int min, int max) {
 		int number = rand.nextInt(max)%(max-min+1)+min;
 		return number;
@@ -161,7 +187,7 @@ public class RealtimeHelper {
 					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
 					new CloudletSchedulerSpaceShared(),
 					RealtimeConstants.SCHEDULING_INTERVAL, 
-					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1) : hostId, 
+					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1):hostId, 
 					frequency));
 		}
 		return vms;
@@ -207,25 +233,32 @@ public class RealtimeHelper {
 
 		// Define wich governor is used by each CPU
 		HashMap<Integer, String> govs = new HashMap<Integer, String>(); 
-		govs.put(0, "OnDemand"); // CPU 0 use UserSpace(Performance、Conservative、OnDemand) Dvfs mode 
+		govs.put(0, "My"); // CPU 0 use My(UserSpace、Performance、Conservative、OnDemand) Dvfs mode 
 
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
+		RealtimeHost host = null;
 		for (int i = 0; i < hostsNumber; i++) {
 			HashMap<String, Integer> tmp_HM_OnDemand = new HashMap<String, Integer>();
-			tmp_HM_OnDemand.put("up_threshold", 80);
+			tmp_HM_OnDemand.put("up_threshold", 90);
 			tmp_HM_OnDemand.put("sampling_down_factor", 10);
 			HashMap<String, Integer> tmp_HM_Conservative = new HashMap<String, Integer>();
-			tmp_HM_Conservative.put("up_threshold", 95);
-			tmp_HM_Conservative.put("down_threshold", 40);
+			tmp_HM_Conservative.put("up_threshold", 90);
+			tmp_HM_Conservative.put("down_threshold", 85);
 			tmp_HM_Conservative.put("enablefreqstep", 0);
 			tmp_HM_Conservative.put("freqstep", 5);
 			HashMap<String, Integer> tmp_HM_UserSpace = new HashMap<String, Integer>();
-			tmp_HM_UserSpace.put("frequency", 5);
+			tmp_HM_UserSpace.put("frequency", 1);
+			HashMap<String, Integer> tmp_HM_My = new HashMap<String, Integer>();
+			tmp_HM_My.put("up_threshold", 90);
+			tmp_HM_My.put("down_threshold", 85);
+			tmp_HM_My.put("enablefreqstep", 0);
+			tmp_HM_My.put("freqstep", 5);
 
 			DvfsDatas ConfigDvfs = new DvfsDatas();
 			ConfigDvfs.setHashMapOnDemand(tmp_HM_OnDemand);
 			ConfigDvfs.setHashMapConservative(tmp_HM_Conservative);
 			ConfigDvfs.setHashMapUserSpace(tmp_HM_UserSpace);
+			ConfigDvfs.setHashMapMy(tmp_HM_My);
 
 			int hostType = (i+1) % RealtimeConstants.HOST_TYPES;
 			List<Pe> peList = new ArrayList<Pe>();
@@ -237,17 +270,18 @@ public class RealtimeHelper {
 						govs.get(j),
 						ConfigDvfs));
 			}
-
-			hostList.add(new RealtimeHost(
+			host=new RealtimeHost(
 					i, 
 					new RamProvisionerSimple(RealtimeConstants.HOST_RAM[hostType]),
 					new BwProvisionerSimple(RealtimeConstants.HOST_BW), 
 					RealtimeConstants.HOST_STORAGE, 
 					peList,
-					new VmSchedulerTimeSharedOverSubscription(peList), 
+					new VmSchedulerTimeShared(peList),
 					new PowerModelSpecPower_BAZAR(peList),
 					RealtimeConstants.ENABLE_ONOFF, 
-					RealtimeConstants.ENABLE_DVFS));
+					RealtimeConstants.ENABLE_DVFS);
+			host.setFrequency(host.getPeList().get(0).getIndexFreq());
+			hostList.add(host);
 		}
 		return hostList;
 	}
@@ -270,7 +304,7 @@ public class RealtimeHelper {
 	 * @throws Exception
 	 *             the exception
 	 */
-	public static Datacenter createDatacenter(String name, Class<? extends Datacenter> datacenterClass, List<PowerHost> hostList) throws Exception {
+	public static Datacenter createDatacenter(String name, Class<? extends Datacenter> datacenterClass, List<PowerHost> hostList, Chromosome chrom) throws Exception {
 		String arch = "x86"; // system architecture
 		String os = "Linux"; // operating system
 		String vmm = "Xen";
@@ -295,7 +329,7 @@ public class RealtimeHelper {
 			datacenter = datacenterClass.getConstructor(String.class, DatacenterCharacteristics.class, VmAllocationPolicy.class, List.class, Double.TYPE).newInstance(
 					name,
 					characteristics,
-					getVmAllocationPolicy(RealtimeConstants.VmAllocationPolicy,RealtimeConstants.VmSelectionPolicy, RealtimeConstants.Parameter, hostList),
+					getVmAllocationPolicy(RealtimeConstants.VmAllocationPolicy,RealtimeConstants.VmSelectionPolicy, RealtimeConstants.Parameter, hostList, chrom),
 					new LinkedList<Storage>(), 
 					RealtimeConstants.SCHEDULING_INTERVAL);
 		} catch (Exception e) {
@@ -318,7 +352,7 @@ public class RealtimeHelper {
 	 * @return the vm allocation policy
 	 */
 	protected static VmAllocationPolicy getVmAllocationPolicy(String vmAllocationPolicyName,
-			String vmSelectionPolicyName, String parameterName, List<PowerHost> hostList) {
+			String vmSelectionPolicyName, String parameterName, List<PowerHost> hostList, Chromosome chrom) {
 		VmAllocationPolicy vmAllocationPolicy = null;
 		PowerVmSelectionPolicy vmSelectionPolicy = null;
 		if (!vmSelectionPolicyName.isEmpty()) {
@@ -347,8 +381,10 @@ public class RealtimeHelper {
         } else if(vmAllocationPolicyName.equals("dvfs_muh")) {
 		    vmAllocationPolicy = new PowerVmAllocationPolicyDVFSMinimumUsedHost(hostList);
 		}else if (vmAllocationPolicyName.equals("ga")) {
-			vmAllocationPolicy = new GaPowerVmAllocationPolicy(hostList);
-		}  else {
+			vmAllocationPolicy = new GaPowerVmAllocationPolicy(hostList, chrom);
+		} else if (vmAllocationPolicyName.equals("SimpleWatt")) {
+			vmAllocationPolicy = new PowerVmAllocationPolicySimpleWattPerMipsMetric(hostList);
+		} else {
 			System.out.println("Unknown VM allocation policy: " + vmAllocationPolicyName);
 			System.exit(0);
 		}
@@ -447,7 +483,14 @@ public class RealtimeHelper {
 		
 		double tdr = (cloudlets.size()-received_cloudlets.size()) * 1.0 / cloudlets.size();
 		double dmr = getDeadlineMissingRate(received_cloudlets);
-		double overall_sla = (1-tdr)*(1-dmr)*(1-dmr);
+		
+		double tmp1=10*(1-tdr), tmp2=10*(1-dmr);
+		//double overall_sla = tmp1*tmp1*tmp2*tmp2*tmp2*(100-energy);
+		long numInstructions=0;
+		for(int i=0; i<received_cloudlets.size(); i++) {
+			numInstructions+=received_cloudlets.get(i).getCloudletLength();
+		}
+		double overall_sla=numInstructions/energy;
 
 		double[] ga_result = new double[4];
 		ga_result[0]=tdr;

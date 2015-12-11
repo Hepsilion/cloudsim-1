@@ -9,17 +9,18 @@ import experiments.paper1.ga.GATaskScheduling;
 
 public class GAExample {
 	public static void main(String[] args) {
-		String resultFile = "ga_result";
-		File result = new File(RealtimeConstants.OutputFolder + "/result/" + resultFile + ".txt");
-		try {
-			result.createNewFile();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
 		int numExes = 0;
         for(int i=0; i<=numExes; i++) {
         	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
+        	
+        	String resultFile = "ga_result_"+temp_numCloudlets;
+    		File result = new File(RealtimeConstants.OutputFolder + "/result/" + resultFile + ".txt");
+    		try {
+    			result.createNewFile();
+    		} catch (IOException e1) {
+    			e1.printStackTrace();
+    		}
+    		
         	String logFile = "ga_"+temp_numCloudlets;
     		try {
     			RealtimeHelper.initLogOutput(

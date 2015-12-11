@@ -284,15 +284,23 @@ public abstract class GA implements Runnable {
 		Chromosome Chrom1, Chrom2;
 
 		iCnt = 0;
-		// Elitism--fittest chromosome automatically go on to next gen (in 2 offspring) TODO暂时注释
+		// Elitism--fittest chromosome automatically go on to next gen (in 2 offspring)
 		this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[this.bestFitnessChromIndex]);
 		this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[this.bestFitnessChromIndex]);
 		
-		for (int i = 0; i < populationDim; i++){
-            if (this.chromosomes[i].fitnessRank>=15 && this.chromosomes[i].fitnessRank!=populationDim - 1) {
-                this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[i]);
-            }
-        }
+//		for(int i=0, j=0; i<populationDim && j<4; i++){
+//			if(this.chromosomes[i].fitnessRank!=this.chromosomes[this.bestFitnessChromIndex].fitnessRank && this.chromosomes[i].fitnessRank>=this.chromosomes[this.bestFitnessChromIndex].fitnessRank-j-1){
+//				this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[i]);
+//				j++;
+//			}
+//		}
+		
+//		for (int i = 0; i < populationDim; i++){
+//            if (this.chromosomes[i].fitnessRank>=this.chromosomes[this.bestFitnessChromIndex].fitnessRank-4 && this.chromosomes[i].fitnessRank!=this.chromosomes[this.bestFitnessChromIndex].fitnessRank) {
+//                System.out.println(iCnt);
+//            	this.chromNextGen[iCnt++].copyChromGenes(this.chromosomes[i]);
+//            }
+//        }
 
 		Chrom1 = new ChromTaskScheduling(chromosomeDim);
 		Chrom2 = new ChromTaskScheduling(chromosomeDim);
@@ -330,7 +338,7 @@ public abstract class GA implements Runnable {
 				this.chromNextGen[iCnt++].copyChromGenes(Chrom1);// CREATE OFFSPRING ONE
 				this.chromNextGen[iCnt++].copyChromGenes(Chrom2);// CREATE OFFSPRING TWO
 			}
-		} while (iCnt < populationDim);
+		} while (iCnt < populationDim-2);
 	}
 	
 	/**
@@ -394,9 +402,13 @@ public abstract class GA implements Runnable {
 			this.chromosomes[i].copyChromGenes(this.chromNextGen[i]);
 			
 			// only mutate chromosomes if it is NOT the best
-			if (i != this.bestFitnessChromIndex) {
-				// always mutate the chromosome with the lowest fitness
-				if ((i == this.worstFitnessChromIndex) || (getRandom(1.0) < mutationProb))
+//			if (i != this.bestFitnessChromIndex) {
+//				// always mutate the chromosome with the lowest fitness
+//				if ((i == this.worstFitnessChromIndex) || (getRandom(1.0) < mutationProb))
+//					doRandomMutation(i);
+//			}
+			if(i!=0 && i!=1) {
+				if (getRandom(1.0) < mutationProb)
 					doRandomMutation(i);
 			}
 		}

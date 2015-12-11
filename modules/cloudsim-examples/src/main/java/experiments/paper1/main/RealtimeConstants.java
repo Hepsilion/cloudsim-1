@@ -12,7 +12,8 @@ public class RealtimeConstants {
 
 	//Dvfs Algorithm
 	//public final static String VmAllocationPolicy = "dvfs_muh";
-	public final static String VmAllocationPolicy = "dvfs";
+	//public final static String VmAllocationPolicy = "dvfs";
+	//public final static String VmAllocationPolicy = "SimpleWatt";
 	
 	//Base Algorithm
 	//public final static String VmAllocationPolicy = "iqr";
@@ -20,12 +21,12 @@ public class RealtimeConstants {
 	public final static String Parameter = "1.5";
 	
 	//Genetic Algorithm
-    //public final static String VmAllocationPolicy = "ga";
+    public final static String VmAllocationPolicy = "ga";
 	
 	public final static String OutputFolder = "output";
 	
-	public final static boolean ENABLE_DVFS = false;
-	public final static boolean ENABLE_ONOFF = false;
+	public final static boolean ENABLE_DVFS = true;
+	public final static boolean ENABLE_ONOFF = true;
 	
 	public final static boolean OUTPUT_CSV    = false;
 	
@@ -35,7 +36,7 @@ public class RealtimeConstants {
 	public final static int CLOUDLET_LENGTH	= 10 * (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES	= 1;
 	
-	public final static int NUMBER_OF_CLOUDLETS = 100;
+	public final static int NUMBER_OF_CLOUDLETS = 50;
 	public final static int NUMBER_OF_HOSTS = 50;
 	
 	/*
@@ -81,10 +82,10 @@ public class RealtimeConstants {
 	public final static double MUTATION_PROB = 0.4;
 	public final static int RANDOM_SELECTION_CHANCE = 10;
 	
-	public final static int numPrelimRuns = 2;
-    public final static int maxPrelimGenerations = 2;
+	public final static int numPrelimRuns = 5;//20
+    public final static int maxPrelimGenerations = 5;
     
-    public final static int MAX_GENERATIONS = 0;
+    public final static int MAX_GENERATIONS = 10;//5
 	
 	public final static boolean COMPUTE_STATISTICS = false;
 }

@@ -7,6 +7,7 @@ public class RealtimeVm extends PowerVm {
 	private int hostId;
 	private int frequency;
 	private RealtimeCloudlet cloudlet;
+	private boolean modified;
 
 	public RealtimeVm(int id, int userId, double mips, int pesNumber, int ram, long bw, long size, int priority,
 			String vmm, CloudletScheduler cloudletScheduler, double schedulingInterval, int hostId, int frequency) {
@@ -42,5 +43,13 @@ public class RealtimeVm extends PowerVm {
 
 	public void setCloudlet(RealtimeCloudlet cloudlet) {
 		this.cloudlet = cloudlet;
+	}
+
+	public boolean isModified() {
+		return modified;
+	}
+
+	public void setModified(boolean modified) {
+		this.modified = modified;
 	}
 }

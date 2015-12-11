@@ -195,21 +195,26 @@ public class Host {
 				&& getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
 				&& getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw()));
 	}
+		
+		// Original Implementation
+//		public boolean MakeSuitableHostForVm(Vm vm) {
+//			// If DVFS Enabled, it's possible that the first vm ask more than the start capacity of the PE(depending of the dvfs mode),
+//			// in this case, we have to increase directly PE capacity! But it's not possible with all governor.
+//			if (this.getVmList().isEmpty() && this.isEnableDVFS() && getVmScheduler().getAvailableMips() < vm.getCurrentRequestedTotalMips()) {
+//				for (Pe pe : getPeList()) {
+//					if (pe.changeToMaxFrequency()){ // if the Freq has been set to MAX , return true
+//						setAvailableMips(getTotalMips());
+//						System.out.println("Current Total Mips: "+getTotalMips());
+//						return true;
+//					}
+//				}
+//				return false;
+//			} else
+//				return false;
+//		}
 	
 		public boolean MakeSuitableHostForVm(Vm vm) {
-			// If DVFS Enabled, it's possible that the first vm ask more than the start capacity of the PE(depending of the dvfs mode),
-			// in this case, we have to increase directly PE capacity! But it's not possible with all governor.
-			if (this.getVmList().isEmpty() && this.isEnableDVFS() && getVmScheduler().getAvailableMips() < vm.getCurrentRequestedTotalMips()) {
-				for (Pe pe : getPeList()) {
-					if (pe.changeToMaxFrequency()){ // if the Freq has been set to MAX , return true
-						setAvailableMips(getTotalMips());
-						System.out.println("Current Total Mips: "+getTotalMips());
-						return true;
-					}
-				}
-				return false;
-			} else
-				return false;
+			return this.increaseHostMipsForNewVm(vm);
 		}
 		
 		/**
@@ -219,40 +224,83 @@ public class Host {
 	    	if(this.isEnableDVFS() && getVmScheduler().getAvailableMips()<vm.getCurrentRequestedTotalMips()) {
 	    		int[] frequencies = new int[getPeList().size()];
 	    		double oldTotalMips = this.getTotalMips();
-	    		System.out.println("Before,Available Mips:"+this.getAvailableMips());
+	    		Log.printLine("Before,Available Mips:"+this.getAvailableMips());
 	    		for(int i=0; i<getPeList().size(); i++) {
 	    			frequencies[i]=getPeList().get(i).getIndexFreq();
 	    			getPeList().get(i).changeToMaxFrequency();
 	    		}
+	    		
 	    		double totalMips = this.getTotalMips();
-	    		if(totalMips-oldTotalMips+this.getAvailableMips() > vm.getCurrentRequestedTotalMips()) {
-	    			this.setAvailableMips(totalMips-oldTotalMips+this.getAvailableMips());
-		    		System.out.println("After,Available Mips:"+this.getAvailableMips());
+	    		double newMips = totalMips-oldTotalMips+this.getAvailableMips();
+	    		//Log.printLine("New:"+newMips);
+	    		if(newMips > vm.getCurrentRequestedTotalMips()) {
+	    			this.getVmScheduler().setAvailableMips(newMips);
+	    			Log.printLine("After,Available Mips:"+this.getAvailableMips());
 	    			return true;
 	    		}else{
 	    			for(int i=0; i<getPeList().size(); i++) {
 	    				getPeList().get(i).setFrequency(frequencies[i]);
 	    			}
+	    			Log.printLine("Increasing failed");
 	    			return false;
 	    		}
 	    	}
 	    	return false;
 		}
+		
+		/**
+		 * @author Hepsilion
+		 * @param vm
+		 * @return
+		 */
+		public boolean tryIncreaseHostMipsForNewVm(Vm vm) {
+			int[] frequencies = new int[getPeList().size()];
+			for(int i=0; i<getPeList().size(); i++) {
+    			frequencies[i]=getPeList().get(i).getIndexFreq();
+    		}
+			
+    		double originalTotalMips = this.getTotalMips();
+    		double oldTotalMips = this.getTotalMips();
+    		double totalMips;
+    		
+    		if(this.isEnableDVFS()) {
+    			while(this.getAvailableMips()<vm.getCurrentRequestedTotalMips()) {
+    				boolean increased = false;
+    	    		for(int i=0; i<getPeList().size(); i++) {
+    	    			if(getPeList().get(i).increastFrequency()) {
+    	    				increased=true;
+    	    			}
+    	    		}
+    	    		if(increased) {
+    	    			totalMips = this.getTotalMips();
+	    				this.setAvailableMips(totalMips-oldTotalMips+this.getAvailableMips());
+	    				oldTotalMips=this.getTotalMips();
+    	    		}
+    	    		if(this.getAvailableMips()>=vm.getCurrentRequestedTotalMips()){
+    	    			return true;
+    				}else if(this.getAvailableMips()<vm.getCurrentRequestedTotalMips() && increased==false) {
+    	    			for(int i=0; i<getPeList().size(); i++) {
+        	    			getPeList().get(i).setFrequency(frequencies[i]);
+        	    		}
+    	    			this.setAvailableMips(originalTotalMips);
+    	    			return false;
+    	    		}
+    			}
+    		}
+			return false;
+		}
 	
 		/**
-		 * 
 		 * This methode modifies VMs size to fit them into one Host
 		 * 
 		 * The VMs size have to be modified when at the same time there is : - their
 		 * size (sum) is > than the Host capacity - a new VM has to be fitted into
 		 * this Host
 		 * 
-		 * 
 		 * @param new_vm
 		 *            (the VM that has to be to added into the Host)
 		 * @return true (false will be implemented next)
 		 */
-	
 		public boolean decreaseVMMipsToHostNewVm(Vm new_vm) {
 			double NewTotalVmMips = 0;
 			double HostCapacity = getTotalMips();
@@ -263,12 +311,7 @@ public class Host {
 	
 			new_vm.setMips(new_vm.getMaxMips() - (new_vm.getMaxMips() * percent));
 	
-			System.out.println("Nouveaux total = " + NewTotalVmMips);
-			System.out.println("HostCapacity = " + HostCapacity);
-	
 			setAvailableMips(HostCapacity - NewTotalVmMips);
-			System.out.println("Mips New VM = " + new_vm.getMips());
-			System.out.println("Mips libre = " + getAvailableMips());
 			return true;
 		}
 	
@@ -277,8 +320,6 @@ public class Host {
 		 * 
 		 * Called after CPU frequency decrease To avoid Host Capacity OverFlow (
 		 * theoritical "CPU utilization > 100%")
-		 * 
-		 * 
 		 */
 		public void decreaseVmMips() {
 			double NewTotalVmMips = 0;
@@ -286,9 +327,7 @@ public class Host {
 			double percent;
 			percent = reducePercentVmMips(null, false);
 			NewTotalVmMips = reduceAllVmMips(percent);
-			// System.out.println("News Total = " +NewTotalVmMips);
 			setAvailableMips(HostCapacity - NewTotalVmMips);
-			// System.out.println("Free Mips = " +getAvailableMips());
 		}
 	
 		/**
@@ -369,7 +408,7 @@ public class Host {
 		 * 
 		 */
 		public void regrowVmMips() {
-			// System.out.println("Regrow VM mips : after Frequency Increase");
+			//System.out.println("Regrow VM mips : after Frequency Increase****************************************************");
 			increaseVmMips(getVmList(), increasePercentVmMips(0));
 		}
 	
@@ -384,12 +423,8 @@ public class Host {
 		 */
 		private double increasePercentVmMips(double FreeMips) {
 			double availableMips = this.getAvailableMips() + FreeMips;
-			// System.out.println("Available mips = " + availableMips);
 			double maxMipsHost = this.getTotalMips();
-			// System.out.println("Max mips host = " + maxMipsHost);
 			double Percent = (maxMipsHost / (maxMipsHost - availableMips));
-			// System.out.println("Increase percent = " + Percent);
-	
 			return Percent;
 		}
 	
@@ -402,15 +437,16 @@ public class Host {
 		 * @param Percent
 		 */
 		private void increaseVmMips(List<Vm> ListVMRunning, double Percent) {
+			double HostCapacity = getTotalMips();//TODO 新添加
 			double NewSumVmMips = 0;
 			for (Vm vm : ListVMRunning) {
-				// System.out.println("Current VM MIPS =  " + vm.getMips() +
-				// "  / percent = " + Percent);
+				// System.out.println("Current VM MIPS =  " + vm.getMips() + "  / percent = " + Percent);
 				double TmpNewVmMips = vm.getMips() * Percent * 0.998;
 	
-				if (TmpNewVmMips > vm.getMaxMips())
+				if (TmpNewVmMips > vm.getMaxMips()) {
 					TmpNewVmMips = vm.getMaxMips();
-	
+					//continue;// TODO 这里似乎错了，修改
+				}
 				vm.setMips(TmpNewVmMips);
 				vm.setSizeHasBeenModified(true);
 	
@@ -418,14 +454,13 @@ public class Host {
 				Map<String, List<Double>> tmp_Map = getVmScheduler().getMipsMap();
 				tmp_Map.put(vm.getUid(), updatedMipsVm);
 				tmp_Map.get(vm.getUid()).add(TmpNewVmMips);
-				// System.out.println("New MIPS on VM #" + vm.getId()+ " = " +
-				// vm.getMips());
+				// System.out.println("New MIPS on VM #" + vm.getId()+ " = " + vm.getMips());
 				NewSumVmMips += TmpNewVmMips;
 				// System.out.println("New Sum VMs MIPS =  " + new_som_vm_mips);
 			}
 			// System.out.println("New Total Sum = " + NewSumVmMips);
 			// System.out.println("Available Mips on HOST = " + getAvailableMips());
-	
+			this.setAvailableMips(HostCapacity-NewSumVmMips);//TODO 新添加
 		}
 
 	/**

@@ -159,6 +159,8 @@ public class HostDynamicWorkload extends Host {
 		 * regarding the Pe.changeFrequency return value.
 		 */
 		private void applyDvfsOnHost() {
+			//System.out.println("Host #"+this.getId()+" DVFS");
+			//System.out.println("Before DVFS, Available MIPS="+this.getAvailableMips());
 			for (Pe pe : this.<Pe> getPeList()) {
 				double utilPe = pe.getPeProvisioner().getUtilization() * 100;
 				int cur_mips = pe.getMips();
@@ -181,6 +183,7 @@ public class HostDynamicWorkload extends Host {
 				if (res == 1 || res == 2)
 					regrowVmMips();
 			}
+			//System.out.println("After DVFS, Available MIPS="+this.getAvailableMips());
 		}
 
 	/**
@@ -326,14 +329,10 @@ public class HostDynamicWorkload extends Host {
 	 * @param requestedMips the requested mips
 	 * @param isActive the is active
 	 */
-	public void addStateHistoryEntry(double time, double allocatedMips,
-			double requestedMips, boolean isActive) {
-
-		HostStateHistoryEntry newState = new HostStateHistoryEntry(time,
-				allocatedMips, requestedMips, isActive);
+	public void addStateHistoryEntry(double time, double allocatedMips, double requestedMips, boolean isActive) {
+		HostStateHistoryEntry newState = new HostStateHistoryEntry(time, allocatedMips, requestedMips, isActive);
 		if (!getStateHistory().isEmpty()) {
-			HostStateHistoryEntry previousState = getStateHistory().get(
-					getStateHistory().size() - 1);
+			HostStateHistoryEntry previousState = getStateHistory().get(getStateHistory().size() - 1);
 			if (previousState.getTime() == time) {
 				getStateHistory().set(getStateHistory().size() - 1, newState);
 				return;

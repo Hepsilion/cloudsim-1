@@ -24,4 +24,19 @@ public class PowerHostList {
 		});
 	}
 
+	public static <T extends Host> void sortByDescAvailableMips(List<T> hosts) {
+		Collections.sort(hosts, new Comparator<T>() {
+			@Override
+			public int compare(T a, T b) throws ClassCastException {
+				Double am = ((PowerHost) a).getAvailableMips();
+				Double bm = ((PowerHost) b).getAvailableMips();
+				if(am>bm)
+					return -1;
+				else if(am<bm)
+					return 1;
+				else
+					return 0;
+			}
+		});
+	}
 }
