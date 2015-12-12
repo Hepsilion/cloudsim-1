@@ -48,7 +48,8 @@ public class RealtimeDatacenterBroker extends PowerDatacenterBroker {
 		for (Vm vm : getVmList()) {
 			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
 				// 向数据中心发送创建虚拟机的消息
-				send(datacenterId, ((RealtimeVm)vm).getCloudlet().getStartTime()-CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, vm);
+				//send(datacenterId, ((RealtimeVm)vm).getCloudlet().getStartTime()-CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, vm);
+				send(datacenterId, ((RealtimeVm)vm).getCloudlet().getStartTime(), CloudSimTags.VM_CREATE_ACK, vm);
 				requestedVms++;
 			}
 		}

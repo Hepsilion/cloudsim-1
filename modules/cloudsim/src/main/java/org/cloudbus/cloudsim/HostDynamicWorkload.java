@@ -159,8 +159,8 @@ public class HostDynamicWorkload extends Host {
 		 * regarding the Pe.changeFrequency return value.
 		 */
 		private void applyDvfsOnHost() {
-			//System.out.println("Host #"+this.getId()+" DVFS");
-			//System.out.println("Before DVFS, Available MIPS="+this.getAvailableMips());
+			Log.printLine("Host #"+this.getId()+" Applying DVFS");
+			Log.printLine("Host #"+this.getId()+": Before DVFS, Available MIPS="+this.getAvailableMips());
 			for (Pe pe : this.<Pe> getPeList()) {
 				double utilPe = pe.getPeProvisioner().getUtilization() * 100;
 				int cur_mips = pe.getMips();
@@ -183,7 +183,7 @@ public class HostDynamicWorkload extends Host {
 				if (res == 1 || res == 2)
 					regrowVmMips();
 			}
-			//System.out.println("After DVFS, Available MIPS="+this.getAvailableMips());
+			Log.printLine("Host #"+this.getId()+": After DVFS, Available MIPS="+this.getAvailableMips());
 		}
 
 	/**

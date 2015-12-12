@@ -27,9 +27,11 @@ public class GADatacenter extends PowerDatacenter {
     
     @Override
     protected void processVmCreate(SimEvent ev, boolean ack) {
-    	this.updateCloudletProcessing();
+    	Vm vm = (Vm) ev.getData();
     	
-        Vm vm = (Vm) ev.getData();
+    	Log.printLine(this.getName()+" compute resource usage and energy before VM#"+vm.getId()+" is created");
+    	this.updateCloudletProcessing();//TODO 修改以支持节约仿真时间
+        
         boolean result = getVmAllocationPolicy().allocateHostForVm(vm);
 
         if (ack) {
@@ -42,7 +44,8 @@ public class GADatacenter extends PowerDatacenter {
             } else {
                 data[2] = CloudSimTags.FALSE;
             }
-            send(vm.getUserId(), CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, data);
+            sendNow(vm.getUserId(), CloudSimTags.VM_CREATE_ACK, data);
+            //send(vm.getUserId(), CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, data);
         }
 
         if (result) {
@@ -54,25 +57,34 @@ public class GADatacenter extends PowerDatacenter {
             vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler().getAllocatedMipsForVm(vm));
             
             //TODO 添加 虚拟机创建成功之后，调节主机频率
-            RealtimeHost host = (RealtimeHost) vm.getHost();
-            //System.out.println("Vm "+vm.getId()+" is created.");
-            host.isDvfsActivatedOnHost();
+//          RealtimeHost h = (RealtimeHost) vm.getHost();
+//          h.isDvfsActivatedOnHost();
+            Log.printLine("Vm "+vm.getId()+" is created.");
+            for(RealtimeHost host : this.<RealtimeHost>getHostList())
+            	host.isDvfsActivatedOnHost();
             
-            this.updateCloudletProcessing();
+            Log.printLine(this.getName()+" compute resource usage and energy after VM#"+vm.getId()+" is created");
+            this.updateCloudletProcessing();//TODO 修改以支持节约仿真时间
         }
     }
     
     protected void processVmDestroy(SimEvent ev, boolean ack) {
-    	this.updateCloudletProcessing();
-    	
     	Vm vm = (Vm) ev.getData();
-    	RealtimeHost h = (RealtimeHost) vm.getHost();
-    	//System.out.println("Vm "+vm.getId()+" is destroyed.");
+    	
+    	Log.printLine(this.getName()+" compute resource usage and energy before VM#"+vm.getId()+" is destroyed");
+    	this.updateCloudletProcessing();//TODO 修改以支持节约仿真时间
+    	
         super.processVmDestroy(ev, ack);
+        Log.printLine("Vm "+vm.getId()+" is destroyed.");
         
-		h.isDvfsActivatedOnHost();
+        //TODO 添加 虚拟机销毁成功之后，调节主机频率
+//      RealtimeHost h = (RealtimeHost) vm.getHost();
+//      h.isDvfsActivatedOnHost();
+        for(RealtimeHost host : this.<RealtimeHost>getHostList())
+        	host.isDvfsActivatedOnHost();
 		
-		this.updateCloudletProcessing();
+		Log.printLine(this.getName()+" compute resource usage and energy after VM#"+vm.getId()+" is destroyed");
+		this.updateCloudletProcessing();//TODO 修改以支持节约仿真时间
     }
     
 	protected void updateCloudletProcessing() {
@@ -84,7 +96,7 @@ public class GADatacenter extends PowerDatacenter {
 		double currentTime = CloudSim.clock();
 
 		// if some time passed since last processing
-		if (currentTime > getLastProcessTime()) {
+		//if (currentTime > getLastProcessTime()) { TODO 修改以支持节约仿真时间，这样在虚拟机创建之后和销毁之后，可以更新主机的CPU利用率
 			Log.printLine(currentTime + " ");
 
 			double minTime = updateCloudetProcessingWithoutSchedulingFutureEventsForce();
@@ -123,10 +135,10 @@ public class GADatacenter extends PowerDatacenter {
 			// schedules an event to the next time
 			if (minTime != Double.MAX_VALUE) {
 				CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.VM_DATACENTER_EVENT));
-				send(getId(), minTime-currentTime, CloudSimTags.VM_DATACENTER_EVENT);// TODO 修改以节约仿真时间
+				send(getId(), minTime-currentTime, CloudSimTags.VM_DATACENTER_EVENT); //TODO 修改以支持节约仿真时间
 			}
 
 			setLastProcessTime(currentTime);
-		}
+		//}
 	}
 }

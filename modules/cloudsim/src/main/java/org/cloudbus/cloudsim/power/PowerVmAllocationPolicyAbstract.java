@@ -104,18 +104,21 @@ public abstract class PowerVmAllocationPolicyAbstract extends VmAllocationPolicy
 			return null;// retour jamais null
 		}
 	
-		/*
-		 * public PowerHost findDVFSEnableHost(Vm vm) {
-		 * 
-		 * for (PowerHost host : this.<PowerHost> getHostList()) {
-		 * if(host.isEnableDVFS()) { if(host.MakeSuitableHostForVm(vm)) // change Pe
-		 * frequency return host; else { if(host.decreaseVMMipsToHostNewVm(vm))
-		 * return host; } } }
-		 * 
-		 * return null;
-		 * 
-		 * }
-		 */
+		
+		public PowerHost findDVFSEnableHost(Vm vm) {
+			for(PowerHost host : this.<PowerHost> getHostList()) {
+				if (host.isEnableDVFS()) {
+					if(host.MakeSuitableHostForVm(vm)) // change Pe frequency
+						return host;
+					else {
+						if(host.decreaseVMMipsToHostNewVm(vm))
+							return host;
+					}
+				}
+			}
+			return null;
+		}
+		 
 
 	/*
 	 * (non-Javadoc)
@@ -155,5 +158,4 @@ public abstract class PowerVmAllocationPolicyAbstract extends VmAllocationPolicy
 	public Map<String, Host> getVmTable() {
 		return vmTable;
 	}
-
 }

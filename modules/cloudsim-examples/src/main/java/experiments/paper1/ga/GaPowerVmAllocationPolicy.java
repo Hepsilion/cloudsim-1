@@ -60,24 +60,24 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 			gene.setFrequency(host.getFrequency());
 			chosenHost = host;
 			if(chosenHost!=null)
-				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+" from hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
+				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
 		}
-//		if(chosenHost==null){
-//			chosenHost=findHostFromNotEmptyHosts(host, vm);
-//			if(chosenHost!=null) {
-//				chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
-//				gene.setFrequency(((RealtimeHost)chosenHost).getFrequency());
-//				gene.setHost(chosenHost.getId());
-//				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+" from not empty hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
-//			}
-//		}
+		if(chosenHost==null){
+			chosenHost=findHostFromNotEmptyHosts(host, vm);
+			if(chosenHost!=null) {
+				chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
+				gene.setFrequency(((RealtimeHost)chosenHost).getFrequency());
+				gene.setHost(chosenHost.getId());
+				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from not empty hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
+			}
+		}
 		if(chosenHost==null){
 			chosenHost = findHostFromEmptyHosts(host, vm);
 			if(chosenHost!=null) {
 				chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
 				gene.setFrequency(((RealtimeHost)chosenHost).getFrequency());
 				gene.setHost(chosenHost.getId());
-				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+" from empty hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
+				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from empty hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
 			}
 		}
 //		if(chosenHost==null) {
@@ -195,14 +195,4 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 			return moreAvailHost;
 		return null;
 	}
-	
-    //TODO  解除分配虚拟机后，可以更新主机频率
-    public void deallocateHostForVm(Vm vm) {
-        Host host = getVmTable().remove(vm.getUid());
-        if (host != null) {
-            if(host.isEnableDVFS())
-                host.regrowVmMipsAfterVmEnd(vm);
-            host.vmDestroy(vm);
-        }
-    }
 }

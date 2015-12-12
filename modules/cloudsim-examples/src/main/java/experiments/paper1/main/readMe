@@ -1,9 +1,9 @@
 1.Base Algorithm
-(1)解注释RealtimeConstants中iqr，ENABLE_DVFS=false和ENABLE_ONOFF=false
+(1)解注释RealtimeConstants中iqr，ENABLE_DVFS=false和ENABLE_ONOFF=true
 (2)RealtimeHelper中govs设置为UserSpace
 
 2.Dvfs Algorithm
-(1)解注释RealtimeConstants中dvfs，ENABLE_DVFS=true和ENABLE_ONOFF=true
+(1)解注释RealtimeConstants中dvfs_muh，ENABLE_DVFS=true和ENABLE_ONOFF=true
 (2)RealtimeHelper中govs设置为OnDemand
 
 3.Ga Algorithm

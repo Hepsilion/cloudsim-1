@@ -233,7 +233,7 @@ public class RealtimeHelper {
 
 		// Define wich governor is used by each CPU
 		HashMap<Integer, String> govs = new HashMap<Integer, String>(); 
-		govs.put(0, "My"); // CPU 0 use My(UserSpace、Performance、Conservative、OnDemand) Dvfs mode 
+		govs.put(0, "UserSpace"); // CPU 0 use My(UserSpace、Performance、Conservative、OnDemand) Dvfs mode 
 
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
 		RealtimeHost host = null;
@@ -247,7 +247,7 @@ public class RealtimeHelper {
 			tmp_HM_Conservative.put("enablefreqstep", 0);
 			tmp_HM_Conservative.put("freqstep", 5);
 			HashMap<String, Integer> tmp_HM_UserSpace = new HashMap<String, Integer>();
-			tmp_HM_UserSpace.put("frequency", 1);
+			tmp_HM_UserSpace.put("frequency", 5);
 			HashMap<String, Integer> tmp_HM_My = new HashMap<String, Integer>();
 			tmp_HM_My.put("up_threshold", 90);
 			tmp_HM_My.put("down_threshold", 85);
@@ -490,7 +490,7 @@ public class RealtimeHelper {
 		for(int i=0; i<received_cloudlets.size(); i++) {
 			numInstructions+=received_cloudlets.get(i).getCloudletLength();
 		}
-		double overall_sla=numInstructions/energy;
+		double overall_sla=numInstructions/(energy*3600*1000);
 
 		double[] ga_result = new double[4];
 		ga_result[0]=tdr;
