@@ -2,23 +2,35 @@ package experiments.paper1.dvfs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationAbstract;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationInterQuartileRange;
+import org.cloudbus.cloudsim.power.PowerVmSelectionPolicy;
 
 
-public class DvfsPowerVmAllocation extends PowerVmAllocationPolicyAbstract {
-    public DvfsPowerVmAllocation(List<? extends Host> list) {
-        super(list);
-    }
+public class DvfsBase1PowerVmAllocation extends PowerVmAllocationPolicyMigrationInterQuartileRange {
 
-    @Override
-    public PowerHost findHostForVm(Vm vm) {
+
+    public DvfsBase1PowerVmAllocation(List<? extends Host> hostList,
+			PowerVmSelectionPolicy vmSelectionPolicy, double safetyParameter,
+			PowerVmAllocationPolicyMigrationAbstract fallbackVmAllocationPolicy) {
+		super(hostList, vmSelectionPolicy, safetyParameter, fallbackVmAllocationPolicy);
+		// TODO Auto-generated constructor stub
+	}
+
+	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
         double minPower = Double.MAX_VALUE;
         PowerHost allocatedHost = null;
 
         for (PowerHost host : this.<PowerHost> getHostList()) {
+        	if (excludedHosts.contains(host)) {
+				continue;
+			}
             if (host.isSuitableForVm(vm)) {
                 if (getUtilizationOfCpuMips(host) != 0 && isHostOverUtilizedAfterAllocation(host, vm)) {
                     continue;
@@ -89,13 +101,8 @@ public class DvfsPowerVmAllocation extends PowerVmAllocationPolicyAbstract {
         return pePotentialUtilization;
     }
 
-    private boolean isHostOverUtilized(PowerHost host) {
-        return false;
-    }
-
     @Override
     public List<Map<String, Object>> optimizeAllocation(List<? extends Vm> vmList) {
         return null;
     }
-    
 }

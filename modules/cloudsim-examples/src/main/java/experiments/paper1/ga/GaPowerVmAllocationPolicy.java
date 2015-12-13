@@ -3,6 +3,7 @@ package experiments.paper1.ga;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
@@ -10,17 +11,14 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
+
 import experiments.paper1.main.PowerHostList;
 import experiments.paper1.main.RealtimeHost;
 import experiments.paper1.main.RealtimeVm;
 
 public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 	ChromTaskScheduling chromosome = null;
-	
-	public GaPowerVmAllocationPolicy(List<? extends Host> list) {
-		super(list);
-	}
-	
+
 	public GaPowerVmAllocationPolicy(List<? extends Host> list, Chromosome chromosome) {
 		super(list);
 		this.chromosome = (ChromTaskScheduling) chromosome;
@@ -31,7 +29,7 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 		return null;
 	}
 	
-	public PowerHost findHostForVm(Vm vm) {
+	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
 		RealtimeHost chosenHost = null;
 		RealtimeVm rv = (RealtimeVm) vm;
 		RealtimeHost host = (RealtimeHost) HostList.getById(this.getHostList(), rv.getHostId());
@@ -55,13 +53,38 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 			chosenHost=host;
 		}
 
-		if(chosenHost==null && host.increaseHostMipsForNewVm(vm)){
+		if(chosenHost==null && host.increaseHostMipsForNewVm(vm) ){
 			host.setFrequency(host.getPeList().get(0).getIndexFreq());
 			gene.setFrequency(host.getFrequency());
 			chosenHost = host;
-			if(chosenHost!=null)
-				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
+			Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
 		}
+		
+//		if(chosenHost==null) {
+//			List<PowerHost> hosts = new ArrayList<PowerHost>();
+//			for(PowerHost h : this.<PowerHost>getHostList()) {
+//				hosts.add(h);
+//			}
+//			PowerHostList.sortDvfsHosts(hosts);
+//			for(int i=0; i<hosts.size(); i++) {
+//				if(hosts.get(i).isSuitableForVm(vm)) {
+//					chosenHost = (RealtimeHost) hosts.get(i);
+//					chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
+//					gene.setFrequency(chosenHost.getFrequency());
+//					gene.setHost(chosenHost.getId());
+//					return chosenHost;
+//				}else if(hosts.get(i).MakeSuitableHostForVm(vm)){
+//					chosenHost = (RealtimeHost) hosts.get(i);
+//					chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
+//					gene.setFrequency(chosenHost.getFrequency());
+//					gene.setHost(chosenHost.getId());
+//					return hosts.get(i);
+//				}
+//			}
+//		}
+		
+		
+		
 		if(chosenHost==null){
 			chosenHost=findHostFromNotEmptyHosts(host, vm);
 			if(chosenHost!=null) {

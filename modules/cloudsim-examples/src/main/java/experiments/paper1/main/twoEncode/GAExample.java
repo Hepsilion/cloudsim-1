@@ -1,11 +1,9 @@
-package experiments.paper1.main;
+package experiments.paper1.main.twoEncode;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.cloudbus.cloudsim.Log;
-
-import experiments.paper1.ga.GATaskScheduling;
 
 public class GAExample {
 	public static void main(String[] args) {
@@ -50,8 +48,6 @@ public class GAExample {
     					RealtimeConstants.CROSSOVER_TYPE,			// crossoverType
     					RealtimeConstants.COMPUTE_STATISTICS); 		// computeStatistics
     			example.evolve();
-    			// Thread taskScheduling = new Thread(example);
-    			// taskScheduling.start();
     			Log.printLine("GAExample finished!");
     		} catch (Exception e) {
     			e.printStackTrace();

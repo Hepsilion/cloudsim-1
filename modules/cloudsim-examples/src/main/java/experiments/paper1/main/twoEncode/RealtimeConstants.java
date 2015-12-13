@@ -1,26 +1,25 @@
-package experiments.paper1.main;
+package experiments.paper1.main.twoEncode;
 
 import org.cloudbus.cloudsim.power.models.PowerModel;
 import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerHpProLiantMl110G4Xeon3040;
 import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerHpProLiantMl110G5Xeon3075;
 
-import experiments.paper1.ga.Crossover;
+import experiments.paper1.main.twoEncode.Crossover;
 
 public class RealtimeConstants {
 	public final static boolean ENABLE_OUTPUT = true;
 	public final static boolean OUTPUT_TO_FILE = true;
 
-	//Base Algorithm
-	//public final static String VmAllocationPolicy = "base";//最大频率下，功耗增加最少
-	public final static String VmSelectionPolicy = "mc";
-	public final static String Parameter = "1.5";
-		
 	//Dvfs Algorithm
-	//public final static String VmAllocationPolicy = "dvfs_my";//最小容量，最小剩余容量
-	//public final static String VmAllocationPolicy = "dvfs_base1";//当前频率下能耗增加最少
-	//public final static String VmAllocationPolicy = "dvfs_base2";//最大频率下能耗增加最少
+	//public final static String VmAllocationPolicy = "dvfs";
 	//public final static String VmAllocationPolicy = "dvfs_muh";
 	//public final static String VmAllocationPolicy = "dvfs_SimpleWatt";
+	//public final static String VmAllocationPolicy = "dvfs_base";
+	
+	//Base Algorithm
+	//public final static String VmAllocationPolicy = "iqr";
+	public final static String VmSelectionPolicy = "mc";
+	public final static String Parameter = "1.5";
 	
 	//Genetic Algorithm
     public final static String VmAllocationPolicy = "ga";
@@ -85,7 +84,7 @@ public class RealtimeConstants {
 	public final static double MUTATION_PROB = 0.4;
 	public final static int RANDOM_SELECTION_CHANCE = 10;
 	
-	public final static int numPrelimRuns = 5;//5;//20
+	public final static int numPrelimRuns = 0;//5;//20
     public final static int maxPrelimGenerations = 5;
     
     public final static int MAX_GENERATIONS = 10;//5

@@ -1,9 +1,7 @@
-package experiments.paper1.ga;
+package experiments.paper1.main.twoEncode;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,10 +14,10 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
 
-import experiments.paper1.main.RealtimeCloudlet;
-import experiments.paper1.main.RealtimeConstants;
-import experiments.paper1.main.RealtimeDatacenterBroker;
-import experiments.paper1.main.RealtimeHelper;
+import experiments.paper1.main.twoEncode.RealtimeCloudlet;
+import experiments.paper1.main.twoEncode.RealtimeConstants;
+import experiments.paper1.main.twoEncode.RealtimeDatacenterBroker;
+import experiments.paper1.main.twoEncode.RealtimeHelper;
 
 public class GATaskScheduling extends GA {
 
@@ -60,9 +58,9 @@ public class GATaskScheduling extends GA {
 			ChromTaskScheduling cn = ((ChromTaskScheduling)chromNextGen[i]);
 			ChromTaskScheduling pc = ((ChromTaskScheduling)prelimChrom[i]);
 			for(int j=0; j<chromosomeDim; j++) {
-				cs.genes[j] = new GeneTaskScheduling(j, 0, 3);
-				cn.genes[j] = new GeneTaskScheduling(j, 0, 3);
-				pc.genes[j] = new GeneTaskScheduling(j, 0, 3);
+				cs.genes[j] = new GeneTaskScheduling(j, 0);
+				cn.genes[j] = new GeneTaskScheduling(j, 0);
+				pc.genes[j] = new GeneTaskScheduling(j, 0);
 			}
 		}
 		initPopulation();
@@ -72,14 +70,11 @@ public class GATaskScheduling extends GA {
 		for(int i=0; i<populationDim; i++) {
 			//random hosts for vms
 			int[] rn = RealtimeHelper.getRandomHosts(chromosomeDim, 0, RealtimeConstants.NUMBER_OF_HOSTS-1);
-			//random frequency level for vms
-			int[] fl = RealtimeHelper.getRandomFrequencies(chromosomeDim, 0, 4);
 			
 			ChromTaskScheduling cs = ((ChromTaskScheduling)chromosomes[i]);
 			for(int j=0; j<chromosomeDim; j++) {
 				cs.getGene(j).setVm(j);
 				cs.getGene(j).setHost(rn[j]);
-				cs.getGene(j).setFrequency(fl[j]);
 				cs.fitness = 0.0;
 			}
 		}
@@ -140,13 +135,11 @@ public class GATaskScheduling extends GA {
 			//random hosts for vms
 			int[] rn = RealtimeHelper.getRandomHosts(chromosomeDim, 0, RealtimeConstants.NUMBER_OF_HOSTS-1);
 			//random frequency level for vms
-			int[] fl = RealtimeHelper.getRandomFrequencies(chromosomeDim, 0, 4);
 			
 			ChromTaskScheduling cs = ((ChromTaskScheduling)chromosomes[i]);
 			for(int j=0; j<chromosomeDim; j++) {
 				cs.getGene(j).setVm(j);
 				cs.getGene(j).setHost(rn[j]);
-				cs.getGene(j).setFrequency(fl[j]);
 				cs.fitness = 0.0;
 			}
 		}
@@ -156,8 +149,7 @@ public class GATaskScheduling extends GA {
 		int geneIndex = getRandom(chromosomeDim);
 		int vmId = ((ChromTaskScheduling)this.chromosomes[iChromIndex]).getGene(geneIndex).getVm();
 		int hostId = RealtimeHelper.getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1);
-        int frequency = RealtimeHelper.getRandomInteger(0, 4);
-		GeneTaskScheduling gene = new GeneTaskScheduling(vmId, hostId, frequency);
+		GeneTaskScheduling gene = new GeneTaskScheduling(vmId, hostId);
 
         setGeneValue(iChromIndex, geneIndex, gene);
         this.chromosomes[iChromIndex].fitness = 0.0;
@@ -171,8 +163,7 @@ public class GATaskScheduling extends GA {
             if (getRandom(100)>70) {//TODO 暂时50->70
                 int vmId = chrom.getGene(i).getVm();
                 int hostId = RealtimeHelper.getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1);
-                int frequency = RealtimeHelper.getRandomInteger(0, 4);
-                GeneTaskScheduling gene = new GeneTaskScheduling(vmId, hostId, frequency);
+                GeneTaskScheduling gene = new GeneTaskScheduling(vmId, hostId);
 
                 setGeneValue(iChromIndex, i, gene);
                 mutated = true;
@@ -246,10 +237,10 @@ public class GATaskScheduling extends GA {
         	GeneTaskScheduling gene_Chrom1, gene_Chrom2;
         	for(int i=iCrossoverPoint1; i<=iCrossoverPoint2; i++) {
         		gene_Chrom2 = ((ChromTaskScheduling)Chrom2).getGene(i);
-        		GeneTaskScheduling temp_gene_Chrom2 = new GeneTaskScheduling(gene_Chrom2.getVm(), gene_Chrom2.getHost(), gene_Chrom2.getFrequency());
+        		GeneTaskScheduling temp_gene_Chrom2 = new GeneTaskScheduling(gene_Chrom2.getVm(), gene_Chrom2.getHost());
         		
         		gene_Chrom1 = ((ChromTaskScheduling)Chrom1).getGene(i);
-        		GeneTaskScheduling temp_gene_Chrom1 = new GeneTaskScheduling(gene_Chrom1.getVm(), gene_Chrom1.getHost(), gene_Chrom1.getFrequency());
+        		GeneTaskScheduling temp_gene_Chrom1 = new GeneTaskScheduling(gene_Chrom1.getVm(), gene_Chrom1.getHost());
         		((ChromTaskScheduling)Chrom2).setGene(temp_gene_Chrom1, i);
         		
         		((ChromTaskScheduling)Chrom1).setGene(temp_gene_Chrom2, i);

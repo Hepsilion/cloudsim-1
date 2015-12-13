@@ -67,7 +67,7 @@ public class DvfsExample {
     			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", DvfsPowerDatacenter.class, hostList, null);
+    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", DvfsPowerDatacenter.class, hostList, RealtimeConstants.VmAllocationPolicy, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);

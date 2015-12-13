@@ -92,8 +92,9 @@ public class PowerVmAllocationPolicyDVFSMinimumUsedHost extends
 			// Normally, there is no case where moreAvailHost can be NULL
 			// moreAvailHost is NOT NULL
 			if (moreAvailHost.MakeSuitableHostForVm(vm)){ // change Pe frequency
-				System.out.println("Change Pe Frequency on HOST#"+moreAvailHost.getId()+" to host VM#"+vm.getId());
-				return moreAvailHost;}
+				Log.printLine("Change Pe Frequency on HOST#"+moreAvailHost.getId()+" to host VM#"+vm.getId());
+				return moreAvailHost;
+			}
 //			} else {
 //				if (moreAvailHost.decreaseVMMipsToHostNewVm(vm))
 //					return moreAvailHost;

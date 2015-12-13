@@ -20,7 +20,7 @@ package org.cloudbus.cloudsim.power.dvfs;
  */
 public abstract class AbstractGovernor {
 	private String name;
-	protected int defautIndexFreq;
+	protected int defautIndexFreq=-1;
 
 	private int downThreshold;
 	private int upThreshold;

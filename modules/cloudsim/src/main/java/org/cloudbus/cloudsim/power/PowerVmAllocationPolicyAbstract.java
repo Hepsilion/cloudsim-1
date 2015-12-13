@@ -63,19 +63,15 @@ public abstract class PowerVmAllocationPolicyAbstract extends VmAllocationPolicy
 	@Override
 	public boolean allocateHostForVm(Vm vm, Host host) {
 		if (host == null) {
-			Log.formatLine("%.2f: No suitable host found for VM #" + vm.getId() + "\n", CloudSim.clock());
+			Log.formatLine("%.2f: No suitable host found for VM #" + vm.getId() + "(" + vm.getMaxMips() + ")" +"\n", CloudSim.clock());
 			return false;
 		}
 		if (host.vmCreate(vm)) { // if vm has been succesfully created in the host
 			getVmTable().put(vm.getUid(), host);
-			Log.formatLine(
-					"%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),
-					CloudSim.clock());
+			Log.formatLine("%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(), CloudSim.clock());
 			return true;
 		}
-		Log.formatLine(
-				"%.2f: Creation of VM #" + vm.getId() + " on the host #" + host.getId() + " failed\n",
-				CloudSim.clock());
+		Log.formatLine("%.2f: Creation of VM #" + vm.getId() + " on the host #" + host.getId() + " failed\n", CloudSim.clock());
 		return false;
 	}
 
@@ -98,8 +94,9 @@ public abstract class PowerVmAllocationPolicyAbstract extends VmAllocationPolicy
 			if (host.MakeSuitableHostForVm(vm)) // change Pe frequency
 				return host;
 			else {
-				if (host.decreaseVMMipsToHostNewVm(vm))
-					return host;
+				//TODO 不缩小主机大小
+//				if (host.decreaseVMMipsToHostNewVm(vm))
+//					return host;
 			}
 			return null;// retour jamais null
 		}

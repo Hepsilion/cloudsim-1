@@ -72,7 +72,19 @@ public class PeList {
 		}
 		return totalMips;
 	}
-
+	
+	/**
+	 * Get total MIPS under max frequency
+	 * @author Hepsilion
+	 */
+	public static <T extends Pe> int getTotalMaxMips(List<T> peList) {
+		int totalMaxMips = 0;
+		for (Pe pe : peList) {
+			totalMaxMips += pe.getMaxMips();
+		}
+		return totalMaxMips;
+	}
+	
 	/**
 	 * Gets the max utilization among by all PEs.
 	 * 

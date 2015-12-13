@@ -1,9 +1,6 @@
 package experiments.paper1.main;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,11 +28,12 @@ public class BaseExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) {
-		int numExes = 30;
+		int numExes = 0;
         double result[][] = new double[numExes+1][3];
         for(int i=0; i<=numExes; i++) {
         	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
-        	String resultFile = "base_f5_" + temp_numCloudlets;
+        	System.out.println("#Cloudlet="+temp_numCloudlets);
+        	String resultFile = "base_f"+RealtimeConstants.DefautFrequency+"_" + temp_numCloudlets;
     		try {
     			RealtimeHelper.initLogOutput(
     					RealtimeConstants.ENABLE_OUTPUT,
@@ -67,7 +65,7 @@ public class BaseExample {
     			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, null);
+    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, RealtimeConstants.VmAllocationPolicy, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);

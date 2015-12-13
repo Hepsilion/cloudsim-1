@@ -31,7 +31,6 @@ import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
-import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
 import org.cloudbus.cloudsim.VmStateHistoryEntry;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
@@ -48,16 +47,20 @@ import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelation;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumMigrationTime;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumUtilization;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyRandomSelection;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.util.MathUtil;
 import org.cloudbus.cloudsim.xml.DvfsDatas;
 
-import experiments.paper1.dvfs.DvfsPowerVmAllocation;
+import experiments.paper1.dvfs.BasePowerVmAllocation;
+import experiments.paper1.dvfs.DvfsBase1PowerVmAllocation;
+import experiments.paper1.dvfs.DvfsBase2PowerVmAllocation;
+import experiments.paper1.dvfs.MyDvfsPowerVmAllocation;
 import experiments.paper1.ga.ChromTaskScheduling;
 import experiments.paper1.ga.Chromosome;
+import experiments.paper1.ga.GaInitialVmAllocationPolicy;
 import experiments.paper1.ga.GaPowerVmAllocationPolicy;
 
 
@@ -170,9 +173,11 @@ public class RealtimeHelper {
 	 */
 	public static List<Vm> createVmList(int brokerId, int vmsNumber, Chromosome chrom) {
 		List<Vm> vms = new ArrayList<Vm>();
+		int[] num=new int[4];
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
-			int hostId = ((ChromTaskScheduling) chrom).getHostByVm(i);
+			num[vmType]++;
+			int hostId = ((ChromTaskScheduling)chrom).getHostByVm(i);
 			int frequency = ((ChromTaskScheduling) chrom).getFreqByVm(i);
 			vms.add(new RealtimeVm(
 					i, 
@@ -190,13 +195,18 @@ public class RealtimeHelper {
 					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1):hostId, 
 					frequency));
 		}
+		System.out.println("Num of VM:");
+		for(int i=0; i<4; i++)
+			System.out.println(num[i]);
 		return vms;
 	}
 
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
+		int[] num=new int[4];
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
+			num[vmType]++;
 			vms.add(new RealtimeVm(
 					i, 
 					brokerId, 
@@ -211,6 +221,8 @@ public class RealtimeHelper {
 					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
 					RealtimeConstants.SCHEDULING_INTERVAL));
 		}
+		for(int i=0; i<4; i++)
+			System.out.println(num[i]);
 		return vms;
 	}
 
@@ -233,10 +245,11 @@ public class RealtimeHelper {
 
 		// Define wich governor is used by each CPU
 		HashMap<Integer, String> govs = new HashMap<Integer, String>(); 
-		govs.put(0, "UserSpace"); // CPU 0 use My(UserSpace、Performance、Conservative、OnDemand) Dvfs mode 
+		govs.put(0, "My"); // CPU 0 use My(UserSpace、Performance、Conservative、OnDemand) Dvfs mode 
 
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
 		RealtimeHost host = null;
+		int[] num=new int[2];
 		for (int i = 0; i < hostsNumber; i++) {
 			HashMap<String, Integer> tmp_HM_OnDemand = new HashMap<String, Integer>();
 			tmp_HM_OnDemand.put("up_threshold", 90);
@@ -251,8 +264,7 @@ public class RealtimeHelper {
 			HashMap<String, Integer> tmp_HM_My = new HashMap<String, Integer>();
 			tmp_HM_My.put("up_threshold", 90);
 			tmp_HM_My.put("down_threshold", 85);
-			tmp_HM_My.put("enablefreqstep", 0);
-			tmp_HM_My.put("freqstep", 5);
+			tmp_HM_My.put("frequency", RealtimeConstants.DefautFrequency);
 
 			DvfsDatas ConfigDvfs = new DvfsDatas();
 			ConfigDvfs.setHashMapOnDemand(tmp_HM_OnDemand);
@@ -261,6 +273,7 @@ public class RealtimeHelper {
 			ConfigDvfs.setHashMapMy(tmp_HM_My);
 
 			int hostType = (i+1) % RealtimeConstants.HOST_TYPES;
+			num[hostType]++;
 			List<Pe> peList = new ArrayList<Pe>();
 			for (int j = 0; j < RealtimeConstants.HOST_PES[hostType]; j++) {
 				peList.add(new Pe(
@@ -277,12 +290,15 @@ public class RealtimeHelper {
 					RealtimeConstants.HOST_STORAGE, 
 					peList,
 					new VmSchedulerTimeShared(peList),
-					new PowerModelSpecPower_BAZAR(peList),
+					new PowerModelSpecPower_BAZAR_ME(peList),
 					RealtimeConstants.ENABLE_ONOFF, 
 					RealtimeConstants.ENABLE_DVFS);
 			host.setFrequency(host.getPeList().get(0).getIndexFreq());
 			hostList.add(host);
 		}
+		System.out.println("Num of Host:");
+		for(int i=0; i<2; i++)
+			System.out.println(num[i]);
 		return hostList;
 	}
 
@@ -304,7 +320,7 @@ public class RealtimeHelper {
 	 * @throws Exception
 	 *             the exception
 	 */
-	public static Datacenter createDatacenter(String name, Class<? extends Datacenter> datacenterClass, List<PowerHost> hostList, Chromosome chrom) throws Exception {
+	public static Datacenter createDatacenter(String name, Class<? extends Datacenter> datacenterClass, List<PowerHost> hostList, String vmAllocationPolicy, Chromosome chrom) throws Exception {
 		String arch = "x86"; // system architecture
 		String os = "Linux"; // operating system
 		String vmm = "Xen";
@@ -329,7 +345,7 @@ public class RealtimeHelper {
 			datacenter = datacenterClass.getConstructor(String.class, DatacenterCharacteristics.class, VmAllocationPolicy.class, List.class, Double.TYPE).newInstance(
 					name,
 					characteristics,
-					getVmAllocationPolicy(RealtimeConstants.VmAllocationPolicy,RealtimeConstants.VmSelectionPolicy, RealtimeConstants.Parameter, hostList, chrom),
+					getVmAllocationPolicy(vmAllocationPolicy,RealtimeConstants.VmSelectionPolicy, RealtimeConstants.Parameter, hostList, chrom),
 					new LinkedList<Storage>(), 
 					RealtimeConstants.SCHEDULING_INTERVAL);
 		} catch (Exception e) {
@@ -376,14 +392,24 @@ public class RealtimeHelper {
 			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationLocalRegressionRobust(hostList, vmSelectionPolicy, parameter, RealtimeConstants.SCHEDULING_INTERVAL, fallbackVmSelectionPolicy);
 		} else if (vmAllocationPolicyName.equals("thr")) {
 			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, parameter);
-		} else if (vmAllocationPolicyName.equals("dvfs")) {
-            vmAllocationPolicy = new DvfsPowerVmAllocation(hostList);
+		} else if (vmAllocationPolicyName.equals("base")) {
+            vmAllocationPolicy = new BasePowerVmAllocation(hostList);
+        } else if (vmAllocationPolicyName.equals("dvfs_my")) {
+            vmAllocationPolicy = new MyDvfsPowerVmAllocation(hostList);
+        } else if (vmAllocationPolicyName.equals("dvfs_base1")) {
+        	PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 1);//TODO 我把过载阈值从0.7改成了0.9
+            vmAllocationPolicy = new DvfsBase1PowerVmAllocation(hostList, vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
+        } else if (vmAllocationPolicyName.equals("dvfs_base2")) {
+        	PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 1);//TODO 我把过载阈值从0.7改成了0.9
+        	vmAllocationPolicy = new DvfsBase2PowerVmAllocation(hostList, vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
         } else if(vmAllocationPolicyName.equals("dvfs_muh")) {
 		    vmAllocationPolicy = new PowerVmAllocationPolicyDVFSMinimumUsedHost(hostList);
-		}else if (vmAllocationPolicyName.equals("ga")) {
-			vmAllocationPolicy = new GaPowerVmAllocationPolicy(hostList, chrom);
-		} else if (vmAllocationPolicyName.equals("SimpleWatt")) {
+		} else if (vmAllocationPolicyName.equals("dvfs_SimpleWatt")) {
 			vmAllocationPolicy = new PowerVmAllocationPolicySimpleWattPerMipsMetric(hostList);
+		} else if (vmAllocationPolicyName.equals("ga")) {
+			vmAllocationPolicy = new GaPowerVmAllocationPolicy(hostList, chrom);
+		} else if (vmAllocationPolicyName.equals("ga_init")) {
+			vmAllocationPolicy = new GaInitialVmAllocationPolicy(hostList, chrom);
 		} else {
 			System.out.println("Unknown VM allocation policy: " + vmAllocationPolicyName);
 			System.exit(0);
@@ -487,8 +513,11 @@ public class RealtimeHelper {
 		double tmp1=10*(1-tdr), tmp2=10*(1-dmr);
 		//double overall_sla = tmp1*tmp1*tmp2*tmp2*tmp2*(100-energy);
 		long numInstructions=0;
+		RealtimeCloudlet rc=null;
 		for(int i=0; i<received_cloudlets.size(); i++) {
-			numInstructions+=received_cloudlets.get(i).getCloudletLength();
+			rc = (RealtimeCloudlet) received_cloudlets.get(i);
+			if(rc.getFinishTime()<rc.getDeadline())
+				numInstructions+=received_cloudlets.get(i).getCloudletLength();
 		}
 		double overall_sla=numInstructions/(energy*3600*1000);
 

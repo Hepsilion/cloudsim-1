@@ -197,6 +197,7 @@ public class Host {
 	}
 		
 		// Original Implementation
+		/*
 		public boolean MakeSuitableHostForVm(Vm vm) {
 			// If DVFS Enabled, it's possible that the first vm ask more than the start capacity of the PE(depending of the dvfs mode),
 			// in this case, we have to increase directly PE capacity! But it's not possible with all governor.
@@ -204,13 +205,17 @@ public class Host {
 				for (Pe pe : getPeList()) {
 					if (pe.changeToMaxFrequency()){ // if the Freq has been set to MAX , return true
 						setAvailableMips(getTotalMips());
-						System.out.println("Current Total Mips: "+getTotalMips());
+						Log.printLine("Current Total Mips: "+getTotalMips());
 						return true;
 					}
 				}
 				return false;
 			} else
 				return false;
+		}*/
+	
+		public boolean MakeSuitableHostForVm(Vm vm) {
+			return this.increaseHostMipsForNewVm(vm);
 		}
 	
 		/**
@@ -220,24 +225,25 @@ public class Host {
 	    	if(this.isEnableDVFS() && getVmScheduler().getAvailableMips()<vm.getCurrentRequestedTotalMips()) {
 	    		int[] frequencies = new int[getPeList().size()];
 	    		double oldTotalMips = this.getTotalMips();
-	    		Log.printLine("Host#"+this.getId()+"Before,Available Mips:"+this.getAvailableMips());
+	    		Log.printLine("Host#"+this.getId()+" Before,Available Mips:"+this.getAvailableMips());
 	    		for(int i=0; i<getPeList().size(); i++) {
 	    			frequencies[i]=getPeList().get(i).getIndexFreq();
+	    			Log.printLine(frequencies[i]+" ");
 	    			getPeList().get(i).changeToMaxFrequency();
 	    		}
 	    		
 	    		double totalMips = this.getTotalMips();
 	    		double newMips = totalMips-oldTotalMips+this.getAvailableMips();
-	    		//Log.printLine("New:"+newMips);
+	    		Log.printLine("New:"+newMips);
 	    		if(newMips > vm.getCurrentRequestedTotalMips()) {
 	    			this.getVmScheduler().setAvailableMips(newMips);
-	    			Log.printLine("Host#"+this.getId()+"After,Available Mips:"+this.getAvailableMips());
+	    			Log.printLine("Host#"+this.getId()+" After,Available Mips:"+this.getAvailableMips());
 	    			return true;
 	    		}else{
 	    			for(int i=0; i<getPeList().size(); i++) {
 	    				getPeList().get(i).setFrequency(frequencies[i]);
 	    			}
-	    			Log.printLine("Host#"+this.getId()+"Increasing failed");
+	    			Log.printLine("Host#"+this.getId()+" Increasing failed: now max avaiable mips="+(this.getTotalMaxMips()-this.getTotalMips()+this.getAvailableMips()));
 	    			return false;
 	    		}
 	    	}
@@ -249,41 +255,41 @@ public class Host {
 		 * @param vm
 		 * @return
 		 */
-		public boolean tryIncreaseHostMipsForNewVm(Vm vm) {
-			int[] frequencies = new int[getPeList().size()];
-			for(int i=0; i<getPeList().size(); i++) {
-    			frequencies[i]=getPeList().get(i).getIndexFreq();
-    		}
-			
-    		double originalTotalMips = this.getTotalMips();
-    		double oldTotalMips = this.getTotalMips();
-    		double totalMips;
-    		
-    		if(this.isEnableDVFS()) {
-    			while(this.getAvailableMips()<vm.getCurrentRequestedTotalMips()) {
-    				boolean increased = false;
-    	    		for(int i=0; i<getPeList().size(); i++) {
-    	    			if(getPeList().get(i).increastFrequency()) {
-    	    				increased=true;
-    	    			}
-    	    		}
-    	    		if(increased) {
-    	    			totalMips = this.getTotalMips();
-	    				this.setAvailableMips(totalMips-oldTotalMips+this.getAvailableMips());
-	    				oldTotalMips=this.getTotalMips();
-    	    		}
-    	    		if(this.getAvailableMips()>=vm.getCurrentRequestedTotalMips()){
-    	    			return true;
-    				}else if(this.getAvailableMips()<vm.getCurrentRequestedTotalMips() && increased==false) {
-    	    			for(int i=0; i<getPeList().size(); i++) {
-        	    			getPeList().get(i).setFrequency(frequencies[i]);
-        	    		}
-    	    			this.setAvailableMips(originalTotalMips);
-    	    			return false;
-    	    		}
-    			}
-    		}
+		public boolean tryIncreaseHostMipsForNewVm(Vm vm, int[] frequencies) {
+			if(this.isEnableDVFS() && getVmScheduler().getAvailableMips()<vm.getCurrentRequestedTotalMips()) {
+	    		double oldTotalMips = this.getTotalMips();
+	    		Log.printLine("Host#"+this.getId()+" Before,Available Mips:"+this.getAvailableMips());
+	    		for(int i=0; i<getPeList().size(); i++) {
+	    			frequencies[i]=getPeList().get(i).getIndexFreq();
+	    			Log.printLine(frequencies[i]+" ");
+	    			getPeList().get(i).changeToMaxFrequency();
+	    		}
+	    		
+	    		double totalMips = this.getTotalMips();
+	    		double newMips = totalMips-oldTotalMips+this.getAvailableMips();
+	    		Log.printLine("New:"+newMips);
+	    		if(newMips > vm.getCurrentRequestedTotalMips()) {
+	    			this.getVmScheduler().setAvailableMips(newMips);
+	    			Log.printLine("Host#"+this.getId()+" After,Available Mips:"+this.getAvailableMips());
+	    			return true;
+	    		}else{
+	    			for(int i=0; i<getPeList().size(); i++) {
+	    				getPeList().get(i).setFrequency(frequencies[i]);
+	    			}
+	    			Log.printLine("Host#"+this.getId()+" Increasing failed: now max avaiable mips="+(this.getTotalMaxMips()-this.getTotalMips()+this.getAvailableMips()));
+	    			return false;
+	    		}
+	    	}
 			return false;
+		}
+		
+		public void backupHostMips(int[] frequencies) {
+			double oldTotalMips = this.getTotalMips();
+			for(int i=0; i<getPeList().size(); i++) {
+				getPeList().get(i).setFrequency(frequencies[i]);
+			}
+			double newMips = this.getTotalMips()-oldTotalMips+this.getAvailableMips();
+			this.getVmScheduler().setAvailableMips(newMips);
 		}
 	
 		/**
@@ -377,7 +383,7 @@ public class Host {
 		 * @return void
 		 */
 		public void regrowVmMipsAfterVmEnd(Vm vmFinished) {
-			Log.printLine("Host# "+this.getId()+":Regrow VM mips : after VM#"+vmFinished.getId()+"("+vmFinished.getMips()+")"+" end");
+			Log.printLine("Host# "+this.getId()+" : Regrow VM mips : after VM#"+vmFinished.getId()+"("+vmFinished.getMips()+")"+" end");
 			double FreeMips;
 			List<Vm> ListVMRunning = getVmList();
 	
@@ -386,7 +392,7 @@ public class Host {
 			ListVMRunning.remove(vmFinished);
 			double percent = increasePercentVmMips(FreeMips);
 			increaseVmMips(ListVMRunning, percent);
-			Log.printLine("Host# "+this.getId()+":Available Mips on HOST after regrow vm mips(after VM#"+vmFinished.getId()+") = " + getAvailableMips());
+			Log.printLine("Host# "+this.getId()+" : Available Mips on HOST after regrow vm mips(after VM#"+vmFinished.getId()+") = " + getAvailableMips());
 		}
 	
 		/**
@@ -396,7 +402,7 @@ public class Host {
 		 * Function called when the CPU frequency is increased.
 		 */
 		public void regrowVmMips() {
-			Log.printLine("Host# "+this.getId()+":Regrow VM mips : after Frequency Increase");
+			Log.printLine("Host# "+this.getId()+" : Regrow VM mips : after Frequency Increase");
 			increaseVmMips(getVmList(), increasePercentVmMips(0));
 		}
 	
@@ -424,7 +430,7 @@ public class Host {
 			double HostCapacity = getTotalMips();//TODO 新添加
 			double NewSumVmMips = 0;
 			for (Vm vm : ListVMRunning) {
-				Log.printLine("Host# "+this.getId()+":VM#"+vm.getId()+" Current MIPS(Before Increase) = " + vm.getMips() + "  / percent = " + Percent);
+				Log.printLine("Host# "+this.getId()+" : VM#"+vm.getId()+" Current MIPS(Before Increase) = " + vm.getMips() + "  / percent = " + Percent);
 				double TmpNewVmMips = vm.getMips() * Percent * 0.998;
 	
 				if (TmpNewVmMips > vm.getMaxMips()) {
@@ -438,7 +444,7 @@ public class Host {
 				Map<String, List<Double>> tmp_Map = getVmScheduler().getMipsMap();
 				tmp_Map.put(vm.getUid(), updatedMipsVm);
 				tmp_Map.get(vm.getUid()).add(TmpNewVmMips);
-				Log.printLine("Host# "+this.getId()+":VM#"+vm.getId()+" New MIPS(After Increase) = " + vm.getMips());
+				Log.printLine("Host# "+this.getId()+" : VM#"+vm.getId()+" New MIPS(After Increase) = " + vm.getMips());
 				NewSumVmMips += TmpNewVmMips;
 			}
 			this.setAvailableMips(HostCapacity-NewSumVmMips);//TODO 新添加
@@ -574,7 +580,7 @@ public class Host {
 	}
 
 	/**
-	 * Gets the total mips.
+	 * Gets the total mips under current frequency.
 	 * 
 	 * @return the total mips
 	 */
@@ -583,12 +589,13 @@ public class Host {
 	}
 	
 		/**
-		 * Gets the total Max mips.
+		 * Gets the total mips under max frequency.
 		 * 
 		 * @return the total mips
+		 * @author Hepsilion
 		 */
 		public int getTotalMaxMips() {
-			return PeList.getTotalMips(getPeList());
+			return PeList.getTotalMaxMips(getPeList());
 		}
 
 	/**

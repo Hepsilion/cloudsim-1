@@ -89,7 +89,8 @@ public class Pe {
 			frequencies = frequencies_;
 			nbFreq = frequencies.size();
 	
-			gov.setDefautIndexFreq(nbFreq - 1);
+			if(gov.getDefautIndexFreq()==-1)//TODO 这里原来实现应该错了，加了个if语句
+				gov.setDefautIndexFreq(nbFreq - 1);
 			setIndexFreq(gov.getDefautIndexFreq());
 			setDefautStartFrequency();
 	
@@ -298,7 +299,7 @@ public class Pe {
 				Log.printLine("lllllllllllllllllllllllll");
 				setNewFrequency(2);
 				return true;
-			} else if(gov.getName().equalsIgnoreCase("Conservative")){
+			} else if(gov.getName().equalsIgnoreCase("MyGovernor")){
 				Log.printLine("2222222222222222222222222");
 				setNewFrequency(2);
 				return true;

@@ -1,0 +1,8 @@
+1.Base Algorithm
+(1)解注释RealtimeConstants中iqr，ENABLE_DVFS=false和ENABLE_ONOFF=true
+
+2.Dvfs Algorithm
+解注释RealtimeConstants中dvfs_muh，ENABLE_DVFS=true和ENABLE_ONOFF=true
+
+3.Ga Algorithm
+(1)解注释RealtimeConstants中ga，ENABLE_DVFS=true和ENABLE_ONOFF=false
