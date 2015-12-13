@@ -66,7 +66,6 @@ import experiments.paper1.ga.GaPowerVmAllocationPolicy;
 
 public class RealtimeHelper {
 	private static Random rand = new Random(RealtimeConstants.RANDOM_SEED);
-
 	/**
 	 * Creates the broker.
 	 * @return the datacenter broker
@@ -108,7 +107,7 @@ public class RealtimeHelper {
 					utilizationModel, 
 					utilizationModel, 
 					startTime[i],
-					startTime[i]+length[i]/500+length[i]/RealtimeConstants.CLOUDLET_LENGTH*50);
+					startTime[i]+length[i]/vmlist.get(i).getMaxMips()+length[i]/RealtimeConstants.CLOUDLET_LENGTH*50);
 			// setting the owner of these Cloudlets
 			cloudlet.setVmId(i);
 			cloudlet.setUserId(userId);
@@ -121,21 +120,21 @@ public class RealtimeHelper {
 	}
 
 	public static int[] getRandomHosts(int length, int min, int max) {
-		Random rand = new Random(new Random().nextInt());
+		Random random = new Random(new Random().nextInt());
+		//System.out.println("Random Hosts:");
 		int[] numbers = new int[length];
-		// System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
-			numbers[i] = rand.nextInt(max)%(max-min+1)+min;
-			// System.out.print(numbers[i]+" ");
+			numbers[i] = random.nextInt(max)%(max-min+1)+min;
+			//System.out.print(numbers[i]+" ");
 		}
-		// System.out.println();
+		//System.out.println();
 		return numbers;
 	}
 	
 	public static int[] getRandomFrequencies(int length, int min, int max) {
 		Random rand = new Random(new Random().nextInt());
+		//System.out.println("Random Frequencies:");
 		int[] numbers = new int[length];
-		//System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
 			numbers[i] = rand.nextInt(max)%(max-min+1)+min;
 			//System.out.print(numbers[i]+" ");
@@ -195,9 +194,9 @@ public class RealtimeHelper {
 					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1):hostId, 
 					frequency));
 		}
-		System.out.println("Num of VM:");
-		for(int i=0; i<4; i++)
-			System.out.println(num[i]);
+////		System.out.println("Num of VM:");
+//		for(int i=0; i<4; i++)
+//			System.out.println(num[i]);
 		return vms;
 	}
 
@@ -221,8 +220,8 @@ public class RealtimeHelper {
 					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
 					RealtimeConstants.SCHEDULING_INTERVAL));
 		}
-		for(int i=0; i<4; i++)
-			System.out.println(num[i]);
+//		for(int i=0; i<4; i++)
+//			System.out.println(num[i]);
 		return vms;
 	}
 
@@ -296,9 +295,9 @@ public class RealtimeHelper {
 			host.setFrequency(host.getPeList().get(0).getIndexFreq());
 			hostList.add(host);
 		}
-		System.out.println("Num of Host:");
-		for(int i=0; i<2; i++)
-			System.out.println(num[i]);
+//		System.out.println("Num of Host:");
+//		for(int i=0; i<2; i++)
+//			System.out.println(num[i]);
 		return hostList;
 	}
 
@@ -397,11 +396,9 @@ public class RealtimeHelper {
         } else if (vmAllocationPolicyName.equals("dvfs_my")) {
             vmAllocationPolicy = new MyDvfsPowerVmAllocation(hostList);
         } else if (vmAllocationPolicyName.equals("dvfs_base1")) {
-        	PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 1);//TODO 我把过载阈值从0.7改成了0.9
-            vmAllocationPolicy = new DvfsBase1PowerVmAllocation(hostList, vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
+            vmAllocationPolicy = new DvfsBase1PowerVmAllocation(hostList);
         } else if (vmAllocationPolicyName.equals("dvfs_base2")) {
-        	PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 1);//TODO 我把过载阈值从0.7改成了0.9
-        	vmAllocationPolicy = new DvfsBase2PowerVmAllocation(hostList, vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
+        	vmAllocationPolicy = new DvfsBase2PowerVmAllocation(hostList);
         } else if(vmAllocationPolicyName.equals("dvfs_muh")) {
 		    vmAllocationPolicy = new PowerVmAllocationPolicyDVFSMinimumUsedHost(hostList);
 		} else if (vmAllocationPolicyName.equals("dvfs_SimpleWatt")) {

@@ -21,7 +21,7 @@ public class GaInitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract
 		this.chromosome = (ChromTaskScheduling) chromosome;
 	}
 	
-	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
+	public PowerHost findHostForVm(Vm vm) {
 		GeneTaskScheduling gene = this.chromosome.getGene(vm.getId());
 		ArrayList<PowerHost> hosts = new ArrayList<PowerHost>();
 		for(PowerHost host : this.<PowerHost>getHostList()) {

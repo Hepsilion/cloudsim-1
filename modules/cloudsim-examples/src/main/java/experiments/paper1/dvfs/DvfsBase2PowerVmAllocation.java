@@ -3,10 +3,8 @@ package experiments.paper1.dvfs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.cloudbus.cloudsim.Host;
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
@@ -15,26 +13,18 @@ import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationInterQuartile
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicy;
 import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 
-import experiments.paper1.main.PowerHostList;
 
-
-public class DvfsBase2PowerVmAllocation extends PowerVmAllocationPolicyMigrationInterQuartileRange {
-
-public DvfsBase2PowerVmAllocation(List<? extends Host> hostList,
-			PowerVmSelectionPolicy vmSelectionPolicy, double safetyParameter,
-			PowerVmAllocationPolicyMigrationAbstract fallbackVmAllocationPolicy) {
-		super(hostList, vmSelectionPolicy, safetyParameter, fallbackVmAllocationPolicy);
+public class DvfsBase2PowerVmAllocation extends PowerVmAllocationPolicyAbstract {
+    public DvfsBase2PowerVmAllocation(List<? extends Host> list) {
+		super(list);
 	}
-    
-    public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
+
+	public PowerHost findHostForVm(Vm vm) {
         double minPower = Double.MAX_VALUE;
         PowerHost allocatedHost = null;
 
         List<PowerHost> suitableHosts = new ArrayList<PowerHost>();
         for (PowerHost host : this.<PowerHost> getHostList()) {
-        	if (excludedHosts.contains(host)) {
-				continue;
-			}
             double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
             if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
             		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
@@ -45,9 +35,9 @@ public DvfsBase2PowerVmAllocation(List<? extends Host> hostList,
         }
         
         for(PowerHost host : suitableHosts) {
-        	if (getUtilizationOfCpuMips(host) != 0 /*&& isHostOverUtilizedAfterAllocation(host, vm)*/) {
-                continue;
-            }
+//        	if (getUtilizationOfCpuMips(host) != 0 /*&& isHostOverUtilizedAfterAllocation(host, vm)*/) {
+//                continue;
+//            }
 
             try {
                 double powerAfterAllocation = getPowerAfterAllocation(host, vm);

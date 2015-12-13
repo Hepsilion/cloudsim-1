@@ -11,6 +11,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 
 import experiments.paper1.main.PowerHostList;
 import experiments.paper1.main.RealtimeHost;
@@ -29,7 +30,7 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 		return null;
 	}
 	
-	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
+	public PowerHost findHostForVm2(Vm vm) {
 		RealtimeHost chosenHost = null;
 		RealtimeVm rv = (RealtimeVm) vm;
 		RealtimeHost host = (RealtimeHost) HostList.getById(this.getHostList(), rv.getHostId());
@@ -52,39 +53,12 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 		} else if(old_freq==vm_freq && host.isSuitableForVm(vm)) {
 			chosenHost=host;
 		}
-
 		if(chosenHost==null && host.increaseHostMipsForNewVm(vm) ){
 			host.setFrequency(host.getPeList().get(0).getIndexFreq());
 			gene.setFrequency(host.getFrequency());
 			chosenHost = host;
 			Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
 		}
-		
-//		if(chosenHost==null) {
-//			List<PowerHost> hosts = new ArrayList<PowerHost>();
-//			for(PowerHost h : this.<PowerHost>getHostList()) {
-//				hosts.add(h);
-//			}
-//			PowerHostList.sortDvfsHosts(hosts);
-//			for(int i=0; i<hosts.size(); i++) {
-//				if(hosts.get(i).isSuitableForVm(vm)) {
-//					chosenHost = (RealtimeHost) hosts.get(i);
-//					chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
-//					gene.setFrequency(chosenHost.getFrequency());
-//					gene.setHost(chosenHost.getId());
-//					return chosenHost;
-//				}else if(hosts.get(i).MakeSuitableHostForVm(vm)){
-//					chosenHost = (RealtimeHost) hosts.get(i);
-//					chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
-//					gene.setFrequency(chosenHost.getFrequency());
-//					gene.setHost(chosenHost.getId());
-//					return hosts.get(i);
-//				}
-//			}
-//		}
-		
-		
-		
 		if(chosenHost==null){
 			chosenHost=findHostFromNotEmptyHosts(host, vm);
 			if(chosenHost!=null) {
@@ -112,52 +86,6 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 //				Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+" by decreasing vm mips:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
 //			}
 //		}
-		return chosenHost;
-	}
-	
-	public PowerHost findHostForVm2(Vm vm) {
-		RealtimeVm rv = (RealtimeVm) vm;
-		RealtimeHost host = (RealtimeHost) HostList.getById(this.getHostList(), rv.getHostId());
-		int frequency = rv.getFrequency();
-		if(host.getFrequency() < frequency) {
-		    host.setFrequency(frequency);
-		    if(!host.isSuitableForVm(vm))
-		        return null;
-		} else if(host.getFrequency() > frequency) {
-		    int old_freq = host.getFrequency();
-		    host.setFrequency(frequency);
-		    if(!host.isSuitableForVm(vm)) {
-		        host.setFrequency(old_freq);
-		        if(!host.isSuitableForVm(vm))
-		            return null;
-		    }
-		}
-		return host ;
-	}
-	
-	public PowerHost findHostForVm1(Vm vm) {
-		PowerHost chosenHost = null;
-		RealtimeVm rv = (RealtimeVm) vm;
-		RealtimeHost host = (RealtimeHost) HostList.getById(this.getHostList(), rv.getHostId());
-		int vm_freq = rv.getFrequency();
-		int old_freq = host.getFrequency();
-		
-		if(old_freq<vm_freq) {
-		    host.setFrequency(vm_freq);
-		    if(host.isSuitableForVm(vm)) {
-		        chosenHost = host;
-		    }else{
-		    	host.setFrequency(old_freq);
-		    }
-		} else if(old_freq>vm_freq && host.isSuitableForVm(vm)) {
-		    chosenHost=host;
-		}
-		if(chosenHost==null && host.increaseHostMipsForNewVm(vm))
-			chosenHost = host;
-		if(chosenHost==null)
-			chosenHost=findHostFromNotEmptyHosts(host, vm);
-		if(chosenHost==null)
-			chosenHost = findHostFromEmptyHosts(host, vm);
 		return chosenHost;
 	}
 	
@@ -218,4 +146,121 @@ public class GaPowerVmAllocationPolicy extends PowerVmAllocationPolicyAbstract {
 			return moreAvailHost;
 		return null;
 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////
+	public PowerHost findHostForVm(Vm vm) {
+		RealtimeHost chosenHost = null;
+		RealtimeVm rv = (RealtimeVm) vm;
+		RealtimeHost h = (RealtimeHost) HostList.getById(this.getHostList(), rv.getHostId());
+		int vm_freq = rv.getFrequency();
+		int old_freq = h.getFrequency();
+		
+		GeneTaskScheduling gene = this.chromosome.getGene(vm.getId());
+		
+		if(old_freq<vm_freq) {
+		    h.setPeFrequency(vm_freq);
+		    if(h.isSuitableForVm(vm)) {
+		    	h.setFrequency(vm_freq);
+		        chosenHost = h;
+		    }else{
+		    	h.setPeFrequency(old_freq);
+		    }
+		} else if(old_freq>vm_freq && h.isSuitableForVm(vm)) {
+			gene.setFrequency(old_freq);
+		    chosenHost=h;
+		} else if(old_freq==vm_freq && h.isSuitableForVm(vm)) {
+			chosenHost=h;
+		}
+		if(chosenHost==null && h.increaseHostMipsForNewVm(vm) ){
+			h.setFrequency(h.getPeList().get(0).getIndexFreq());
+			gene.setFrequency(h.getFrequency());
+			chosenHost = h;
+			Log.printLine("Choose Host#"+chosenHost.getId()+" for VM"+vm.getId()+"("+vm.getMips()+")"+" from hosts:chrom->F="+gene.getFrequency()+",H="+gene.getHost());
+		}
+		
+        if(chosenHost==null) {
+        	double minPower = Double.MAX_VALUE;
+            PowerHost allocatedHost = null;
+
+            List<PowerHost> suitableHosts = new ArrayList<PowerHost>();
+            for (PowerHost host : this.<PowerHost> getHostList()) {
+                double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
+                if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
+                		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
+                		&& host.getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
+        				&& host.getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw())){
+                	suitableHosts.add(host);
+                }
+            }
+            
+            for(PowerHost host : suitableHosts) {
+                try {
+                    double powerAfterAllocation = getPowerAfterAllocation(host, vm);
+                    double powerBeforeAllocation = getPowerAfterAllocation(host);
+                    if (powerAfterAllocation != -1) {
+                        double powerDiff = powerAfterAllocation - powerBeforeAllocation;
+                        if (powerDiff < minPower) {
+                            minPower = powerDiff;
+                            allocatedHost = host;
+                        }
+                    }
+                } catch (Exception e) {
+                }
+            }
+            
+            if(allocatedHost!=null){
+            	chosenHost=(RealtimeHost) allocatedHost;
+            	chosenHost.MakeSuitableHostForVm(vm);
+            	chosenHost.setFrequency(chosenHost.getPeList().get(0).getIndexFreq());
+    			gene.setFrequency(((RealtimeHost)chosenHost).getFrequency());
+    			gene.setHost(chosenHost.getId());
+            }
+        }
+        
+        return chosenHost;
+    }
+    
+    protected double getPowerAfterAllocation(PowerHost host){
+    	double hostUtilizationMips = getUtilizationOfCpuMips(host);
+    	double pePotentialUtilization = hostUtilizationMips / host.getTotalMaxMips();
+    	double power = 0;
+    	try {
+    		power = ((PowerModelSpecPower_BAZAR_ME)host.getPowerModel()).getPower(pePotentialUtilization, 4);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+            System.exit(0);
+    	}
+    	return power;
+    }
+    
+    protected double getPowerAfterAllocation(PowerHost host, Vm vm) {
+        double power = 0;
+        try {
+            power = ((PowerModelSpecPower_BAZAR_ME)host.getPowerModel()).getPower(getMaxUtilizationAfterAllocation(host, vm), 4);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+        return power;
+    }
+
+    protected double getMaxUtilizationAfterAllocation(PowerHost host, Vm vm) {
+        double requestedTotalMips = vm.getCurrentRequestedTotalMips();
+        double hostUtilizationMips = getUtilizationOfCpuMips(host);
+        double hostPotentialUtilizationMips = hostUtilizationMips + requestedTotalMips;
+        double pePotentialUtilization = hostPotentialUtilizationMips / host.getTotalMaxMips();
+        return pePotentialUtilization;
+    }
+
+    protected double getUtilizationOfCpuMips(PowerHost host) {
+        double hostUtilizationMips = 0;
+        for (Vm vm2 : host.getVmList()) {
+            if (host.getVmsMigratingIn().contains(vm2)) {
+                // calculate additional potential CPU usage of a migrating in VM
+                hostUtilizationMips += host.getTotalAllocatedMipsForVm(vm2) * 0.9 / 0.1;
+            }
+            hostUtilizationMips += host.getTotalAllocatedMipsForVm(vm2);
+        }
+        return hostUtilizationMips;
+    }
 }

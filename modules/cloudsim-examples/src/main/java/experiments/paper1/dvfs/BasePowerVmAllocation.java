@@ -19,16 +19,13 @@ public class BasePowerVmAllocation extends PowerVmAllocationPolicyAbstract{
 		return null;
 	}
 	
-	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
+	public PowerHost findHostForVm(Vm vm) {
 		double minPower = Double.MAX_VALUE;
 		PowerHost allocatedHost = null;
 
 		for (PowerHost host : this.<PowerHost> getHostList()) {
-			if (excludedHosts.contains(host)) {
-				continue;
-			}
 			if (host.isSuitableForVm(vm)) {
-//				if (getUtilizationOfCpuMips(host) != 0 /*&& isHostOverUtilizedAfterAllocation(host, vm)*/) {
+//				if (getUtilizationOfCpuMips(host) != 0 && isHostOverUtilizedAfterAllocation(host, vm)) {
 //					continue;
 //				}
 

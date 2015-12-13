@@ -1,9 +1,7 @@
 package experiments.paper1.ga;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,7 +66,7 @@ public class GATaskScheduling extends GA {
 		initPopulation();
 	}
 	
-	protected void initPopulation1() {
+	protected void initPopulation() {
 		for(int i=0; i<populationDim; i++) {
 			//random hosts for vms
 			int[] rn = RealtimeHelper.getRandomHosts(chromosomeDim, 0, RealtimeConstants.NUMBER_OF_HOSTS-1);
@@ -85,7 +83,7 @@ public class GATaskScheduling extends GA {
 		}
 	}
 	
-	protected void initPopulation() {
+	protected void initPopulation1() {
 		Log.printLine("Init Population:");
 		try {
 			CloudSim.init(1, Calendar.getInstance(), false);
