@@ -20,18 +20,6 @@ import experiments.paper1.main.RealtimeDatacenterBroker;
 import experiments.paper1.main.RealtimeHelper;
 
 public class GATaskScheduling extends GA {
-
-	/** The broker. */
-	protected static RealtimeDatacenterBroker broker;
-	/** The cloudlet list. */
-	private static List<Cloudlet> cloudletList;
-	/** The vmlist. */
-	private static List<Vm> vmlist;
-	/** The host list. */
-	protected static List<PowerHost> hostList;
-	/** The datacenter. */
-	private static PowerDatacenter datacenter;
-	
 	private OutputStream ga_log;
 	private OutputStream result_log;
 	
@@ -66,7 +54,7 @@ public class GATaskScheduling extends GA {
 		initPopulation();
 	}
 	
-	protected void initPopulation() {
+	protected void initPopulation2() {
 		for(int i=0; i<populationDim; i++) {
 			//random hosts for vms
 			int[] rn = RealtimeHelper.getRandomHosts(chromosomeDim, 0, RealtimeConstants.NUMBER_OF_HOSTS-1);
@@ -83,56 +71,12 @@ public class GATaskScheduling extends GA {
 		}
 	}
 	
-	protected void initPopulation1() {
-		Log.printLine("Init Population:");
-		try {
-			CloudSim.init(1, Calendar.getInstance(), false);
-
-			broker = (RealtimeDatacenterBroker) RealtimeHelper.createBroker();
-			int brokerId = broker.getId();
-
-			vmlist = RealtimeHelper.createVmList(brokerId, chromosomeDim);
-			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, chromosomeDim);
-			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
-
-			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, "ga_init", this.chromosomes[0]);
-			datacenter.setDisableMigrations(true);
-			broker.submitVmList(vmlist);
-			broker.submitCloudletList(cloudletList);
-			
-			CloudSim.terminateSimulation(RealtimeConstants.SIMULATION_LIMIT);
-			
-			CloudSim.startSimulation();
-			List<Cloudlet> received_cloudlets = broker.getCloudletReceivedList();
-			CloudSim.stopSimulation();
-			
-			Log.printLine("Received " + received_cloudlets.size() + " cloudlets");
-			System.out.println(received_cloudlets.size());
-			CloudSim.stopSimulation();
-
-			double tdr = (cloudletList.size()-received_cloudlets.size())/ cloudletList.size();
-			double dmr = 0;
-			double energy = datacenter.getPower() / (3600 * 1000);
-			int instructions = 0;
-			RealtimeCloudlet rc = null;
-			for(int i=0; i<received_cloudlets.size(); i++) {
-				rc = (RealtimeCloudlet) received_cloudlets.get(i);
-				if(rc.getFinishTime()>rc.getDeadline())
-					dmr+=1;
-				else
-					instructions+=rc.getCloudletLength();
-			}
-			dmr /= cloudletList.size();
-			((ChromTaskScheduling)(this.chromosomes[0])).dmr=dmr;
-			((ChromTaskScheduling)(this.chromosomes[0])).energy=energy;
-			((ChromTaskScheduling)(this.chromosomes[0])).tdr=tdr;
-			((ChromTaskScheduling)(this.chromosomes[0])).fitness=instructions/(energy*3600*1000);
-			
-			Log.printLine("Base Example Simulation finished!");
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.printLine("Unwanted errors happen");
-		}
+	protected void initPopulation() {
+		double[] result = this.getGaFitness(0);
+		((ChromTaskScheduling)(this.chromosomes[0])).tdr=result[0];
+		((ChromTaskScheduling)(this.chromosomes[0])).dmr=result[1];
+		((ChromTaskScheduling)(this.chromosomes[0])).energy=result[2];
+		((ChromTaskScheduling)(this.chromosomes[0])).fitness=result[3];
 		
 		for(int i=1; i<populationDim; i++) {
 			//random hosts for vms
@@ -458,15 +402,15 @@ public class GATaskScheduling extends GA {
 		try {
 			CloudSim.init(1, Calendar.getInstance(), false);
 	
-			broker = (RealtimeDatacenterBroker) RealtimeHelper.createBroker();
+			RealtimeDatacenterBroker broker = (RealtimeDatacenterBroker) RealtimeHelper.createBroker();
 			int brokerId = broker.getId();
 	
-			vmlist = RealtimeHelper.createVmList(brokerId, chromosomeDim, this.chromosomes[iChromIndex]);
-			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, chromosomeDim);
-			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
+			List<Vm> vmlist = RealtimeHelper.createVmList(brokerId, chromosomeDim, this.chromosomes[iChromIndex]);
+			List<Cloudlet> cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, chromosomeDim);
+			List<PowerHost> hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
 	
 			//TODO 沿着这条线改了
-			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", GADatacenter.class, hostList, RealtimeConstants.VmAllocationPolicy, this.chromosomes[iChromIndex]);
+			PowerDatacenter datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", GADatacenter.class, hostList, RealtimeConstants.VmAllocationPolicy, this.chromosomes[iChromIndex]);
 			datacenter.setDisableMigrations(true);
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);

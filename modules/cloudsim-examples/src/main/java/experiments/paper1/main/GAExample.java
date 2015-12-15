@@ -9,7 +9,7 @@ import experiments.paper1.ga.GATaskScheduling;
 
 public class GAExample {
 	public static void main(String[] args) {
-		int numExes = 0;
+		int numExes = 100;
         for(int i=0; i<=numExes; i++) {
         	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
         	System.out.println("#Cloudlet="+temp_numCloudlets);

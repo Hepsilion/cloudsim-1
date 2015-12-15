@@ -32,6 +32,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.VmStateHistoryEntry;
+import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyDVFSMinimumUsedHost;
@@ -91,28 +92,29 @@ public class RealtimeHelper {
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
 		// length, start time and deadline
-		int[] length = getRandomIntegers(num_cloudlets, RealtimeConstants.CLOUDLET_LENGTH, RealtimeConstants.CLOUDLET_LENGTH*10);
-		int[] startTime = getRandomIntegers(num_cloudlets, 0, 10000);
+		int[] length = getRandomIntegers(num_cloudlets, RealtimeConstants.CLOUDLET_LENGTH/10, RealtimeConstants.CLOUDLET_LENGTH);
+		int[] startTime = getRandomIntegers(num_cloudlets, 0, 3600*24);
+		int[] execution_time = getRandomIntegers(num_cloudlets, 3600*14,  3600*16);
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		RealtimeCloudlet cloudlet= null;
 		for (int i = 0; i < num_cloudlets; i++) {
 			cloudlet = new RealtimeCloudlet(
 					i, 
-					length[i],
+					(long)(VmList.getById(vmlist, i).getMaxMips()*execution_time[i]),//length[i],
 					RealtimeConstants.CLOUDLET_PES,
 					fileSize, 
 					outputSize, 
 					utilizationModel, 
 					utilizationModel, 
 					utilizationModel, 
-					startTime[i],
-					startTime[i]+length[i]/vmlist.get(i).getMaxMips()+length[i]/RealtimeConstants.CLOUDLET_LENGTH*50);
+					startTime[i]-100,
+					startTime[i]+execution_time[i]);//startTime[i]+length[i]/VmList.getById(vmlist, i).getMaxMips()+50);
 			// setting the owner of these Cloudlets
 			cloudlet.setVmId(i);
 			cloudlet.setUserId(userId);
 			cloudlets.add(cloudlet);
-			((RealtimeVm)(vmlist.get(i))).setCloudlet(cloudlet);
+			((RealtimeVm)VmList.getById(vmlist, i)).setCloudlet(cloudlet);
 			Log.printLine("MyCloudlet #" + cloudlet.getCloudletId() + "   $Length:" + cloudlet.getCloudletLength() + ";$request start time:" + cloudlet.getStartTime() + ";$request deadline:" + cloudlet.getDeadline());
 		}
 
@@ -172,44 +174,38 @@ public class RealtimeHelper {
 	 */
 	public static List<Vm> createVmList(int brokerId, int vmsNumber, Chromosome chrom) {
 		List<Vm> vms = new ArrayList<Vm>();
-		int[] num=new int[4];
+		int[] MIPSs = getRandomMIPSs(vmsNumber, 200, 1000);//200 2000
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
-			num[vmType]++;
 			int hostId = ((ChromTaskScheduling)chrom).getHostByVm(i);
 			int frequency = ((ChromTaskScheduling) chrom).getFreqByVm(i);
 			vms.add(new RealtimeVm(
 					i, 
 					brokerId, 
-					RealtimeConstants.VM_MIPS[vmType], 
+					MIPSs[i],//RealtimeConstants.VM_MIPS[vmType], //
 					RealtimeConstants.VM_PES[vmType],
 					RealtimeConstants.VM_RAM[vmType], 
 					RealtimeConstants.VM_BW, 
 					RealtimeConstants.VM_SIZE, 
 					1, 
 					"Xen",
-					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
 					new CloudletSchedulerSpaceShared(),
 					RealtimeConstants.SCHEDULING_INTERVAL, 
 					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1):hostId, 
 					frequency));
 		}
-////		System.out.println("Num of VM:");
-//		for(int i=0; i<4; i++)
-//			System.out.println(num[i]);
 		return vms;
 	}
 
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
-		int[] num=new int[4];
+		int[] MIPSs = getRandomMIPSs(vmsNumber, 200, 2000);
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
-			num[vmType]++;
 			vms.add(new RealtimeVm(
 					i, 
 					brokerId, 
-					RealtimeConstants.VM_MIPS[vmType], 
+					MIPSs[i],//RealtimeConstants.VM_MIPS[vmType], 
 					RealtimeConstants.VM_PES[vmType],
 					RealtimeConstants.VM_RAM[vmType], 
 					RealtimeConstants.VM_BW, 
@@ -217,12 +213,18 @@ public class RealtimeHelper {
 					1, 
 					"Xen",
 					new CloudletSchedulerSpaceShared(),
-					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
 					RealtimeConstants.SCHEDULING_INTERVAL));
 		}
-//		for(int i=0; i<4; i++)
-//			System.out.println(num[i]);
 		return vms;
+	}
+	
+	public static int[] getRandomMIPSs(int vmNum, int min, int max) {
+		Random rand = new Random(200);
+		int[] MIPSs = new int[vmNum];
+		for (int i = 0; i < vmNum; i++) {
+			MIPSs[i] = rand.nextInt(max)%(max-min+1)+min;
+		}
+		return MIPSs;
 	}
 
 	/**
@@ -438,13 +440,13 @@ public class RealtimeHelper {
 		return vmSelectionPolicy;
 	}
 
-	public static void printCloudletList(List<Cloudlet> cloudlets, List<Host> hosts) {
+	public static void printCloudletList(List<Cloudlet> cloudlets, List<Host> hosts, List<Vm>vms) {
 		RealtimeCloudlet cloudlet = null;
 
 		String indent = "\t";
 		Log.printLine("========== OUTPUT ==========");
-		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + indent + "ResourceID" + indent + "VmID" + indent
-				+ "Length" + indent + "CPUTime" + indent + "StartExecTime" + indent + "FinishTime" + indent
+		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + indent + "ResourceID" + indent + "VmID" + indent+"VM MIPS" + indent+ indent
+				+ "Length" + indent + indent + "CPUTime" + indent + "StartExecTime" + indent + "FinishTime" + indent
 				+ "RequestStartTime" + indent + "Deadline");
 
 		DecimalFormat dft = new DecimalFormat("###.##");
@@ -452,13 +454,16 @@ public class RealtimeHelper {
 			cloudlet = (RealtimeCloudlet) cloudlets.get(i);
 			Log.print(indent + cloudlet.getCloudletId());
 			if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
-				Log.printLine(indent + indent + "SUCCESS" + indent + indent + cloudlet.getResourceId() + indent + indent + indent
-						+ cloudlet.getVmId() + indent + indent + cloudlet.getCloudletLength() + indent
+				Log.printLine(indent + indent + "SUCCESS" + indent + indent 
+						+ cloudlet.getResourceId() + indent + indent + indent
+						+ cloudlet.getVmId() + indent + indent 
+						+ VmList.getById(vms, cloudlet.getCloudletId()).getMaxMips() + indent + indent 
+						+ cloudlet.getCloudletLength() + indent + indent
 						+ dft.format(cloudlet.getActualCPUTime()) + indent + indent
 						+ dft.format(cloudlet.getExecStartTime()) + indent + indent + indent
-						+ dft.format(cloudlet.getFinishTime()) + indent + indent + cloudlet.getStartTime() + indent
-						+ indent + indent + (cloudlet.getDeadline() == Double.MAX_VALUE ? "Not limited"
-								: dft.format(cloudlet.getDeadline())));
+						+ dft.format(cloudlet.getFinishTime()) + indent + indent 
+						+ cloudlet.getStartTime() + indent + indent + indent 
+						+ (cloudlet.getDeadline() == Double.MAX_VALUE ? "Not limited": dft.format(cloudlet.getDeadline())));
 			}
 		}
 	}
@@ -495,7 +500,7 @@ public class RealtimeHelper {
 
 		List<Host> hosts = datacenter.getHostList();
 		Log.printLine("Received " + received_cloudlets.size() + " cloudlets of " + cloudlets.size()+ " submitted cloudlets");
-		printCloudletList(received_cloudlets, hosts);
+		printCloudletList(received_cloudlets, hosts, vms);
 		
 		int numberOfHosts = hosts.size();
 		int numberOfVms = vms.size();
@@ -513,11 +518,12 @@ public class RealtimeHelper {
 		RealtimeCloudlet rc=null;
 		for(int i=0; i<received_cloudlets.size(); i++) {
 			rc = (RealtimeCloudlet) received_cloudlets.get(i);
-			if(rc.getFinishTime()<rc.getDeadline())
-				numInstructions+=received_cloudlets.get(i).getCloudletLength();
+			//if(rc.getFinishTime()<=rc.getDeadline())
+				numInstructions+=rc.getCloudletLength();
 		}
-		double overall_sla=numInstructions/(energy*3600*1000);
-
+		double overall_sla=numInstructions/datacenter.getPower();
+		//System.out.println("#Instr="+numInstructions+", #Energy="+energy+", fitness="+overall_sla);
+		
 		double[] ga_result = new double[4];
 		ga_result[0]=tdr;
 		ga_result[1]=dmr;

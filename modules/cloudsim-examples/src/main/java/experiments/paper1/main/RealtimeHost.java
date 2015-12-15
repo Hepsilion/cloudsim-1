@@ -40,7 +40,6 @@ public class RealtimeHost extends PowerHostUtilizationHistory {
     @Override
 	public double updateVmsProcessing(double currentTime) {
 		double time = super.updateVmsProcessing(currentTime);
-		//isDvfsActivatedOnHost();
 		return time;
     }
 }
