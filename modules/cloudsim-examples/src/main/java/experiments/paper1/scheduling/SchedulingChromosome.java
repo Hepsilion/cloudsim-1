@@ -1,25 +1,25 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 
-public class ChromTaskScheduling extends Chromosome {
-	protected GeneTaskScheduling[] genes;
+public class SchedulingChromosome extends Chromosome {
+	protected SchedulingGene[] genes;
 	protected double tdr;
 	protected double dmr;
 	protected double energy;
 	
-	public ChromTaskScheduling(int numTasks) {
-		genes = new GeneTaskScheduling[numTasks];
+	public SchedulingChromosome(int numTasks) {
+		genes = new SchedulingGene[numTasks];
 	}
 
-	public GeneTaskScheduling[] getGenes() {
+	public SchedulingGene[] getGenes() {
 		return genes;
 	}
 	
-	public GeneTaskScheduling getGene(int index) {
+	public SchedulingGene getGene(int index) {
 		return genes[index];
 	}
 
-	public void setGene(GeneTaskScheduling gene, int index) {
+	public void setGene(SchedulingGene gene, int index) {
 		genes[index] = gene;
 	}
 	
@@ -38,10 +38,9 @@ public class ChromTaskScheduling extends Chromosome {
 			return -1;
 	}
 
-
 	@Override
 	public void copyChromGenes(Chromosome chromosome) {
-		ChromTaskScheduling chromTaskScheduling = (ChromTaskScheduling) chromosome;
+		SchedulingChromosome chromTaskScheduling = (SchedulingChromosome) chromosome;
 		for(int i=0; i<genes.length; i++) {
 			this.genes[i] = chromTaskScheduling.genes[i];
 		}
@@ -73,22 +72,13 @@ public class ChromTaskScheduling extends Chromosome {
 	@Override
 	public int getNumGenesInCommon(Chromosome chromosome) {
 		int numGenesInCommon = 0;
-		ChromTaskScheduling chromTaskScheduling = (ChromTaskScheduling) chromosome;
+		SchedulingChromosome chromTaskScheduling = (SchedulingChromosome) chromosome;
 		for(int i=0; i<genes.length; i++) {
 			if(this.genes[i].equals(chromTaskScheduling.genes[i])) {
 				numGenesInCommon++;
 			}
 		}
 		return numGenesInCommon;
-	}
-	
-	public Domination dominates(Chromosome chrom) {
-		if(fitness > chrom.fitness)
-			return Domination.Ture;
-		else if(fitness < chrom.fitness)
-			return Domination.False;
-		else
-			return Domination.NoDomination;
 	}
 	
 	public String toString() {

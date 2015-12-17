@@ -1,4 +1,4 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 /**
  * Chromosome is the abstract base class for all chromosomes. It defines each chromosome's

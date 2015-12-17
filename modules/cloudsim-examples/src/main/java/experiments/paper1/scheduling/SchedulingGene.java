@@ -1,10 +1,10 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
-public class GeneTaskScheduling {
+public class SchedulingGene {
 	private int vm;
 	private int host;
 
-	public GeneTaskScheduling(int vm, int host) {
+	public SchedulingGene(int vm, int host) {
 		this.vm = vm;
 		this.host = host;
 	}
@@ -25,10 +25,9 @@ public class GeneTaskScheduling {
 		this.host = host;
 	}
 
-
 	@Override
 	public boolean equals(Object obj) {
-		GeneTaskScheduling another = (GeneTaskScheduling) obj;
+		SchedulingGene another = (SchedulingGene) obj;
 		if (this.vm == another.getVm() && this.host == another.getHost())
 			return true;
 		else

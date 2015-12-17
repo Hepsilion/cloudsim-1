@@ -18,16 +18,16 @@ public class RealtimeConstants {
 	//Dvfs Algorithm
 	//public final static String VmAllocationPolicy = "dvfs_my";//最小容量，最小剩余容量
 	//public final static String VmAllocationPolicy = "dvfs_base1";//当前频率下能耗增加最少
-	//public final static String VmAllocationPolicy = "dvfs_base2";//最大频率下能耗增加最少
+	public final static String VmAllocationPolicy = "dvfs_base2";//最大频率下能耗增加最少
 	//public final static String VmAllocationPolicy = "dvfs_muh";
 	//public final static String VmAllocationPolicy = "dvfs_SimpleWatt";
 	
 	//Genetic Algorithm
-    public final static String VmAllocationPolicy = "ga";
+    //public final static String VmAllocationPolicy = "ga";
 	
 	public final static String OutputFolder = "output";
 	
-	public final static int DefautFrequency = 5;
+	public final static int DefautFrequency = 1;
 	public final static boolean ENABLE_DVFS = true;
 	public final static boolean ENABLE_ONOFF = true;
 	
@@ -39,7 +39,7 @@ public class RealtimeConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;//10 * 
 	public final static int CLOUDLET_PES	= 1;
 	
-	public final static int NUMBER_OF_CLOUDLETS = 50;
+	public final static int NUMBER_OF_CLOUDLETS = 100;
 	public final static int NUMBER_OF_HOSTS = 50;
 	
 	/*
@@ -66,7 +66,7 @@ public class RealtimeConstants {
 	 *   We increase the memory size to enable over-subscription (x4)
 	 */
 	public final static int HOST_TYPES	 = 2;
-	public final static int[] HOST_MIPS	 = { 1860, 2660 };//{1860, 1860};//
+	public final static int[] HOST_MIPS	 = { 1860, 2660 };//{1860, 2660};//
 	public final static int[] HOST_PES	 = { 1, 1 };
 	public final static int[] HOST_RAM	 = {100000000, 100000000};//{ 4096, 4096 };
 	public final static int HOST_BW		 = 100000000; // 1 Gbit/s

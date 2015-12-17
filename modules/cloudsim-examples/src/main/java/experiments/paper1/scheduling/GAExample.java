@@ -1,4 +1,4 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class GAExample {
     		
     		Log.printLine("Starting GAExample...");
     		try {
-    			GATaskScheduling example = new GATaskScheduling(
+    			SchedulingGA example = new SchedulingGA(
     					temp_numCloudlets, 							// chromosomeDim
     					RealtimeConstants.POPULATION_DIM, 			// populationDim
     					RealtimeConstants.CROSSOVER_PROB, 			// crossoverProb

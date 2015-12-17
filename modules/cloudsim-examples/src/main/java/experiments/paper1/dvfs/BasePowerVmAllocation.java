@@ -24,7 +24,7 @@ public class BasePowerVmAllocation extends PowerVmAllocationPolicyAbstract{
 
 		for (PowerHost host : this.<PowerHost> getHostList()) {
 			if (host.isSuitableForVm(vm)) {
-//				if (getUtilizationOfCpuMips(host) != 0 && isHostOverUtilizedAfterAllocation(host, vm)) {
+//				if (getUtilizationOfCpuMips(host) != 0 /*&& isHostOverUtilizedAfterAllocation(host, vm)*/) {
 //					continue;
 //				}
 

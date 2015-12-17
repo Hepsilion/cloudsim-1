@@ -1,4 +1,4 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 import java.util.List;
 import java.util.Map;
@@ -53,11 +53,11 @@ public class GADatacenter extends PowerDatacenter {
             vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler().getAllocatedMipsForVm(vm));
             
             //TODO 添加 虚拟机创建成功之后，调节主机频率
-//          RealtimeHost h = (RealtimeHost) vm.getHost();
 //          h.isDvfsActivatedOnHost();
             Log.printLine("Vm "+vm.getId()+" is created.");
-            for(PowerHost host : this.<PowerHost>getHostList())
+            for(RealtimeHost host : this.<RealtimeHost>getHostList()){
             	host.isDvfsActivatedOnHost();
+            }
             
             Log.printLine(this.getName()+" compute resource usage and energy after VM#"+vm.getId()+" is created");
             this.updateCloudletProcessing();//TODO 修改以支持节约仿真时间
@@ -74,10 +74,10 @@ public class GADatacenter extends PowerDatacenter {
         Log.printLine("Vm "+vm.getId()+" is destroyed.");
         
         //TODO 添加 虚拟机销毁成功之后，调节主机频率
-//      RealtimeHost h = (RealtimeHost) vm.getHost();
 //      h.isDvfsActivatedOnHost();
-        for(PowerHost host : this.<PowerHost>getHostList())
-        	host.isDvfsActivatedOnHost();
+      for(RealtimeHost host : this.<RealtimeHost>getHostList()){
+      	host.isDvfsActivatedOnHost();
+      }
 		
 		Log.printLine(this.getName()+" compute resource usage and energy after VM#"+vm.getId()+" is destroyed");
 		this.updateCloudletProcessing();//TODO 修改以支持节约仿真时间

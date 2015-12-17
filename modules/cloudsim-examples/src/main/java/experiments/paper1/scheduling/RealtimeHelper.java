@@ -1,4 +1,4 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,9 +32,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.VmStateHistoryEntry;
+import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
-import org.cloudbus.cloudsim.power.PowerHostUtilizationHistory;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyDVFSMinimumUsedHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationAbstract;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationInterQuartileRange;
@@ -48,24 +48,15 @@ import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelation;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumMigrationTime;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumUtilization;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyRandomSelection;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.util.MathUtil;
 import org.cloudbus.cloudsim.xml.DvfsDatas;
 
-import experiments.paper1.dvfs.DvfsBase1PowerVmAllocation;
-import experiments.paper1.dvfs.DvfsBase2PowerVmAllocation;
-import experiments.paper1.main.twoEncode.ChromTaskScheduling;
-import experiments.paper1.main.twoEncode.Chromosome;
-import experiments.paper1.main.twoEncode.GaInitialVmAllocationPolicy;
-import experiments.paper1.main.twoEncode.GaPowerVmAllocationPolicy;
-
-
 public class RealtimeHelper {
 	private static Random rand = new Random(RealtimeConstants.RANDOM_SEED);
-
 	/**
 	 * Creates the broker.
 	 * @return the datacenter broker
@@ -91,28 +82,29 @@ public class RealtimeHelper {
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
 		// length, start time and deadline
-		int[] length = getRandomIntegers(num_cloudlets, RealtimeConstants.CLOUDLET_LENGTH, RealtimeConstants.CLOUDLET_LENGTH*10);
-		int[] startTime = getRandomIntegers(num_cloudlets, 0, 10000);
+		int[] length = getRandomIntegers(num_cloudlets, RealtimeConstants.CLOUDLET_LENGTH/10, RealtimeConstants.CLOUDLET_LENGTH);
+		int[] startTime = getRandomIntegers(num_cloudlets, 0, 3600*24);
+		int[] execution_time = getRandomIntegers(num_cloudlets, 3600*14,  3600*16);
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		RealtimeCloudlet cloudlet= null;
 		for (int i = 0; i < num_cloudlets; i++) {
 			cloudlet = new RealtimeCloudlet(
 					i, 
-					length[i],
+					(long)(VmList.getById(vmlist, i).getMaxMips()*execution_time[i]),//length[i],
 					RealtimeConstants.CLOUDLET_PES,
 					fileSize, 
 					outputSize, 
 					utilizationModel, 
 					utilizationModel, 
 					utilizationModel, 
-					startTime[i],
-					startTime[i]+length[i]/500+length[i]/RealtimeConstants.CLOUDLET_LENGTH*50);
+					startTime[i]-100,
+					startTime[i]+execution_time[i]);//startTime[i]+length[i]/VmList.getById(vmlist, i).getMaxMips()+50);
 			// setting the owner of these Cloudlets
 			cloudlet.setVmId(i);
 			cloudlet.setUserId(userId);
 			cloudlets.add(cloudlet);
-			((RealtimeVm)(vmlist.get(i))).setCloudlet(cloudlet);
+			((RealtimeVm)VmList.getById(vmlist, i)).setCloudlet(cloudlet);
 			Log.printLine("MyCloudlet #" + cloudlet.getCloudletId() + "   $Length:" + cloudlet.getCloudletLength() + ";$request start time:" + cloudlet.getStartTime() + ";$request deadline:" + cloudlet.getDeadline());
 		}
 
@@ -120,21 +112,21 @@ public class RealtimeHelper {
 	}
 
 	public static int[] getRandomHosts(int length, int min, int max) {
-		Random rand = new Random(new Random().nextInt());
+		Random random = new Random(new Random().nextInt());
+		//System.out.println("Random Hosts:");
 		int[] numbers = new int[length];
-		// System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
-			numbers[i] = rand.nextInt(max)%(max-min+1)+min;
-			// System.out.print(numbers[i]+" ");
+			numbers[i] = random.nextInt(max)%(max-min+1)+min;
+			//System.out.print(numbers[i]+" ");
 		}
-		// System.out.println();
+		//System.out.println();
 		return numbers;
 	}
 	
 	public static int[] getRandomFrequencies(int length, int min, int max) {
 		Random rand = new Random(new Random().nextInt());
+		//System.out.println("Random Frequencies:");
 		int[] numbers = new int[length];
-		//System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
 			numbers[i] = rand.nextInt(max)%(max-min+1)+min;
 			//System.out.print(numbers[i]+" ");
@@ -172,56 +164,34 @@ public class RealtimeHelper {
 	 */
 	public static List<Vm> createVmList(int brokerId, int vmsNumber, Chromosome chrom) {
 		List<Vm> vms = new ArrayList<Vm>();
-		int[] num=new int[4];
+		int[] MIPSs = getRandomMIPSs(vmsNumber, 200, 1000);//200 2000
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
-			num[vmType]++;
-			int hostId = ((ChromTaskScheduling) chrom).getHostByVm(i);
+			int hostId = ((SchedulingChromosome)chrom).getHostByVm(i);
 			vms.add(new RealtimeVm(
 					i, 
 					brokerId, 
-					RealtimeConstants.VM_MIPS[vmType], 
+					MIPSs[i],//RealtimeConstants.VM_MIPS[vmType], //
 					RealtimeConstants.VM_PES[vmType],
 					RealtimeConstants.VM_RAM[vmType], 
 					RealtimeConstants.VM_BW, 
 					RealtimeConstants.VM_SIZE, 
 					1, 
 					"Xen",
-					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
 					new CloudletSchedulerSpaceShared(),
 					RealtimeConstants.SCHEDULING_INTERVAL, 
-					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1):hostId
-			));
+					hostId==-1 ? getRandomInteger(0, RealtimeConstants.NUMBER_OF_HOSTS-1):hostId));
 		}
-		System.out.println("Num of VM:");
-		for(int i=0; i<4; i++)
-			System.out.println(num[i]);
 		return vms;
 	}
 
-	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
-		List<Vm> vms = new ArrayList<Vm>();
-		int[] num=new int[4];
-		for (int i = 0; i < vmsNumber; i++) {
-			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
-			num[vmType]++;
-			vms.add(new RealtimeVm(
-					i, 
-					brokerId, 
-					RealtimeConstants.VM_MIPS[vmType], 
-					RealtimeConstants.VM_PES[vmType],
-					RealtimeConstants.VM_RAM[vmType], 
-					RealtimeConstants.VM_BW, 
-					RealtimeConstants.VM_SIZE, 
-					1, 
-					"Xen",
-					new CloudletSchedulerSpaceShared(),
-					//new CloudletSchedulerDynamicWorkload(RealtimeConstants.VM_MIPS[vmType],RealtimeConstants.VM_PES[vmType]),
-					RealtimeConstants.SCHEDULING_INTERVAL));
+	public static int[] getRandomMIPSs(int vmNum, int min, int max) {
+		Random rand = new Random(200);
+		int[] MIPSs = new int[vmNum];
+		for (int i = 0; i < vmNum; i++) {
+			MIPSs[i] = rand.nextInt(max)%(max-min+1)+min;
 		}
-		for(int i=0; i<4; i++)
-			System.out.println(num[i]);
-		return vms;
+		return MIPSs;
 	}
 
 	/**
@@ -246,7 +216,7 @@ public class RealtimeHelper {
 		govs.put(0, "My"); // CPU 0 use My(UserSpace、Performance、Conservative、OnDemand) Dvfs mode 
 
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
-		PowerHostUtilizationHistory host = null;
+		RealtimeHost host = null;
 		int[] num=new int[2];
 		for (int i = 0; i < hostsNumber; i++) {
 			HashMap<String, Integer> tmp_HM_OnDemand = new HashMap<String, Integer>();
@@ -281,21 +251,21 @@ public class RealtimeHelper {
 						govs.get(j),
 						ConfigDvfs));
 			}
-			host=new PowerHostUtilizationHistory(
+			host=new RealtimeHost(
 					i, 
 					new RamProvisionerSimple(RealtimeConstants.HOST_RAM[hostType]),
 					new BwProvisionerSimple(RealtimeConstants.HOST_BW), 
 					RealtimeConstants.HOST_STORAGE, 
 					peList,
 					new VmSchedulerTimeShared(peList),
-					new PowerModelSpecPower_BAZAR(peList),
+					new PowerModelSpecPower_BAZAR_ME(peList),
 					RealtimeConstants.ENABLE_ONOFF, 
 					RealtimeConstants.ENABLE_DVFS);
 			hostList.add(host);
 		}
-		System.out.println("Num of Host:");
-		for(int i=0; i<2; i++)
-			System.out.println(num[i]);
+//		System.out.println("Num of Host:");
+//		for(int i=0; i<2; i++)
+//			System.out.println(num[i]);
 		return hostList;
 	}
 
@@ -367,36 +337,10 @@ public class RealtimeHelper {
 	protected static VmAllocationPolicy getVmAllocationPolicy(String vmAllocationPolicyName,
 			String vmSelectionPolicyName, String parameterName, List<PowerHost> hostList, Chromosome chrom) {
 		VmAllocationPolicy vmAllocationPolicy = null;
-		PowerVmSelectionPolicy vmSelectionPolicy = null;
-		if (!vmSelectionPolicyName.isEmpty()) {
-			vmSelectionPolicy = getVmSelectionPolicy(vmSelectionPolicyName);
-		}
-		double parameter = 0;
-		if (!parameterName.isEmpty()) {
-			parameter = Double.valueOf(parameterName);
-		}
-		if (vmAllocationPolicyName.equals("iqr")) {
-			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 1);//TODO 我把过载阈值从0.7改成了0.9
-			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationInterQuartileRange(hostList, vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
-		} else if (vmAllocationPolicyName.equals("mad")) {
-			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 0.9);
-			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationMedianAbsoluteDeviation(hostList,vmSelectionPolicy, parameter, fallbackVmSelectionPolicy);
-		} else if (vmAllocationPolicyName.equals("lr")) {
-			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 0.9);
-			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationLocalRegression(hostList, vmSelectionPolicy, parameter, RealtimeConstants.SCHEDULING_INTERVAL, fallbackVmSelectionPolicy);
-		} else if (vmAllocationPolicyName.equals("lrr")) {
-			PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, 0.9);
-			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationLocalRegressionRobust(hostList, vmSelectionPolicy, parameter, RealtimeConstants.SCHEDULING_INTERVAL, fallbackVmSelectionPolicy);
-		} else if (vmAllocationPolicyName.equals("thr")) {
-			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(hostList, vmSelectionPolicy, parameter);
-		} else if(vmAllocationPolicyName.equals("dvfs_muh")) {
-		    vmAllocationPolicy = new PowerVmAllocationPolicyDVFSMinimumUsedHost(hostList);
-		} else if (vmAllocationPolicyName.equals("dvfs_SimpleWatt")) {
-			vmAllocationPolicy = new PowerVmAllocationPolicySimpleWattPerMipsMetric(hostList);
-		} else if (vmAllocationPolicyName.equals("ga")) {
+		if (vmAllocationPolicyName.equals("ga")) {
 			vmAllocationPolicy = new GaPowerVmAllocationPolicy(hostList, chrom);
 		} else if (vmAllocationPolicyName.equals("ga_init")) {
-			vmAllocationPolicy = new GaInitialVmAllocationPolicy(hostList, vmSelectionPolicy, chrom);
+			vmAllocationPolicy = new GaInitialVmAllocationPolicy(hostList, chrom);
 		} else {
 			System.out.println("Unknown VM allocation policy: " + vmAllocationPolicyName);
 			System.exit(0);
@@ -404,37 +348,13 @@ public class RealtimeHelper {
 		return vmAllocationPolicy;
 	}
 
-	/**
-	 * Gets the vm selection policy.
-	 * 
-	 * @param vmSelectionPolicyName
-	 *            the vm selection policy name
-	 * @return the vm selection policy
-	 */
-	protected static PowerVmSelectionPolicy getVmSelectionPolicy(String vmSelectionPolicyName) {
-		PowerVmSelectionPolicy vmSelectionPolicy = null;
-		if (vmSelectionPolicyName.equals("mc")) {
-			vmSelectionPolicy = new PowerVmSelectionPolicyMaximumCorrelation(new PowerVmSelectionPolicyMinimumMigrationTime());
-		} else if (vmSelectionPolicyName.equals("mmt")) {
-			vmSelectionPolicy = new PowerVmSelectionPolicyMinimumMigrationTime();
-		} else if (vmSelectionPolicyName.equals("mu")) {
-			vmSelectionPolicy = new PowerVmSelectionPolicyMinimumUtilization();
-		} else if (vmSelectionPolicyName.equals("rs")) {
-			vmSelectionPolicy = new PowerVmSelectionPolicyRandomSelection();
-		} else {
-			System.out.println("Unknown VM selection policy: " + vmSelectionPolicyName);
-			System.exit(0);
-		}
-		return vmSelectionPolicy;
-	}
-
-	public static void printCloudletList(List<Cloudlet> cloudlets, List<Host> hosts) {
+	public static void printCloudletList(List<Cloudlet> cloudlets, List<Host> hosts, List<Vm>vms) {
 		RealtimeCloudlet cloudlet = null;
 
 		String indent = "\t";
 		Log.printLine("========== OUTPUT ==========");
-		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + indent + "ResourceID" + indent + "VmID" + indent
-				+ "Length" + indent + "CPUTime" + indent + "StartExecTime" + indent + "FinishTime" + indent
+		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + indent + "ResourceID" + indent + "VmID" + indent+"VM MIPS" + indent+ indent
+				+ "Length" + indent + indent + "CPUTime" + indent + "StartExecTime" + indent + "FinishTime" + indent
 				+ "RequestStartTime" + indent + "Deadline");
 
 		DecimalFormat dft = new DecimalFormat("###.##");
@@ -442,13 +362,16 @@ public class RealtimeHelper {
 			cloudlet = (RealtimeCloudlet) cloudlets.get(i);
 			Log.print(indent + cloudlet.getCloudletId());
 			if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
-				Log.printLine(indent + indent + "SUCCESS" + indent + indent + cloudlet.getResourceId() + indent + indent + indent
-						+ cloudlet.getVmId() + indent + indent + cloudlet.getCloudletLength() + indent
+				Log.printLine(indent + indent + "SUCCESS" + indent + indent 
+						+ cloudlet.getResourceId() + indent + indent + indent
+						+ cloudlet.getVmId() + indent + indent 
+						+ VmList.getById(vms, cloudlet.getCloudletId()).getMaxMips() + indent + indent 
+						+ cloudlet.getCloudletLength() + indent + indent
 						+ dft.format(cloudlet.getActualCPUTime()) + indent + indent
 						+ dft.format(cloudlet.getExecStartTime()) + indent + indent + indent
-						+ dft.format(cloudlet.getFinishTime()) + indent + indent + cloudlet.getStartTime() + indent
-						+ indent + indent + (cloudlet.getDeadline() == Double.MAX_VALUE ? "Not limited"
-								: dft.format(cloudlet.getDeadline())));
+						+ dft.format(cloudlet.getFinishTime()) + indent + indent 
+						+ cloudlet.getStartTime() + indent + indent + indent 
+						+ (cloudlet.getDeadline() == Double.MAX_VALUE ? "Not limited": dft.format(cloudlet.getDeadline())));
 			}
 		}
 	}
@@ -485,7 +408,7 @@ public class RealtimeHelper {
 
 		List<Host> hosts = datacenter.getHostList();
 		Log.printLine("Received " + received_cloudlets.size() + " cloudlets of " + cloudlets.size()+ " submitted cloudlets");
-		printCloudletList(received_cloudlets, hosts);
+		printCloudletList(received_cloudlets, hosts, vms);
 		
 		int numberOfHosts = hosts.size();
 		int numberOfVms = vms.size();
@@ -503,11 +426,12 @@ public class RealtimeHelper {
 		RealtimeCloudlet rc=null;
 		for(int i=0; i<received_cloudlets.size(); i++) {
 			rc = (RealtimeCloudlet) received_cloudlets.get(i);
-			if(rc.getFinishTime()<rc.getDeadline())
-				numInstructions+=received_cloudlets.get(i).getCloudletLength();
+			//if(rc.getFinishTime()<=rc.getDeadline())
+				numInstructions+=rc.getCloudletLength();
 		}
-		double overall_sla=numInstructions/(energy*3600*1000);
-
+		double overall_sla=numInstructions/datacenter.getPower();
+		//System.out.println("#Instr="+numInstructions+", #Energy="+energy+", fitness="+overall_sla);
+		
 		double[] ga_result = new double[4];
 		ga_result[0]=tdr;
 		ga_result[1]=dmr;
@@ -650,15 +574,17 @@ public class RealtimeHelper {
 			Log.printLine(String.format("Number of VMs: " + numberOfVms));
 			Log.printLine(String.format("Total simulation time: %.2f sec", totalSimulationTime));
 			Log.printLine(String.format("Energy consumption: %.5f kWh", energy));
+			//System.out.println(String.format("Energy consumption: %.5f kWh", energy));
 			Log.printLine(String.format("Number of VM migrations: %d", numberOfMigrations));
 			Log.printLine(String.format("SLA: %.5f%%", sla * 100));
-			Log.printLine(
-					String.format("SLA perf degradation due to migration: %.2f%%", slaDegradationDueToMigration * 100));
+			Log.printLine(String.format("SLA perf degradation due to migration: %.2f%%", slaDegradationDueToMigration * 100));
 			Log.printLine(String.format("SLA time per active host: %.2f%%", slaTimePerActiveHost * 100));
 			Log.printLine(String.format("Overall SLA violation: %.2f%%", slaOverall * 100));
 			Log.printLine(String.format("Average SLA violation: %.2f%%", slaAverage * 100));
 			Log.printLine(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
+			//System.out.println(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
 			Log.printLine(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));
+			//System.out.println(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));
 			// Log.printLine(String.format("SLA time per VM with migration:
 			// %.2f%%", slaTimePerVmWithMigration * 100));
 			// Log.printLine(String.format("SLA time per VM without migration:

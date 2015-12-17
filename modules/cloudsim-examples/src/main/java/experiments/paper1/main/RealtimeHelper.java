@@ -58,7 +58,7 @@ import org.cloudbus.cloudsim.xml.DvfsDatas;
 import experiments.paper1.dvfs.BasePowerVmAllocation;
 import experiments.paper1.dvfs.DvfsBase1PowerVmAllocation;
 import experiments.paper1.dvfs.DvfsBase2PowerVmAllocation;
-import experiments.paper1.dvfs.MyDvfsPowerVmAllocation;
+import experiments.paper1.dvfs.DvfsPowerVmAllocation;
 import experiments.paper1.ga.ChromTaskScheduling;
 import experiments.paper1.ga.Chromosome;
 import experiments.paper1.ga.GaInitialVmAllocationPolicy;
@@ -199,7 +199,7 @@ public class RealtimeHelper {
 
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
-		int[] MIPSs = getRandomMIPSs(vmsNumber, 200, 2000);
+		int[] MIPSs = getRandomMIPSs(vmsNumber, 200, 1000);
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / RealtimeConstants.VM_TYPES);
 			vms.add(new RealtimeVm(
@@ -396,7 +396,7 @@ public class RealtimeHelper {
 		} else if (vmAllocationPolicyName.equals("base")) {
             vmAllocationPolicy = new BasePowerVmAllocation(hostList);
         } else if (vmAllocationPolicyName.equals("dvfs_my")) {
-            vmAllocationPolicy = new MyDvfsPowerVmAllocation(hostList);
+            vmAllocationPolicy = new DvfsPowerVmAllocation(hostList);
         } else if (vmAllocationPolicyName.equals("dvfs_base1")) {
             vmAllocationPolicy = new DvfsBase1PowerVmAllocation(hostList);
         } else if (vmAllocationPolicyName.equals("dvfs_base2")) {
@@ -666,15 +666,17 @@ public class RealtimeHelper {
 			Log.printLine(String.format("Number of VMs: " + numberOfVms));
 			Log.printLine(String.format("Total simulation time: %.2f sec", totalSimulationTime));
 			Log.printLine(String.format("Energy consumption: %.5f kWh", energy));
+			//System.out.println(String.format("Energy consumption: %.5f kWh", energy));
 			Log.printLine(String.format("Number of VM migrations: %d", numberOfMigrations));
 			Log.printLine(String.format("SLA: %.5f%%", sla * 100));
-			Log.printLine(
-					String.format("SLA perf degradation due to migration: %.2f%%", slaDegradationDueToMigration * 100));
+			Log.printLine(String.format("SLA perf degradation due to migration: %.2f%%", slaDegradationDueToMigration * 100));
 			Log.printLine(String.format("SLA time per active host: %.2f%%", slaTimePerActiveHost * 100));
 			Log.printLine(String.format("Overall SLA violation: %.2f%%", slaOverall * 100));
 			Log.printLine(String.format("Average SLA violation: %.2f%%", slaAverage * 100));
 			Log.printLine(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
+			//System.out.println(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
 			Log.printLine(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));
+			//System.out.println(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));
 			// Log.printLine(String.format("SLA time per VM with migration:
 			// %.2f%%", slaTimePerVmWithMigration * 100));
 			// Log.printLine(String.format("SLA time per VM without migration:

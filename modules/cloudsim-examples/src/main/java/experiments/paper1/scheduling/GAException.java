@@ -1,4 +1,4 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 /**
  * Custom GA exception class

@@ -19,8 +19,8 @@ import org.cloudbus.cloudsim.Pe;
  */
 public class PowerModelSpecPower_BAZAR_ME extends PowerModelSpecPowerDVFS {
     /* Tables power, in relation with CPU Frequency ! tabIdle[f1][f2]....[fn] tabFull[f1][f2]....[fn] */
-    double Tab_Power_idle[] = { 82.75, 82.85, 85.95, 83.10, 83.25 };
-    double Tab_Power_full[] = { 88.77, 92.00, 95.5, 99.45, 103.0 };
+    double Tab_Power_idle[] = { 140, 146, 153, 159, 167 };
+    double Tab_Power_full[] = { 228, 238, 249, 260, 272 };
     List<Pe> peList;
 
     Pe tmp_pe;

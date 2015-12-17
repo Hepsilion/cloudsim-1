@@ -1,4 +1,4 @@
-package experiments.paper1.main.twoEncode;
+package experiments.paper1.scheduling;
 
 import java.util.Date;
 import org.cloudbus.cloudsim.Log;
@@ -302,8 +302,8 @@ public abstract class GA implements Runnable {
 //            }
 //        }
 
-		Chrom1 = new ChromTaskScheduling(chromosomeDim);
-		Chrom2 = new ChromTaskScheduling(chromosomeDim);
+		Chrom1 = new SchedulingChromosome(chromosomeDim);
+		Chrom2 = new SchedulingChromosome(chromosomeDim);
 		do {
 			int indexes[] = { indexParent1, indexParent2 };
 			selectTwoParents(indexes);
@@ -315,21 +315,13 @@ public abstract class GA implements Runnable {
 			
 			// do crossover
 			if (getRandom(1.0) < crossoverProb) {
-				if (this.crossoverType == Crossover.ctOnePoint) {
+				iRandom = getRandom(3);
+				if (iRandom < 1) {
 					doOnePtCrossover(Chrom1, Chrom2);
-				} else if (this.crossoverType == Crossover.ctTwoPoint) {
+				} else if (iRandom < 2) {
 					doTwoPtCrossover(Chrom1, Chrom2);
-				} else if (this.crossoverType == Crossover.ctUniform) {
+				} else {
 					doUniformCrossover(Chrom1, Chrom2);
-				} else if (this.crossoverType == Crossover.ctRoulette) {
-					iRandom = getRandom(3);
-					if (iRandom < 1) {
-						doOnePtCrossover(Chrom1, Chrom2);
-					} else if (iRandom < 2) {
-						doTwoPtCrossover(Chrom1, Chrom2);
-					} else {
-						doUniformCrossover(Chrom1, Chrom2);
-					}
 				}
 
 				this.chromNextGen[iCnt++].copyChromGenes(Chrom1);
@@ -407,7 +399,7 @@ public abstract class GA implements Runnable {
 //				if ((i == this.worstFitnessChromIndex) || (getRandom(1.0) < mutationProb))
 //					doRandomMutation(i);
 //			}
-			if(i!=0 && i!=1) {
+			if(i!=0) {
 				if (getRandom(1.0) < mutationProb)
 					doRandomMutation(i);
 			}
@@ -447,10 +439,10 @@ public abstract class GA implements Runnable {
 	protected double getAvgDeviationAmongChroms() {
 		int devCnt = 0;
 		for (int iGene = 0; iGene < this.chromosomeDim; iGene++) {
-			GeneTaskScheduling bestFitGene = ((ChromTaskScheduling) this.chromosomes[this.bestFitnessChromIndex])
+			SchedulingGene bestFitGene = ((SchedulingChromosome) this.chromosomes[this.bestFitnessChromIndex])
 					.getGene(iGene);
 			for (int i = 0; i < this.populationDim; i++) {
-				GeneTaskScheduling thisGene = ((ChromTaskScheduling) this.chromosomes[i]).getGene(iGene);
+				SchedulingGene thisGene = ((SchedulingChromosome) this.chromosomes[i]).getGene(iGene);
 				if (thisGene.equals(bestFitGene) == false)
 					devCnt++;
 			}
