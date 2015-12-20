@@ -1,4 +1,4 @@
-package scheduling.genetic_algorithm;
+package scheduling.our_approach;
 
 public class SchedulingConstants {
 	public final static boolean ENABLE_OUTPUT = true;

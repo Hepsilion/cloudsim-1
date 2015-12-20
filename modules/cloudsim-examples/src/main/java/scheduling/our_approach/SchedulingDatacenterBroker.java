@@ -1,4 +1,4 @@
-package scheduling.genetic_algorithm;
+package scheduling.our_approach;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package scheduling.genetic_algorithm;
+package scheduling.our_approach;
 
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.power.PowerVm;

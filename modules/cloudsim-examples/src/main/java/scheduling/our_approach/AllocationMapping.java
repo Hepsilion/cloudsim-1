@@ -1,4 +1,4 @@
-package scheduling.genetic_algorithm;
+package scheduling.our_approach;
 
 public class AllocationMapping {
 	private int numVms;

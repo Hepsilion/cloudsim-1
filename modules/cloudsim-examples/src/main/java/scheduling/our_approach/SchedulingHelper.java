@@ -1,4 +1,4 @@
-package scheduling.genetic_algorithm;
+package scheduling.our_approach;
 
 import java.io.File;
 import java.io.FileNotFoundException;
