@@ -11,14 +11,14 @@ public class RealtimeConstants {
 	public final static boolean OUTPUT_TO_FILE = true;
 
 	//Base Algorithm
-	//public final static String VmAllocationPolicy = "base";//最大频率下，功耗增加最少
+	public final static String VmAllocationPolicy = "base";//最大频率下，功耗增加最少
 	public final static String VmSelectionPolicy = "mc";
 	public final static String Parameter = "1.5";
 		
 	//Dvfs Algorithm
 	//public final static String VmAllocationPolicy = "dvfs_my";//最小容量，最小剩余容量
 	//public final static String VmAllocationPolicy = "dvfs_base1";//当前频率下能耗增加最少
-	public final static String VmAllocationPolicy = "dvfs_base2";//最大频率下能耗增加最少
+	//public final static String VmAllocationPolicy = "dvfs_base2";//最大频率下能耗增加最少
 	//public final static String VmAllocationPolicy = "dvfs_muh";
 	//public final static String VmAllocationPolicy = "dvfs_SimpleWatt";
 	
@@ -27,8 +27,8 @@ public class RealtimeConstants {
 	
 	public final static String OutputFolder = "output";
 	
-	public final static int DefautFrequency = 1;
-	public final static boolean ENABLE_DVFS = true;
+	public final static int DefautFrequency = 5;
+	public final static boolean ENABLE_DVFS = false;
 	public final static boolean ENABLE_ONOFF = true;
 	
 	public final static boolean OUTPUT_CSV    = false;

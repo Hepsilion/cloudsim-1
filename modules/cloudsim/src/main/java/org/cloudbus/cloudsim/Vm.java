@@ -633,4 +633,10 @@ public class Vm {
 	        sizeHasBeenModified = SizeHasBeenModified_;
 	    }
 
+		@Override
+		public boolean equals(Object obj) {
+			Vm vm = (Vm) obj;
+			return this.getId()==vm.getId();
+		}
+
 }

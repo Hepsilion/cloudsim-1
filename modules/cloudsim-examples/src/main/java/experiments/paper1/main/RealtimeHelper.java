@@ -522,7 +522,7 @@ public class RealtimeHelper {
 				numInstructions+=rc.getCloudletLength();
 		}
 		double overall_sla=numInstructions/datacenter.getPower();
-		//System.out.println("#Instr="+numInstructions+", #Energy="+energy+", fitness="+overall_sla);
+		System.out.println("#Instr="+numInstructions+", #Energy="+energy+", fitness="+overall_sla);
 		
 		double[] ga_result = new double[4];
 		ga_result[0]=tdr;

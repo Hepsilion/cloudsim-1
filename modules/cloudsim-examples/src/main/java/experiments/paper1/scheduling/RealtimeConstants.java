@@ -39,7 +39,7 @@ public class RealtimeConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;//10 * 
 	public final static int CLOUDLET_PES	= 1;
 	
-	public final static int NUMBER_OF_CLOUDLETS = 50;
+	public final static int NUMBER_OF_CLOUDLETS = 150;
 	public final static int NUMBER_OF_HOSTS = 50;
 	
 	/*
@@ -88,7 +88,7 @@ public class RealtimeConstants {
 	public final static int numPrelimRuns = 0;//20
     public final static int maxPrelimGenerations = 2;
     
-    public final static int MAX_GENERATIONS = 20;//5
+    public final static int MAX_GENERATIONS = 50;//5
 	
 	public final static boolean COMPUTE_STATISTICS = false;
 }
