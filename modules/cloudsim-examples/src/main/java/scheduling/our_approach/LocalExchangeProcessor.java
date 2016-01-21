@@ -14,13 +14,15 @@ import org.cloudbus.cloudsim.power.lists.PowerVmList;
 public class LocalExchangeProcessor{
 	AllocationMapping overallMapping;
 	List<Vm> allVms;
+	int num_all_cloudlets;
 	List<Cloudlet> cloudlets;
 	List<PowerHost> hostList;
 	List<Vm> vmList;
 	
-	public LocalExchangeProcessor(List<Vm> allVms, AllocationMapping mapping) {
+	public LocalExchangeProcessor(List<Vm> allVms, int num_all_cloudlets, AllocationMapping mapping) {
 		this.overallMapping = mapping;
 		this.allVms = allVms;
+		this.num_all_cloudlets = num_all_cloudlets;
 		this.cloudlets = new ArrayList<Cloudlet>();
 		this.hostList = new ArrayList<PowerHost>();
 		this.vmList = new ArrayList<Vm>();
@@ -134,16 +136,18 @@ public class LocalExchangeProcessor{
 			super();
 			this.host1 = host1;
 			this.host2 = host2;
-			mapping = new AllocationMapping(SchedulingConstants.NUMBER_OF_CLOUDLETS);
+			mapping = new AllocationMapping(num_all_cloudlets);
 		}
 		
 		@Override
-		public void run() {		
+		public void run() {
+			int host1Id = host1.getHost().getId();
+			int host2Id = host2.getHost().getId();
 			for(Cloudlet c1 : host1.getCloudlets()) {
-				this.mapping.setHostOfVm(c1.getCloudletId(), host1.getHost().getId());
+				this.mapping.setHostOfVm(c1.getCloudletId(), host1Id);
 			}
 			for(Cloudlet c2 : host2.getCloudlets()) {
-				this.mapping.setHostOfVm(c2.getCloudletId(), host2.getHost().getId());
+				this.mapping.setHostOfVm(c2.getCloudletId(), host2Id);
 			}
 			SchedulingHelper.simulation(cloudlets, hostList, vmList, mapping, SchedulingConstants.normal_vmAllocationPolicy);
 		}

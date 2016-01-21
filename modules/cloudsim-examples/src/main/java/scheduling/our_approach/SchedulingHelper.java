@@ -69,20 +69,20 @@ public class SchedulingHelper {
 				cloudlets = SchedulingHelper.createSchedulingCloudlet(brokerId, vms, mapping.getNumVms());
 				hosts = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
 				
-				List<Vm> t_vms = new ArrayList<Vm>();
-				List<Cloudlet> t_cls = new ArrayList<Cloudlet>();
+				List<Vm> remove_vms = new ArrayList<Vm>();
+				List<Cloudlet> remove_cloudlets = new ArrayList<Cloudlet>();
 				for(Vm vm : vms) {
 					if(!vmlist.contains(vm)) {
-						t_vms.add(vm);
+						remove_vms.add(vm);
 					}
 				}
-				vms.removeAll(t_vms);
+				vms.removeAll(remove_vms);
 				for(Cloudlet cl : cloudlets) {
 					if(!cloudletList.contains(cl)){
-						t_cls.add(cl);
+						remove_cloudlets.add(cl);
 					}
 				}
-				cloudlets.removeAll(t_cls);
+				cloudlets.removeAll(remove_cloudlets);
 			} 
 			
 			PowerDatacenter datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", SchedulingDatacenter.class, hosts, vmAllocationPolicy, mapping);
@@ -324,8 +324,8 @@ public class SchedulingHelper {
 		return cloudletList;
 	}
 	
-	public static void getOrderedCloudletOnSchedulingHost(AllocationMapping mapping, SchedulingHost[] hosts, List<Cloudlet> cloudletList) {
-		for(int i=0; i<SchedulingConstants.NUMBER_OF_CLOUDLETS; i++) {
+	public static void getOrderedCloudletOnSchedulingHost(AllocationMapping mapping, SchedulingHost[] hosts, List<Cloudlet> cloudletList, int num_all_cloudlets) {
+		for(int i=0; i<num_all_cloudlets; i++) {
 			int hostId = mapping.getHostOfVm(i);
 			if(hostId!=-1)
 				hosts[hostId].addCloudlet((SchedulingCloudlet)CloudletList.getById(cloudletList, i));
@@ -422,6 +422,12 @@ public class SchedulingHelper {
 		Log.setOutput(originOutput);
 	}
 	
+	/**
+	 * Ouput <b>message</b> to <b>result_output</b>, then restore outputstream to <b>originOutput</b>
+	 * @param originOutput
+	 * @param result_output
+	 * @param message
+	 */
 	public static void outputToResultFile(OutputStream originOutput, OutputStream result_output, String message) {
 		Log.setOutput(result_output);
 		Log.printLine(message);
@@ -446,16 +452,15 @@ public class SchedulingHelper {
 //			else
 //				declined_cloudlet_num++;
 		}
-		double fitness=numInstructions/datacenter.getPower();
+		double fitness=1.0*numInstructions/datacenter.getPower();
 		if(cloudlets.size()>0) {
-			fitness *= (received_cloudlets.size()/cloudlets.size());
+			fitness = fitness*Math.pow(received_cloudlets.size()/cloudlets.size(), 3);
 		}
 		//double fitness = received_cloudlets.size()/(datacenter.getPower()/1000/3600);
 		mapping.setTask_acceptance_rate(acceptance_rate);
 		mapping.setEnergy(datacenter.getPower());
 		mapping.setFitness(fitness);
 		mapping.setNumInstruction(numInstructions);
-		
 		
 		Helper.printResults(datacenter, vms, lastClock, null, outputInCsv, SchedulingConstants.OutputFolder);
 		Log.setDisabled(false);

@@ -19,17 +19,20 @@ public class OverallExchangeProcessor {
 	List<PowerHost> hostList;
 	List<Vm> vmList;
 	
+	int num_all_cloudlets;
+	
 	List<Cloudlet> tempCloudlets = null;
 	
 	OutputStream result_output = null;
 	OutputStream mediate_result_output;
 	OutputStream originOutput;
 	
-	public OverallExchangeProcessor(int id, AllocationMapping overallMapping, List<PowerHost> hostList, List<Cloudlet> cloudletList, List<Vm> vmList, OutputStream result_output, OutputStream mediate_result_output, OutputStream originOutput) {
+	public OverallExchangeProcessor(int id, AllocationMapping overallMapping, List<PowerHost> hostList, List<Cloudlet> cloudletList, List<Vm> vmList, int num_all_cloudlets, OutputStream result_output, OutputStream mediate_result_output, OutputStream originOutput) {
 		this.id = id;
+		this.num_all_cloudlets = num_all_cloudlets;
 		this.overallMapping = overallMapping;
-		localMapping = new AllocationMapping(SchedulingConstants.NUMBER_OF_CLOUDLETS);
-		for(int i=0; i<SchedulingConstants.NUMBER_OF_CLOUDLETS; i++) {
+		localMapping = new AllocationMapping(this.num_all_cloudlets);
+		for(int i=0; i<this.num_all_cloudlets; i++) {
 			localMapping.setHostOfVm(i, overallMapping.getHostOfVm(i));
 		}
 		
@@ -53,10 +56,10 @@ public class OverallExchangeProcessor {
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-			SchedulingHelper.getOrderedCloudletOnSchedulingHost(this.localMapping, hosts, tempCloudlets);
+			SchedulingHelper.getOrderedCloudletOnSchedulingHost(this.localMapping, hosts, tempCloudlets, num_all_cloudlets);
 			int num[] = SchedulingHelper.getRandomPermitation(SchedulingConstants.NUMBER_OF_HOSTS);
 			for(int i=0; i<SchedulingConstants.NUMBER_OF_HOSTS;) {
-				new LocalExchangeProcessor(vmList, this.localMapping).doExchange(hosts[num[i++]], hosts[num[i++]], this.mediate_result_output, this.originOutput);
+				new LocalExchangeProcessor(vmList, num_all_cloudlets, this.localMapping).doExchange(hosts[num[i++]], hosts[num[i++]], this.mediate_result_output, this.originOutput);
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);

@@ -18,12 +18,12 @@ public class SchedulingConstants {
 	public final static boolean ENABLE_ONOFF = true;
 	
 	public final static int NUMBER_OF_CLOUDLETS = 100;
-	public final static int NUMBER_OF_HOSTS = 50;
+	public final static int NUMBER_OF_HOSTS = 40;
 	
-	public final static int NUMBER_OF_ITERATIONS = 5;
+	public final static int NUMBER_OF_ITERATIONS = 3;
 	public final static int NUMBER_OF_PROCESSORS = 20;
 	public final static int NUMBER_OF_ITERATION_PER_PROCESSOR = 5;
-	
+	public final static int NUMBER_OF_CASE = 1;
 	
 	public final static double SCHEDULING_INTERVAL = 1;
 	public final static double SIMULATION_LIMIT = 24 * 60 * 60 * 2;
@@ -39,10 +39,9 @@ public class SchedulingConstants {
 	 *   Small Instance: 1 EC2 Compute Unit, 1.7 GB
 	 *   Micro Instance: 0.5 EC2 Compute Unit, 0.633 GB
 	 *   We decrease the memory size two times to enable oversubscription
-	 *
 	 */
 	public final static int VM_TYPES	= 4;
-	public final static int[] VM_MIPS	= {250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500};//{ 2500, 2000, 1000, 500 };//{ 500, 500, 500, 500 };//
+	//public final static int[] VM_MIPS	= {250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500};//{ 2500, 2000, 1000, 500 };//{ 500, 500, 500, 500 };//
 	public final static int[] VM_PES	= { 1, 1, 1, 1 };
 	public final static int[] VM_RAM	= { 870,  1740, 1740, 613 };
 	public final static int VM_BW		= 100000; // 100 Mbit/s
