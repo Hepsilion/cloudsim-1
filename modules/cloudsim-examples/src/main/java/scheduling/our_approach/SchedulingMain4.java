@@ -12,7 +12,7 @@ import org.cloudbus.cloudsim.power.PowerHost;
 public class SchedulingMain4 {
 	public static void main(String[] args) {
 		for(int ca=0; ca<SchedulingConstants.NUMBER_OF_CASE; ca++){
-			int num_all_cloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + ca*15;
+			int num_all_cloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + ca*10;
 			
 			SchedulingHelper.initOutput(SchedulingConstants.log_file+num_all_cloudlets, SchedulingConstants.result_file+num_all_cloudlets, SchedulingConstants.result_temp_file+num_all_cloudlets);
 			OutputStream result_output = SchedulingHelper.getOutputStream(SchedulingConstants.result_file+num_all_cloudlets);

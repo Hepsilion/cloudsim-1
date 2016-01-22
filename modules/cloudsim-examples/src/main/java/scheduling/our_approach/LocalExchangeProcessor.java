@@ -91,7 +91,14 @@ public class LocalExchangeProcessor{
 		}
 	}
 	
-	private void generateOffSpring(SchedulingHost host1, SchedulingHost host2, int kind) {
+	/**
+	 * select the max intersect cloudlet on each host
+	 * 
+	 * @param host1
+	 * @param host2
+	 * @param kind
+	 */
+	private void generateOffSpring1(SchedulingHost host1, SchedulingHost host2, int kind) {
 		//System.out.println("A----B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
 		if(kind==1) {
 			//just keep the orginal parents
@@ -115,6 +122,49 @@ public class LocalExchangeProcessor{
 			//exchange cloudlet between host1 and host2
 			SchedulingCloudlet c41 = host1.getMaxIntersectCloudletOnHost();
 			SchedulingCloudlet c42 = host2.getMaxIntersectCloudletOnHost();
+			if(c41!=null){
+				host1.delCloudlet(c41);
+				host2.addCloudlet(c41);
+			}
+			if(c42!=null) {
+				host2.delCloudlet(c42);
+				host1.addCloudlet(c42);
+			}
+			//System.out.println("A<-->B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
+		}
+	}
+	
+	/**
+	 * Select the min intersect cloudlet on each host
+	 * 
+	 * @param host1
+	 * @param host2
+	 * @param kind
+	 */
+	private void generateOffSpring(SchedulingHost host1, SchedulingHost host2, int kind) {
+		//System.out.println("A----B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
+		if(kind==1) {
+			//just keep the orginal parents
+		}else if(kind==2) {
+			//transfer a cloudlet from host1 to host2
+			SchedulingCloudlet c2 = host1.getMinIntersectCloudletOnHost();
+			if(c2!=null) {
+				host1.delCloudlet(c2);
+				host2.addCloudlet(c2);
+			}
+			//System.out.println("A--->B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
+		}else if(kind==3) {
+			//transfer a cloudlet from host2 to host1
+			SchedulingCloudlet c3 = host2.getMinIntersectCloudletOnHost();
+			if(c3!=null) {
+				host2.delCloudlet(c3);
+				host1.addCloudlet(c3);
+			}
+			//System.out.println("A<---B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
+		}else if(kind==4) {
+			//exchange cloudlet between host1 and host2
+			SchedulingCloudlet c41 = host1.getMinIntersectCloudletOnHost();
+			SchedulingCloudlet c42 = host2.getMinIntersectCloudletOnHost();
 			if(c41!=null){
 				host1.delCloudlet(c41);
 				host2.addCloudlet(c41);

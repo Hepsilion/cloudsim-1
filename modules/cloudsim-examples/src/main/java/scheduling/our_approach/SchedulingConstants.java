@@ -18,12 +18,12 @@ public class SchedulingConstants {
 	public final static boolean ENABLE_ONOFF = true;
 	
 	public final static int NUMBER_OF_CLOUDLETS = 100;
-	public final static int NUMBER_OF_HOSTS = 40;
+	public final static int NUMBER_OF_HOSTS = 50;
 	
-	public final static int NUMBER_OF_ITERATIONS = 3;
+	public final static int NUMBER_OF_ITERATIONS = 5;
 	public final static int NUMBER_OF_PROCESSORS = 20;
 	public final static int NUMBER_OF_ITERATION_PER_PROCESSOR = 5;
-	public final static int NUMBER_OF_CASE = 1;
+	public final static int NUMBER_OF_CASE = 25;
 	
 	public final static double SCHEDULING_INTERVAL = 1;
 	public final static double SIMULATION_LIMIT = 24 * 60 * 60 * 2;

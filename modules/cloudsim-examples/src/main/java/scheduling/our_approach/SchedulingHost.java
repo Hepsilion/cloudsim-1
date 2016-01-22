@@ -50,6 +50,30 @@ public class SchedulingHost {
 		return cloudlet;
 	}
 	
+	public SchedulingCloudlet getMinIntersectCloudletOnHost() {
+		SchedulingCloudlet cloudlet = null;
+		double minIntersectionTime = Double.MAX_VALUE;
+		if(this.getCloudlets().size()==1)
+			return this.getCloudlets().get(0);
+		else{
+			for(SchedulingCloudlet c1 : this.getCloudlets()) {
+				double intersectionTime = 0;
+				for(SchedulingCloudlet c2 : this.getCloudlets()) {
+					if(c1 == c2) {
+						continue;
+					} else {
+						intersectionTime+=c1.getIntersectionTime(c2);
+					}
+				}
+				if(minIntersectionTime>intersectionTime) {
+					minIntersectionTime = intersectionTime;
+					cloudlet = c1;
+				}
+			}
+		}
+		return cloudlet;
+	}
+	
 	public PowerHost getHost() {
 		return host;
 	}
