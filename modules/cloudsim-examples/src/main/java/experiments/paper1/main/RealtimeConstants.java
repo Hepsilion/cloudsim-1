@@ -55,9 +55,9 @@ public class RealtimeConstants {
 	public final static int VM_TYPES	= 4;
 	public final static int[] VM_MIPS	= {250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500};//{ 2500, 2000, 1000, 500 };//{ 500, 500, 500, 500 };//
 	public final static int[] VM_PES	= { 1, 1, 1, 1 };
-	public final static int[] VM_RAM	= { 870,  1740, 1740, 613 };
-	public final static int VM_BW		= 100000; // 100 Mbit/s
-	public final static int VM_SIZE		= 2500; // 2.5 GB
+	public final static int[] VM_RAM	= {0,0,0,0};//{ 870,  1740, 1740, 613 };
+	public final static int VM_BW		= 0; // 100 Mbit/s
+	public final static int VM_SIZE		= 0; // 2.5 GB
 	
 	/*
 	 * Host types:

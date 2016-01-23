@@ -76,7 +76,7 @@ public class SchedulingCloudlet extends Cloudlet {
 	 * @param cloudlet
 	 * @return
 	 */
-	private int intersected(SchedulingCloudlet cloudlet){
+	public int intersected(SchedulingCloudlet cloudlet){
 		if(this.getStartTime()>cloudlet.getStartTime() && this.getDeadline()<cloudlet.getDeadline())
 			return 1;
 		else if(this.getStartTime()<cloudlet.getStartTime() && this.getDeadline()>cloudlet.getDeadline())

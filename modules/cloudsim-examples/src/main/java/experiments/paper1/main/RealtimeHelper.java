@@ -108,7 +108,7 @@ public class RealtimeHelper {
 					utilizationModel, 
 					utilizationModel, 
 					utilizationModel, 
-					startTime[i]-100,
+					startTime[i],
 					startTime[i]+execution_time[i]);//startTime[i]+length[i]/VmList.getById(vmlist, i).getMaxMips()+50);
 			// setting the owner of these Cloudlets
 			cloudlet.setVmId(i);
@@ -509,10 +509,10 @@ public class RealtimeHelper {
 		double energy = datacenter.getPower() / (3600 * 1000);
 		int numberOfMigrations = datacenter.getMigrationCount();
 		
-		double tdr = (cloudlets.size()-received_cloudlets.size()) * 1.0 / cloudlets.size();
+		double tar = received_cloudlets.size() * 1.0 / cloudlets.size();
 		double dmr = getDeadlineMissingRate(received_cloudlets);
 		
-		double tmp1=10*(1-tdr), tmp2=10*(1-dmr);
+		double tmp1=10*tar, tmp2=10*(1-dmr);
 		//double overall_sla = tmp1*tmp1*tmp2*tmp2*tmp2*(100-energy);
 		long numInstructions=0;
 		RealtimeCloudlet rc=null;
@@ -525,13 +525,13 @@ public class RealtimeHelper {
 		System.out.println("#Instr="+numInstructions+", #Energy="+energy+", fitness="+overall_sla);
 		
 		double[] ga_result = new double[4];
-		ga_result[0]=tdr;
+		ga_result[0]=tar;
 		ga_result[1]=dmr;
 		ga_result[2]=energy;
 		ga_result[3]=overall_sla;
 		
 		if(result != null) {
-			result[index][0] = tdr;
+			result[index][0] = tar;
 			result[index][1] = dmr;
 			result[index][2] = energy;
 		}
@@ -673,7 +673,7 @@ public class RealtimeHelper {
 			Log.printLine(String.format("SLA time per active host: %.2f%%", slaTimePerActiveHost * 100));
 			Log.printLine(String.format("Overall SLA violation: %.2f%%", slaOverall * 100));
 			Log.printLine(String.format("Average SLA violation: %.2f%%", slaAverage * 100));
-			Log.printLine(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
+			Log.printLine(String.format("Task Acceptance Rate = %.5f%%", tar * 100));
 			//System.out.println(String.format("Declined Clouelet Rate: %.2f%%", tdr * 100));
 			Log.printLine(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));
 			//System.out.println(String.format("Deadline Missing Rate: %.2f%%", dmr * 100));

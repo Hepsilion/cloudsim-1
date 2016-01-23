@@ -19,20 +19,17 @@ public class OverallExchangeProcessor {
 	List<PowerHost> hostList;
 	List<Vm> vmList;
 	
-	int num_all_cloudlets;
-	
 	List<Cloudlet> tempCloudlets = null;
 	
 	OutputStream result_output = null;
 	OutputStream mediate_result_output;
 	OutputStream originOutput;
 	
-	public OverallExchangeProcessor(int id, AllocationMapping overallMapping, List<PowerHost> hostList, List<Cloudlet> cloudletList, List<Vm> vmList, int num_all_cloudlets, OutputStream result_output, OutputStream mediate_result_output, OutputStream originOutput) {
+	public OverallExchangeProcessor(int id, AllocationMapping overallMapping, List<PowerHost> hostList, List<Cloudlet> cloudletList, List<Vm> vmList, OutputStream result_output, OutputStream mediate_result_output, OutputStream originOutput) {
 		this.id = id;
-		this.num_all_cloudlets = num_all_cloudlets;
 		this.overallMapping = overallMapping;
-		localMapping = new AllocationMapping(this.num_all_cloudlets);
-		for(int i=0; i<this.num_all_cloudlets; i++) {
+		localMapping = new AllocationMapping(this.overallMapping.getNumVms());
+		for(int i=0; i<this.overallMapping.getNumVms(); i++) {
 			localMapping.setHostOfVm(i, overallMapping.getHostOfVm(i));
 		}
 		
@@ -56,10 +53,10 @@ public class OverallExchangeProcessor {
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-			SchedulingHelper.getOrderedCloudletOnSchedulingHost(this.localMapping, hosts, tempCloudlets, num_all_cloudlets);
+			SchedulingHelper.getOrderedCloudletOnSchedulingHost(this.localMapping, hosts, tempCloudlets);
 			int num[] = SchedulingHelper.getRandomPermitation(SchedulingConstants.NUMBER_OF_HOSTS);
 			for(int i=0; i<SchedulingConstants.NUMBER_OF_HOSTS;) {
-				new LocalExchangeProcessor(vmList, num_all_cloudlets, this.localMapping).doExchange(hosts[num[i++]], hosts[num[i++]], this.mediate_result_output, this.originOutput);
+				new LocalExchangeProcessor(vmList, this.localMapping).doExchange(hosts[num[i++]], hosts[num[i++]], this.mediate_result_output, this.originOutput);
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
@@ -68,6 +65,17 @@ public class OverallExchangeProcessor {
 		
 			iCnt++;
 		}
+		
+		//reallocate host for these tasks which has no host	
+		this.hosts = new SchedulingHost[SchedulingConstants.NUMBER_OF_HOSTS];
+		for(int i=0; i<SchedulingConstants.NUMBER_OF_HOSTS; i++) {
+			hosts[i] = new SchedulingHost(HostList.getById(hostList, i));
+		}
+		tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
+		SchedulingHelper.getOrderedCloudletOnSchedulingHost(this.localMapping, hosts, tempCloudlets);
+		ReallocateProcessor rp = new ReallocateProcessor(overallMapping, hosts, vmList, tempCloudlets);
+		rp.reAllocate();
+		
 		tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
 		SchedulingHelper.simulation(tempCloudlets, hostList, vmList, this.localMapping, SchedulingConstants.normal_vmAllocationPolicy);
 		SchedulingHelper.outputResultToResultFile(this.id+"th processor Final----", originOutput, result_output, this.localMapping, 2);

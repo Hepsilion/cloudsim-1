@@ -17,8 +17,10 @@ public class SchedulingConstants {
 	public final static boolean ENABLE_DVFS = true;
 	public final static boolean ENABLE_ONOFF = true;
 	
-	public final static int NUMBER_OF_CLOUDLETS = 250;
+	public final static int NUMBER_OF_CLOUDLETS = 310;
 	public final static int NUMBER_OF_HOSTS = 50;
+	
+	public final static int RANDOM_SEED = 50;
 	
 	//5 20 5
 	public final static int NUMBER_OF_ITERATIONS = 5;

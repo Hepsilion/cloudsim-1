@@ -14,15 +14,13 @@ import org.cloudbus.cloudsim.power.lists.PowerVmList;
 public class LocalExchangeProcessor{
 	AllocationMapping overallMapping;
 	List<Vm> allVms;
-	int num_all_cloudlets;
 	List<Cloudlet> cloudlets;
 	List<PowerHost> hostList;
 	List<Vm> vmList;
 	
-	public LocalExchangeProcessor(List<Vm> allVms, int num_all_cloudlets, AllocationMapping mapping) {
+	public LocalExchangeProcessor(List<Vm> allVms, AllocationMapping mapping) {
 		this.overallMapping = mapping;
 		this.allVms = allVms;
-		this.num_all_cloudlets = num_all_cloudlets;
 		this.cloudlets = new ArrayList<Cloudlet>();
 		this.hostList = new ArrayList<PowerHost>();
 		this.vmList = new ArrayList<Vm>();
@@ -54,10 +52,10 @@ public class LocalExchangeProcessor{
 		SchedulingHost t6 = host2.clone();
 		this.generateOffSpring(t5, t6, 4);//A<-->B
 		
-		simulator simulator1 = new simulator(overallMapping, host1, host2);
-		simulator simulator2 = new simulator(overallMapping, t1, t2);
-		simulator simulator3 = new simulator(overallMapping, t3, t4);
-		simulator simulator4 = new simulator(overallMapping, t5, t6);
+		simulator simulator1 = new simulator(this.overallMapping.getNumVms(), host1, host2);
+		simulator simulator2 = new simulator(this.overallMapping.getNumVms(), t1, t2);
+		simulator simulator3 = new simulator(this.overallMapping.getNumVms(), t3, t4);
+		simulator simulator4 = new simulator(this.overallMapping.getNumVms(), t5, t6);
 		
 		simulator1.run();
 		simulator2.run();
@@ -182,11 +180,11 @@ public class LocalExchangeProcessor{
 		SchedulingHost host2;
 		AllocationMapping mapping;
 		
-		public simulator(AllocationMapping overallMapping, SchedulingHost host1, SchedulingHost host2) {
+		public simulator(int numVms, SchedulingHost host1, SchedulingHost host2) {
 			super();
 			this.host1 = host1;
 			this.host2 = host2;
-			mapping = new AllocationMapping(num_all_cloudlets);
+			mapping = new AllocationMapping(numVms);
 		}
 		
 		@Override

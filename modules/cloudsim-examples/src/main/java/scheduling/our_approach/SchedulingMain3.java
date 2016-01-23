@@ -36,7 +36,7 @@ public class SchedulingMain3 {
 				//some processor along to search more search space
 				processors = new OverallExchangeProcessor[numProcessor];
 				for(int i=0; i<numProcessor; i++) {
-					processors[i] = new OverallExchangeProcessor(i+1, mapping, hostList, cloudletList, vmList, num_all_cloudlets, result_output, mediate_result_output, originOutput);
+					processors[i] = new OverallExchangeProcessor(i+1, mapping, hostList, cloudletList, vmList, result_output, mediate_result_output, originOutput);
 					processors[i].run();
 				}
 				

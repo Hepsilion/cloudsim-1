@@ -28,7 +28,7 @@ public class BaseExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) {
-		int numExes = 5;
+		int numExes = 0;
         double result[][] = new double[numExes+1][3];
         for(int i=0; i<=numExes; i++) {
         	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;

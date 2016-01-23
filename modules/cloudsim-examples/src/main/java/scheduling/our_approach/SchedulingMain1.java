@@ -39,10 +39,10 @@ public class SchedulingMain1 {
 					hosts[i] = new SchedulingHost(HostList.getById(hostList, i));
 				}
 				tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-				SchedulingHelper.getOrderedCloudletOnSchedulingHost(mapping, hosts, tempCloudlets, num_all_cloudlets);
+				SchedulingHelper.getOrderedCloudletOnSchedulingHost(mapping, hosts, tempCloudlets);
 				int num[] = SchedulingHelper.getRandomPermitation(SchedulingConstants.NUMBER_OF_HOSTS);
 				for(int i=0; i<SchedulingConstants.NUMBER_OF_HOSTS;) {
-					new LocalExchangeProcessor(vmList, num_all_cloudlets, mapping).doExchange(hosts[num[i++]], hosts[num[i++]], mediate_result_output, originOutput);
+					new LocalExchangeProcessor(vmList, mapping).doExchange(hosts[num[i++]], hosts[num[i++]], mediate_result_output, originOutput);
 				}
 				tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
 				SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.normal_vmAllocationPolicy);

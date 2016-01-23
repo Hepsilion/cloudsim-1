@@ -135,7 +135,7 @@ public class SchedulingHelper {
 	}
 	
 	public static int[] getRandomMIPSs(int vmNum, int min, int max) {
-		Random rand = new Random(500);
+		Random rand = new Random(200);
 		int[] MIPSs = new int[vmNum];
 		for (int i = 0; i < vmNum; i++) {
 			MIPSs[i] = rand.nextInt(max)%(max-min+1)+min;
@@ -180,7 +180,7 @@ public class SchedulingHelper {
 	}
 	
 	public static int[] getRandomIntegers(int length, int min, int max) {
-		Random rand = new Random(200);
+		Random rand = new Random(SchedulingConstants.RANDOM_SEED);
 		int[] numbers = new int[length];
 		//System.out.println("Generate some random numbers");
 		for (int i = 0; i < length; i++) {
@@ -324,8 +324,8 @@ public class SchedulingHelper {
 		return cloudletList;
 	}
 	
-	public static void getOrderedCloudletOnSchedulingHost(AllocationMapping mapping, SchedulingHost[] hosts, List<Cloudlet> cloudletList, int num_all_cloudlets) {
-		for(int i=0; i<num_all_cloudlets; i++) {
+	public static void getOrderedCloudletOnSchedulingHost(AllocationMapping mapping, SchedulingHost[] hosts, List<Cloudlet> cloudletList) {
+		for(int i=0; i<mapping.getNumVms(); i++) {
 			int hostId = mapping.getHostOfVm(i);
 			if(hostId!=-1)
 				hosts[hostId].addCloudlet((SchedulingCloudlet)CloudletList.getById(cloudletList, i));
@@ -415,10 +415,10 @@ public class SchedulingHelper {
 	public static void outputToResultFile(String ith, OutputStream originOutput, OutputStream result_output, AllocationMapping mapping, int where) {
 		Log.setOutput(result_output);
 		Log.printLine(ith+ " Allocation:\n"+mapping);
-		Log.printLine("Task Acceptance Rate = " + mapping.getTask_acceptance_rate());
-		Log.printLine("Energy Consumption = " + mapping.getEnergy()/3600/1000+" kwh");
+		Log.printLine(String.format("Clouelet Acceptance Rate = %.5f%%", mapping.getTask_acceptance_rate() * 100));
+		Log.printLine(String.format("Energy consumption = %.5f kwh", mapping.getEnergy()/3600/1000));
 		Log.printLine("Num of Instructions = " + mapping.getNumInstruction());
-		Log.printLine("Fitness = " + mapping.getFitness());
+		Log.printLine(String.format("Allocation Fitness = %.5f", mapping.getFitness()));
 		
 		Log.setOutput(originOutput);
 	}
@@ -465,10 +465,10 @@ public class SchedulingHelper {
 		
 		Helper.printResults(datacenter, vms, lastClock, null, outputInCsv, SchedulingConstants.OutputFolder);
 		Log.setDisabled(false);
-		Log.printLine(String.format("Clouelet Acceptance Rate: %.2f%%", acceptance_rate * 100));
-		Log.printLine(String.format("Deadline Missing Rate: %.2f%%", declined_cloudlet_num*1.0/cloudlets.size()*100));
-		Log.printLine(String.format("Energy consumption: %f Ws", datacenter.getPower()));
-		Log.printLine(String.format("Allocation Fitness: %.2f", fitness));
+		Log.printLine(String.format("Clouelet Acceptance Rate: %.5f%%", acceptance_rate * 100));
+		Log.printLine(String.format("Deadline Missing Rate: %.4f%%", declined_cloudlet_num*1.0/cloudlets.size()*100));
+		Log.printLine(String.format("Energy consumption: %.5f Ws", datacenter.getPower()));
+		Log.printLine(String.format("Allocation Fitness: %.5f", fitness));
 		
 		Log.printLine();
 		Log.printLine();
