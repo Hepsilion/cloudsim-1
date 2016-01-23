@@ -61,11 +61,6 @@ public class SchedulingMain4 {
 					}
 				}
 				
-				for(int i=0; i<SchedulingConstants.NUMBER_OF_HOSTS; i++){
-					System.out.print(hosts[i]+" ");
-				}
-				System.out.println();
-				
 				//reallocate host for these tasks which has no host
 				for(int i=0; i<mapping.getNumVms(); i++) {
 					hostId = processors[max_num].getLocalMapping().getHostOfVm(i);

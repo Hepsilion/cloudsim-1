@@ -419,6 +419,7 @@ public class SchedulingHelper {
 		Log.printLine("Energy Consumption = " + mapping.getEnergy()/3600/1000+" kwh");
 		Log.printLine("Num of Instructions = " + mapping.getNumInstruction());
 		Log.printLine("Fitness = " + mapping.getFitness());
+		
 		Log.setOutput(originOutput);
 	}
 	
@@ -454,7 +455,7 @@ public class SchedulingHelper {
 		}
 		double fitness=1.0*numInstructions/datacenter.getPower();
 		if(cloudlets.size()>0) {
-			fitness = fitness*Math.pow(received_cloudlets.size()/cloudlets.size(), 3);
+			fitness = fitness*Math.pow(1.0*received_cloudlets.size()/cloudlets.size(), 3);
 		}
 		//double fitness = received_cloudlets.size()/(datacenter.getPower()/1000/3600);
 		mapping.setTask_acceptance_rate(acceptance_rate);

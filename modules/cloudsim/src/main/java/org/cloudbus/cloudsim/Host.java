@@ -233,10 +233,10 @@ public class Host {
 	    		}
 	    		
 	    		double totalMips = this.getTotalMips();
-	    		double newMips = totalMips-oldTotalMips+this.getAvailableMips();
-	    		Log.printLine("New:"+newMips);
-	    		if(newMips > vm.getCurrentRequestedTotalMips()) {
-	    			this.getVmScheduler().setAvailableMips(newMips);
+	    		double newAvailableMips = totalMips-oldTotalMips+this.getAvailableMips();
+	    		Log.printLine("NewAvailableMips:"+newAvailableMips);
+	    		if(newAvailableMips >= vm.getCurrentRequestedTotalMips()) {
+	    			this.getVmScheduler().setAvailableMips(newAvailableMips);
 	    			Log.printLine("Host#"+this.getId()+" After,Available Mips:"+this.getAvailableMips());
 	    			return true;
 	    		}else{

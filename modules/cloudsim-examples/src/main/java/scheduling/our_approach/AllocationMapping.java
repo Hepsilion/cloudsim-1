@@ -1,5 +1,6 @@
 package scheduling.our_approach;
 
+
 public class AllocationMapping {
 	private int numVms;
 	private int[] hostsMapping;
@@ -77,6 +78,8 @@ public class AllocationMapping {
 
 	@Override
 	public String toString() {
+		String mapping = "";
+		
 		StringBuffer vms = new StringBuffer(this.numVms);
 		StringBuffer hosts = new StringBuffer(this.numVms);
 		for(int i=0; i<this.numVms; i++) {
@@ -87,6 +90,30 @@ public class AllocationMapping {
             	hosts.append("\t");
             }
 		}
-		return (vms.toString() + "\n" + hosts.toString());
+		
+		mapping = mapping + vms.toString() + "\n" + hosts.toString()+"\nNumber of Cloudlets on each Host:\n";
+		
+		StringBuffer hostsId = new StringBuffer(SchedulingConstants.NUMBER_OF_HOSTS);
+		StringBuffer numTask = new StringBuffer(SchedulingConstants.NUMBER_OF_HOSTS);
+		int[] numTasks = new int[SchedulingConstants.NUMBER_OF_HOSTS];
+		int hostId;
+		for(int i=0; i<this.getNumVms(); i++) {
+			hostId = this.getHostOfVm(i);
+			if(hostId!=-1){
+				numTasks[hostId]++; // record number of tasks on each host
+			}
+		}
+		hostsId.append("#Host:\t");
+		numTask.append("#Task:\t");
+		for(int i=0; i<SchedulingConstants.NUMBER_OF_HOSTS; i++){
+			hostsId.append(i);
+			numTask.append(numTasks[i]);
+        	if (i < SchedulingConstants.NUMBER_OF_HOSTS - 1) {
+        		hostsId.append("\t");
+        		numTask.append("\t");
+            }
+		}
+		mapping = mapping + hostsId.toString() + "\n" + numTask.toString();
+		return mapping;
 	}
 }

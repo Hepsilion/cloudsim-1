@@ -17,13 +17,15 @@ public class SchedulingConstants {
 	public final static boolean ENABLE_DVFS = true;
 	public final static boolean ENABLE_ONOFF = true;
 	
-	public final static int NUMBER_OF_CLOUDLETS = 100;
+	public final static int NUMBER_OF_CLOUDLETS = 250;
 	public final static int NUMBER_OF_HOSTS = 50;
 	
+	//5 20 5
 	public final static int NUMBER_OF_ITERATIONS = 5;
-	public final static int NUMBER_OF_PROCESSORS = 20;
-	public final static int NUMBER_OF_ITERATION_PER_PROCESSOR = 5;
-	public final static int NUMBER_OF_CASE = 25;
+	public final static int NUMBER_OF_PROCESSORS = 10;
+	public final static int NUMBER_OF_ITERATION_PER_PROCESSOR = 10;
+	
+	public final static int NUMBER_OF_CASE = 20;
 	
 	public final static double SCHEDULING_INTERVAL = 1;
 	public final static double SIMULATION_LIMIT = 24 * 60 * 60 * 2;
@@ -43,9 +45,9 @@ public class SchedulingConstants {
 	public final static int VM_TYPES	= 4;
 	//public final static int[] VM_MIPS	= {250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500};//{ 2500, 2000, 1000, 500 };//{ 500, 500, 500, 500 };//
 	public final static int[] VM_PES	= { 1, 1, 1, 1 };
-	public final static int[] VM_RAM	= { 870,  1740, 1740, 613 };
-	public final static int VM_BW		= 100000; // 100 Mbit/s
-	public final static int VM_SIZE		= 2500; // 2.5 GB
+	public final static int[] VM_RAM	= {0,0,0,0};//{ 870,  1740, 1740, 613 };
+	public final static int VM_BW		= 0;//100000; // 100 Mbit/s
+	public final static int VM_SIZE		= 0;//2500; // 2.5 GB
 	
 	/*
 	 * Host types:
