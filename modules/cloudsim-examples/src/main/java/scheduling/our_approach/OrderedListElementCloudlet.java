@@ -1,5 +1,7 @@
 package scheduling.our_approach;
 
+import scheduling.our_approach.utility.SchedulingCloudlet;
+
 public class OrderedListElementCloudlet {
 	private SchedulingCloudlet cloudlet;
 	private OrderedListElementCloudlet next;

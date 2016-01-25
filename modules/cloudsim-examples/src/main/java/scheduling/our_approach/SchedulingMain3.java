@@ -9,14 +9,17 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 
+import scheduling.our_approach.utility.SchedulingConstants;
+import scheduling.our_approach.utility.SchedulingHelper;
+
 public class SchedulingMain3 {
 	public static void main(String[] args) {
 		for(int ca=0; ca<SchedulingConstants.NUMBER_OF_CASE; ca++){
 			int num_all_cloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + ca*20;
 			
-			SchedulingHelper.initOutput(SchedulingConstants.log_file+num_all_cloudlets, SchedulingConstants.result_file+num_all_cloudlets, SchedulingConstants.result_temp_file+num_all_cloudlets);
-			OutputStream result_output = SchedulingHelper.getOutputStream(SchedulingConstants.result_file+num_all_cloudlets);
-			OutputStream mediate_result_output = SchedulingHelper.getOutputStream(SchedulingConstants.result_temp_file+num_all_cloudlets);
+			SchedulingHelper.initOutput(SchedulingConstants.our_log_file+num_all_cloudlets, SchedulingConstants.our_result_file+num_all_cloudlets, SchedulingConstants.our_result_temp_file+num_all_cloudlets);
+			OutputStream result_output = SchedulingHelper.getOutputStream(SchedulingConstants.our_result_file+num_all_cloudlets);
+			OutputStream mediate_result_output = SchedulingHelper.getOutputStream(SchedulingConstants.our_result_temp_file+num_all_cloudlets);
 			OutputStream originOutput = Log.getOutput();
 			
 			AllocationMapping mapping = new AllocationMapping(num_all_cloudlets);
@@ -24,7 +27,7 @@ public class SchedulingMain3 {
 			List<Vm> vmList = new ArrayList<Vm>();
 			List<Cloudlet> cloudletList = new ArrayList<Cloudlet>();
 			List<PowerHost> hostList = new ArrayList<PowerHost>();
-			SchedulingHelper.simulation(cloudletList, hostList, vmList, mapping, SchedulingConstants.initial_vmAllocationPolicy);
+			SchedulingHelper.simulation(cloudletList, hostList, vmList, mapping, SchedulingConstants.our_initial_vmAllocationPolicy);
 			SchedulingHelper.outputResultToResultFile("Initial", originOutput, result_output, mapping, 1);
 			
 			OverallExchangeProcessor[] processors = null;
@@ -57,12 +60,12 @@ public class SchedulingMain3 {
 				}
 				
 				tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-				SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.normal_vmAllocationPolicy);
+				SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 				SchedulingHelper.outputResultToResultFile(iCnt++ +"th iteration ", originOutput, result_output, mapping, 1);
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-			SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.normal_vmAllocationPolicy);
+			SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 			SchedulingHelper.outputResultToResultFile("Final", originOutput, result_output, mapping, 1);
 		}
 	}

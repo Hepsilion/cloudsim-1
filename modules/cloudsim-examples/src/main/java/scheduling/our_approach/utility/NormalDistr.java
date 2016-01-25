@@ -1,4 +1,4 @@
-package scheduling.our_approach;
+package scheduling.our_approach.utility;
 
 import java.util.Random;
 
@@ -24,9 +24,9 @@ public class NormalDistr implements ContinuousDistribution{
 	}
 	
 	public static void main(String[] args) {
-		NormalDistr dist = new NormalDistr(new Random(), 10, 1);
-		for(int i=0; i<50; i++) {
-			System.out.println(dist.sample());
+		int[] execution_time = SchedulingHelper.getExecutionTime(50, 3600*15,  250);
+		for(int i=0; i<50; i++){
+			System.out.println(execution_time[i]);
 		}
 	}
 }

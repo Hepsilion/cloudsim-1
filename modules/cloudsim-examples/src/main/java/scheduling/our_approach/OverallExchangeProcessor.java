@@ -8,6 +8,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.power.PowerHost;
 
+import scheduling.our_approach.utility.SchedulingConstants;
+import scheduling.our_approach.utility.SchedulingHelper;
+
 public class OverallExchangeProcessor {
 	int id;
 	AllocationMapping overallMapping;
@@ -60,7 +63,7 @@ public class OverallExchangeProcessor {
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-			SchedulingHelper.simulation(tempCloudlets, hostList, vmList, this.localMapping, SchedulingConstants.normal_vmAllocationPolicy);
+			SchedulingHelper.simulation(tempCloudlets, hostList, vmList, this.localMapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 			SchedulingHelper.outputResultToResultFile(this.id + "th processor----"+ iCnt +" iteration ", this.originOutput, this.result_output, this.localMapping, 3);
 		
 			iCnt++;
@@ -77,7 +80,7 @@ public class OverallExchangeProcessor {
 		rp.reAllocate();
 		
 		tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
-		SchedulingHelper.simulation(tempCloudlets, hostList, vmList, this.localMapping, SchedulingConstants.normal_vmAllocationPolicy);
+		SchedulingHelper.simulation(tempCloudlets, hostList, vmList, this.localMapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 		SchedulingHelper.outputResultToResultFile(this.id+"th processor Final----", originOutput, result_output, this.localMapping, 2);
 		SchedulingHelper.outputToResultFile(originOutput, this.result_output, "++++++++++++++++++++++++++++++++++++++++"+this.id+"th Processor++++++++++++++++++++++++++++++++++++++++\n\n");
 	}

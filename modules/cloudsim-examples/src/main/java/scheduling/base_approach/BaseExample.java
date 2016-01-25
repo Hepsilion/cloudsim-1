@@ -1,4 +1,4 @@
-package experiments.paper1.main;
+package scheduling.base_approach;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -13,9 +13,13 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
 
+import scheduling.our_approach.utility.SchedulingConstants;
+import scheduling.our_approach.utility.SchedulingDatacenterBroker;
+import scheduling.our_approach.utility.SchedulingHelper;
+
 public class BaseExample {
 	/** The broker. */
-	protected static RealtimeDatacenterBroker broker;
+	protected static SchedulingDatacenterBroker broker;
 	/** The cloudlet list. */
 	private static List<Cloudlet> cloudletList;
 	/** The vmlist. */
@@ -28,22 +32,14 @@ public class BaseExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) {
-		int numExes = 15;
-        double result[][] = new double[numExes+1][3];
-        for(int i=0; i<=numExes; i++) {
-        	int temp_numCloudlets = RealtimeConstants.NUMBER_OF_CLOUDLETS + i*10;
+        for(int i=0; i<SchedulingConstants.NUMBER_OF_CASE; i++) {
+        	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*10;
         	System.out.println("#Cloudlet="+temp_numCloudlets);
-        	String resultFile = "base_f"+RealtimeConstants.DefautFrequency+"_" + temp_numCloudlets;
+        	String resultFile = SchedulingConstants.base_resultFile + "_"+ temp_numCloudlets;
+        	String logFile = SchedulingConstants.base_logFile+ "_"+ temp_numCloudlets;
     		try {
-    			RealtimeHelper.initLogOutput(
-    					RealtimeConstants.ENABLE_OUTPUT,
-    					RealtimeConstants.OUTPUT_TO_FILE,
-    					RealtimeConstants.OutputFolder,
-    					resultFile,
-    					RealtimeConstants.VmAllocationPolicy,
-    					RealtimeConstants.VmSelectionPolicy,
-    					RealtimeConstants.Parameter);
-    			os = new FileOutputStream(RealtimeConstants.OutputFolder+"/result/" + resultFile + ".txt");
+    			SchedulingHelper.initOutput(logFile, resultFile, null);
+    			os = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + resultFile + ".txt");
     		} catch (Exception e) {
     			e.printStackTrace();
     			System.exit(0);
@@ -58,19 +54,19 @@ public class BaseExample {
     		try {
     			CloudSim.init(1, Calendar.getInstance(), false);
 
-    			broker = (RealtimeDatacenterBroker) RealtimeHelper.createBroker();
+    			broker = (SchedulingDatacenterBroker) SchedulingHelper.createBroker();
     			int brokerId = broker.getId();
 
-    			vmlist = RealtimeHelper.createVmList(brokerId, temp_numCloudlets);
-    			cloudletList = RealtimeHelper.createRealtimeCloudlet(brokerId, vmlist, temp_numCloudlets);
-    			hostList = RealtimeHelper.createHostList(RealtimeConstants.NUMBER_OF_HOSTS);
+    			vmlist = SchedulingHelper.createVmList(brokerId, temp_numCloudlets);
+    			cloudletList = SchedulingHelper.createSchedulingCloudlet(brokerId, vmlist, temp_numCloudlets);
+    			hostList = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) RealtimeHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, RealtimeConstants.VmAllocationPolicy, null);
+    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, SchedulingConstants.base_vmAllocationPolicy, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);
     			
-    			CloudSim.terminateSimulation(RealtimeConstants.SIMULATION_LIMIT);
+    			CloudSim.terminateSimulation(SchedulingConstants.SIMULATION_LIMIT);
     			
     			double lastClock = CloudSim.startSimulation();
     			List<Cloudlet> received_cloudlets = broker.getCloudletReceivedList();
@@ -80,7 +76,7 @@ public class BaseExample {
 
     			Log.setOutput(os);
     			Log.printLine("Base Example end time: " + new Date().toString());
-    			RealtimeHelper.printResults(datacenter, vmlist, cloudletList, result, i, received_cloudlets, lastClock, RealtimeConstants.OUTPUT_CSV);
+    			SchedulingHelper.printResults(datacenter, null, vmlist, cloudletList, received_cloudlets, lastClock, SchedulingConstants.OUTPUT_CSV);
     			Log.setOutput(origional_output);
     			
     			Log.printLine("Base Example Simulation finished!");
@@ -88,10 +84,6 @@ public class BaseExample {
     			e.printStackTrace();
     			Log.printLine("Unwanted errors happen");
     		}
-        }
-        
-        for(int i=0; i<=numExes; i++) {
-        	System.out.println(result[i][0]+"  "+result[i][1]+"  "+result[i][2]);
         }
 	}
 }

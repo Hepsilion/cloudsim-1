@@ -1,4 +1,4 @@
-package scheduling.our_approach;
+package scheduling.our_approach.utility;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,6 +41,11 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.xml.DvfsDatas;
 
+import scheduling.base_approach.BasePowerVmAllocation;
+import scheduling.our_approach.AllocationMapping;
+import scheduling.our_approach.InitialVmAllocationPolicy;
+import scheduling.our_approach.NormalVmAllocationPolicy;
+import scheduling.our_approach.SchedulingHost;
 import experiments.paper1.main.RealtimeConstants;
 
 
@@ -57,14 +62,14 @@ public class SchedulingHelper {
 			List<Cloudlet> cloudlets=null;
 			List<PowerHost> hosts=null;
 			
-			if(vmAllocationPolicy.equals(SchedulingConstants.initial_vmAllocationPolicy)){
+			if(vmAllocationPolicy.equals(SchedulingConstants.our_initial_vmAllocationPolicy)){
 				vms = SchedulingHelper.createVmList(brokerId, mapping.getNumVms());
 				cloudlets = SchedulingHelper.createSchedulingCloudlet(brokerId, vms, mapping.getNumVms());
 				hosts = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
 				cloudletList.addAll(cloudlets);
 				hostList.addAll(hosts);
 				vmlist.addAll(vms);
-			} else if(vmAllocationPolicy.equals(SchedulingConstants.normal_vmAllocationPolicy)) {
+			} else if(vmAllocationPolicy.equals(SchedulingConstants.our_normal_vmAllocationPolicy)) {
 				vms = SchedulingHelper.createVmList(brokerId, mapping.getNumVms());
 				cloudlets = SchedulingHelper.createSchedulingCloudlet(brokerId, vms, mapping.getNumVms());
 				hosts = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
@@ -115,13 +120,13 @@ public class SchedulingHelper {
 	
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
-		int[] MIPSs = getRandomMIPSs(vmsNumber, 200, 1000);
+		int[] MIPSs = getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / SchedulingConstants.VM_TYPES);
 			vms.add(new SchedulingVm(
 					i, 
 					brokerId, 
-					MIPSs[i],
+					MIPSs[i],//SchedulingConstants.VM_MIPS[vmType],//
 					SchedulingConstants.VM_PES[vmType],
 					SchedulingConstants.VM_RAM[vmType], 
 					SchedulingConstants.VM_BW, 
@@ -177,6 +182,15 @@ public class SchedulingHelper {
 		}
 
 		return cloudlets;
+	}
+	
+	public static int[] getExecutionTime(int length, int mean, int dev){
+		NormalDistr md = new NormalDistr(mean, dev);
+		int[] numbers = new int[length];
+		for (int i = 0; i < length; i++) {
+			numbers[i] = (int) md.sample();
+		}
+		return numbers;
 	}
 	
 	public static int[] getRandomIntegers(int length, int min, int max) {
@@ -293,6 +307,8 @@ public class SchedulingHelper {
 			vmAllocationPolicy = new NormalVmAllocationPolicy(hostList, mapping);
 		} else if (vmAllocationPolicyName.equals("init")) {
 			vmAllocationPolicy = new InitialVmAllocationPolicy(hostList, mapping);
+		} else if(vmAllocationPolicyName.equals("base")) {
+			vmAllocationPolicy = new BasePowerVmAllocation(hostList);
 		} else {
 			System.out.println("Unknown VM allocation policy: " + vmAllocationPolicyName);
 			System.exit(0);
@@ -371,15 +387,21 @@ public class SchedulingHelper {
 				folder3.mkdir();
 			}
 
-			File file = new File(outputFolder + "/" + logFile + ".txt");
-			file.createNewFile();
-			Log.setOutput(new FileOutputStream(file));
+			if(logFile!=null){
+				File file = new File(outputFolder + "/" + logFile + ".txt");
+				file.createNewFile();
+				Log.setOutput(new FileOutputStream(file));
+			}
 			
-			File result = new File(outputFolder + "/" + resultFile + ".txt");
-			result.createNewFile();
+			if(resultFile!=null){
+				File result = new File(outputFolder + "/" + resultFile + ".txt");
+				result.createNewFile();
+			}
 			
-			File tempResult = new File(outputFolder + "/" + tmpResultFile + ".txt");
-			tempResult.createNewFile();
+			if(tmpResultFile!=null){
+				File tempResult = new File(outputFolder + "/" + tmpResultFile + ".txt");
+				tempResult.createNewFile();
+			}
 		}
 	}
 	
@@ -458,10 +480,12 @@ public class SchedulingHelper {
 			fitness = fitness*Math.pow(1.0*received_cloudlets.size()/cloudlets.size(), 3);
 		}
 		//double fitness = received_cloudlets.size()/(datacenter.getPower()/1000/3600);
-		mapping.setTask_acceptance_rate(acceptance_rate);
-		mapping.setEnergy(datacenter.getPower());
-		mapping.setFitness(fitness);
-		mapping.setNumInstruction(numInstructions);
+		if(mapping!=null){
+			mapping.setTask_acceptance_rate(acceptance_rate);
+			mapping.setEnergy(datacenter.getPower());
+			mapping.setFitness(fitness);
+			mapping.setNumInstruction(numInstructions);
+		}
 		
 		Helper.printResults(datacenter, vms, lastClock, null, outputInCsv, SchedulingConstants.OutputFolder);
 		Log.setDisabled(false);

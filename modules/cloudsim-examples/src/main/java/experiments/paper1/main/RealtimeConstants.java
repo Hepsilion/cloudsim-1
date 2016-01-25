@@ -39,7 +39,7 @@ public class RealtimeConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;//10 * 
 	public final static int CLOUDLET_PES	= 1;
 	
-	public final static int NUMBER_OF_CLOUDLETS = 310;
+	public final static int NUMBER_OF_CLOUDLETS = 50;
 	public final static int NUMBER_OF_HOSTS = 50;
 	
 	/*

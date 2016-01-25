@@ -10,6 +10,10 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.lists.PowerVmList;
 
+import scheduling.our_approach.utility.SchedulingCloudlet;
+import scheduling.our_approach.utility.SchedulingConstants;
+import scheduling.our_approach.utility.SchedulingHelper;
+
 
 public class LocalExchangeProcessor{
 	AllocationMapping overallMapping;
@@ -197,7 +201,7 @@ public class LocalExchangeProcessor{
 			for(Cloudlet c2 : host2.getCloudlets()) {
 				this.mapping.setHostOfVm(c2.getCloudletId(), host2Id);
 			}
-			SchedulingHelper.simulation(cloudlets, hostList, vmList, mapping, SchedulingConstants.normal_vmAllocationPolicy);
+			SchedulingHelper.simulation(cloudlets, hostList, vmList, mapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 		}
 
 		public AllocationMapping getMapping() {

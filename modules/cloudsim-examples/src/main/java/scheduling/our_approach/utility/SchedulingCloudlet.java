@@ -1,4 +1,4 @@
-package scheduling.our_approach;
+package scheduling.our_approach.utility;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModel;

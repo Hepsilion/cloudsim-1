@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.power.PowerHost;
 
+import scheduling.our_approach.utility.SchedulingCloudlet;
+
 public class SchedulingHost {
 	OrderedList cloudlets;
 	PowerHost host;

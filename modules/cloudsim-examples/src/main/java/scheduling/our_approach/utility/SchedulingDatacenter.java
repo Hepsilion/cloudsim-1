@@ -1,4 +1,4 @@
-package scheduling.our_approach;
+package scheduling.our_approach.utility;
 
 import java.util.List;
 import java.util.Map;

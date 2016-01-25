@@ -1,5 +1,7 @@
 package scheduling.our_approach;
 
+import scheduling.our_approach.utility.SchedulingConstants;
+
 
 public class AllocationMapping {
 	private int numVms;
