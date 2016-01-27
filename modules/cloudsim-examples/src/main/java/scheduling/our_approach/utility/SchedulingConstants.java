@@ -6,10 +6,6 @@ public class SchedulingConstants {
 	public final static boolean OUTPUT_CSV    = false;
 	public final static String OutputFolder = "output";
 	
-	public final static int NUMBER_OF_CASE = 1;
-	public final static int NUMBER_OF_CLOUDLETS = 350;
-	public final static int NUMBER_OF_HOSTS = 50;//50
-	
 	public final static int RANDOM_SEED = 50; 
 	
 	public final static double SCHEDULING_INTERVAL = 1;
@@ -18,11 +14,19 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES = 1;
 	
-	public final static int VM_MIPS_MAX = 1000;
-	public final static int VM_MIPS_MIN = 200;
+	public final static int NUMBER_OF_CASE = 1;
+	public final static int NUMBER_OF_CLOUDLETS = 50;
+	public final static int NUMBER_OF_HOSTS = 50;//50
 	
-	public final static int DefautFrequency = 5;     //Base 5;     Our 1
-	public final static boolean ENABLE_DVFS = false;  //Base false; Our true
+	//1000  200
+	public final static int VM_MIPS_MAX = 2500;
+	public final static int VM_MIPS_MIN = 500; 
+	
+	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;
+	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
+	
+	public final static int DefautFrequency = 1;     //Base 5;     Our 1
+	public final static boolean ENABLE_DVFS = true;  //Base false; Our true
 	public final static boolean ENABLE_ONOFF = true;
 	
 	//*****************************Base************************************//

@@ -155,7 +155,7 @@ public class SchedulingHelper {
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
 		int[] startTime = getRandomIntegers(num_cloudlets, 0, 3600*24);
-		int[] execution_time = getRandomIntegers(num_cloudlets, 3600*14,  3600*16);
+		int[] execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		SchedulingCloudlet cloudlet= null;

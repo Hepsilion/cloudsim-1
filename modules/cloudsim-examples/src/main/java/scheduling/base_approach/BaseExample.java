@@ -2,6 +2,7 @@ package scheduling.base_approach;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,7 +34,7 @@ public class BaseExample {
 	
 	private static OutputStream os;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
         for(int i=0; i<SchedulingConstants.NUMBER_OF_CASE; i++) {
         	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*10;
         	System.out.println("#Cloudlet="+temp_numCloudlets);
@@ -87,6 +88,7 @@ public class BaseExample {
     			Log.printLine("Unwanted errors happen");
     		}
     		
+    		origional_output.close();
     		File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.base_log_File+"_"+temp_numCloudlets+".txt");
     		if(file.exists())
     			file.delete();
