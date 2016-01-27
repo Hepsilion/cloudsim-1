@@ -1,5 +1,6 @@
 package scheduling.our_approach;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +68,10 @@ public class SchedulingMain3 {
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
 			SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 			SchedulingHelper.outputResultToResultFile("Final", originOutput, result_output, mapping, 1);
+			
+			File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.our_log_file+num_all_cloudlets+".txt");
+			if(file.exists())
+				file.delete();
 		}
 	}
 }

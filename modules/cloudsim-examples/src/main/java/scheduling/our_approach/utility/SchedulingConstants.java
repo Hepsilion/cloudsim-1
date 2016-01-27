@@ -7,7 +7,7 @@ public class SchedulingConstants {
 	public final static String OutputFolder = "output";
 	
 	public final static int NUMBER_OF_CASE = 1;
-	public final static int NUMBER_OF_CLOUDLETS = 50;
+	public final static int NUMBER_OF_CLOUDLETS = 350;
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	public final static int RANDOM_SEED = 50; 
@@ -21,13 +21,13 @@ public class SchedulingConstants {
 	public final static int VM_MIPS_MAX = 1000;
 	public final static int VM_MIPS_MIN = 200;
 	
-	public final static int DefautFrequency = 1;     //Base 5; Our 1
-	public final static boolean ENABLE_DVFS = true;  //Base false; Our true
+	public final static int DefautFrequency = 5;     //Base 5;     Our 1
+	public final static boolean ENABLE_DVFS = false;  //Base false; Our true
 	public final static boolean ENABLE_ONOFF = true;
 	
 	//*****************************Base************************************//
-	public final static String base_logFile = "log/Base_f"+SchedulingConstants.DefautFrequency+"_Log";
-	public final static String base_resultFile = "result/Base_f"+SchedulingConstants.DefautFrequency;
+	public final static String base_log_File = "log/Base_f"+SchedulingConstants.DefautFrequency+"_Log";
+	public final static String base_result_File = "result/Base_f"+SchedulingConstants.DefautFrequency;
 	public final static String base_vmAllocationPolicy = "base";
 	
 	//*****************************Our************************************//

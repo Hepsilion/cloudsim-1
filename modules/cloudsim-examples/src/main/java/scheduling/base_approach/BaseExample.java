@@ -1,5 +1,6 @@
 package scheduling.base_approach;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -14,6 +15,7 @@ import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
 
 import scheduling.our_approach.utility.SchedulingConstants;
+import scheduling.our_approach.utility.SchedulingDatacenter;
 import scheduling.our_approach.utility.SchedulingDatacenterBroker;
 import scheduling.our_approach.utility.SchedulingHelper;
 
@@ -35,8 +37,8 @@ public class BaseExample {
         for(int i=0; i<SchedulingConstants.NUMBER_OF_CASE; i++) {
         	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*10;
         	System.out.println("#Cloudlet="+temp_numCloudlets);
-        	String resultFile = SchedulingConstants.base_resultFile + "_"+ temp_numCloudlets;
-        	String logFile = SchedulingConstants.base_logFile+ "_"+ temp_numCloudlets;
+        	String resultFile = SchedulingConstants.base_result_File + "_"+ temp_numCloudlets;
+        	String logFile = SchedulingConstants.base_log_File+ "_"+ temp_numCloudlets;
     		try {
     			SchedulingHelper.initOutput(logFile, resultFile, null);
     			os = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + resultFile + ".txt");
@@ -61,7 +63,7 @@ public class BaseExample {
     			cloudletList = SchedulingHelper.createSchedulingCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", PowerDatacenter.class, hostList, SchedulingConstants.base_vmAllocationPolicy, null);
+    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", SchedulingDatacenter.class, hostList, SchedulingConstants.base_vmAllocationPolicy, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);
@@ -84,6 +86,10 @@ public class BaseExample {
     			e.printStackTrace();
     			Log.printLine("Unwanted errors happen");
     		}
+    		
+    		File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.base_log_File+"_"+temp_numCloudlets+".txt");
+    		if(file.exists())
+    			file.delete();
         }
 	}
 }

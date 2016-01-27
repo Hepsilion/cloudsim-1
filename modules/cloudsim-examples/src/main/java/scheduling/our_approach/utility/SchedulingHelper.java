@@ -46,7 +46,6 @@ import scheduling.our_approach.AllocationMapping;
 import scheduling.our_approach.InitialVmAllocationPolicy;
 import scheduling.our_approach.NormalVmAllocationPolicy;
 import scheduling.our_approach.SchedulingHost;
-import experiments.paper1.main.RealtimeConstants;
 
 
 public class SchedulingHelper {
@@ -408,7 +407,7 @@ public class SchedulingHelper {
 	public static OutputStream getOutputStream(String output) {
 		OutputStream outputStream = null;
 		try {
-			outputStream = new FileOutputStream(RealtimeConstants.OutputFolder+"/" + output + ".txt");
+			outputStream = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + output + ".txt");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

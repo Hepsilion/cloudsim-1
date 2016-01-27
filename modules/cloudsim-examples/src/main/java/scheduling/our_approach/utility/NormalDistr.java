@@ -24,9 +24,9 @@ public class NormalDistr implements ContinuousDistribution{
 	}
 	
 	public static void main(String[] args) {
-		int[] execution_time = SchedulingHelper.getExecutionTime(50, 3600*15,  250);
-		for(int i=0; i<50; i++){
-			System.out.println(execution_time[i]);
-		}
+//		int[] execution_time = SchedulingHelper.getExecutionTime(50, 3600*15,  250);
+//		for(int i=0; i<50; i++){
+//			System.out.println(execution_time[i]);
+//		}
 	}
 }
