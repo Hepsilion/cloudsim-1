@@ -14,8 +14,8 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES = 1;
 	
-	public final static int NUMBER_OF_CASE = 20;
-	public final static int NUMBER_OF_CLOUDLETS = 50;
+	public final static int NUMBER_OF_CASE = 1;
+	public final static int NUMBER_OF_CLOUDLETS = 340;
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	//1000  200
@@ -26,7 +26,7 @@ public class SchedulingConstants {
 	
 	//14-16
 	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;
-	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*10;
+	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
 	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*8;
 	public final static int CLOUDLET_EXECUTION_TIME_DEV = 500;
 	
