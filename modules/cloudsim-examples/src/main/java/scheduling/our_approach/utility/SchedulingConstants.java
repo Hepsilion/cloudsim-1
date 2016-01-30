@@ -63,7 +63,7 @@ public class SchedulingConstants {
 	 *   We decrease the memory size two times to enable oversubscription
 	 */
 	public final static int VM_TYPES	= 4;
-	public final static int[] VM_MIPS	= { 2500, 2000, 1000, 500 };//{500, 400, 600, 400, 700, 400, 600, 1000, 800, 300};//
+	public final static int[] VM_MIPS	= { 2500, 2000, 1000, 500 };
 	public final static int[] VM_PES	= { 1, 1, 1, 1 };
 	public final static int[] VM_RAM	= {0,0,0,0};//{ 870,  1740, 1740, 613 };
 	public final static int VM_BW		= 0;//100000; // 100 Mbit/s

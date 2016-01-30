@@ -119,6 +119,8 @@ public class SchedulingHelper {
 	
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
+		//Parameters for example in paper
+		//int[] MIPSs = {500, 400, 600, 400, 700, 400, 600, 1000, 800, 300};
 		int[] MIPSs = getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / SchedulingConstants.VM_TYPES);
@@ -154,6 +156,10 @@ public class SchedulingHelper {
 		long outputSize = 300;
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
+		//Parameters for example in paper
+		//int[] startTime = {0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0};
+		//int[] execution_time = {5.0, 6.0, 4.0, 7.0, 8.0, 4.0, 4.0, 6.0, 7.0, 4.0};
+		
 		int[] startTime = getRandomIntegers(num_cloudlets, 0, 3600*24);
 		int[] execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
 

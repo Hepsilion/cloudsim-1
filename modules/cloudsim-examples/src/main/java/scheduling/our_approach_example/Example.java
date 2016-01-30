@@ -1,4 +1,4 @@
-package scheduling.our_approach;
+package scheduling.our_approach_example;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,6 +10,8 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 
+import scheduling.our_approach.AllocationMapping;
+import scheduling.our_approach.OverallExchangeProcessor;
 import scheduling.our_approach.utility.SchedulingConstants;
 import scheduling.our_approach.utility.SchedulingHelper;
 
