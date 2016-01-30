@@ -35,8 +35,8 @@ public class BaseExample {
 	private static OutputStream os;
 	
 	public static void main(String[] args) throws IOException {
-        for(int i=0; i<SchedulingConstants.NUMBER_OF_CASE; i++) {
-        	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*10;
+        for(int i=0; i<=SchedulingConstants.NUMBER_OF_CASE; i++) {
+        	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*20;
         	System.out.println("#Cloudlet="+temp_numCloudlets);
         	String resultFile = SchedulingConstants.base_result_File + "_"+ temp_numCloudlets;
         	String logFile = SchedulingConstants.base_log_File+ "_"+ temp_numCloudlets;

@@ -16,8 +16,8 @@ import scheduling.our_approach.utility.SchedulingHelper;
 
 public class SchedulingMain3 {
 	public static void main(String[] args) throws IOException {
-		for(int ca=0; ca<SchedulingConstants.NUMBER_OF_CASE; ca++){
-			int num_all_cloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + ca*10;
+		for(int ca=0; ca<=SchedulingConstants.NUMBER_OF_CASE; ca++){
+			int num_all_cloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + ca*20;
 			
 			SchedulingHelper.initOutput(SchedulingConstants.our_log_file+num_all_cloudlets, SchedulingConstants.our_result_file+num_all_cloudlets, SchedulingConstants.our_result_temp_file+num_all_cloudlets);
 			OutputStream result_output = SchedulingHelper.getOutputStream(SchedulingConstants.our_result_file+num_all_cloudlets);
