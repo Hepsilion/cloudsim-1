@@ -27,8 +27,28 @@ public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
 		return result;
 	}
 	
-	@Override
 	public PowerHost findHostForVm(Vm vm) {
+		PowerHost allocatedHost = null;
+		for (PowerHost host : this.<PowerHost> getHostList()) {
+            double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
+            if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
+            		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
+            		&& host.getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
+    				&& host.getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw())){
+            	allocatedHost = host;
+            	break;
+            }
+        }
+		
+		if(allocatedHost!=null){
+        	if(!allocatedHost.isSuitableForVm(vm))
+        		allocatedHost.MakeSuitableHostForVm(vm);
+			return allocatedHost;
+        }
+		return super.findHostForVm(vm);
+	}
+
+	public PowerHost findHostForVm2(Vm vm) {
         List<PowerHost> suitableHosts = new ArrayList<PowerHost>();
         for (PowerHost host : this.<PowerHost> getHostList()) {
             double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());

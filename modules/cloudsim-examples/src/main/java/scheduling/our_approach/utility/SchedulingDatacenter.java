@@ -78,7 +78,7 @@ public class SchedulingDatacenter extends PowerDatacenter {
         
         //TODO 添加 虚拟机销毁成功之后，调节主机频率
 		for(PowerHost host : this.<PowerHost>getHostList()){
-			host.isDvfsActivatedOnHost();
+			host.dvfs();
 		}
 		
 		Log.printLine(this.getName()+" compute resource usage and energy after VM#"+vm.getId()+" is destroyed");

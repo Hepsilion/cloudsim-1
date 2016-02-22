@@ -150,6 +150,38 @@ public class HostDynamicWorkload extends Host {
 			if (isEnableDVFS())
 				applyDvfsOnHost();
 		}
+		
+		public void dvfs() {
+			if(isEnableDVFS()){
+				double usedMips = this.getTotalMips()-this.getAvailableMips();
+				while(usedMips <= this.getTotalMips()){
+					int[] frequencies = new int[getPeList().size()];
+		    		double oldTotalMips = this.getTotalMips();
+		    		Log.printLine("Host#"+this.getId()+" Before,Available Mips:"+this.getAvailableMips());
+		    		for(int i=0; i<getPeList().size(); i++) {
+		    			frequencies[i]=getPeList().get(i).getIndexFreq();
+		    			Log.printLine(frequencies[i]+" ");
+		    			getPeList().get(i).decreaseFrequency();
+		    		}
+		    		
+		    		double totalMips = this.getTotalMips();
+		    		double newAvailableMips = totalMips-oldTotalMips+this.getAvailableMips();
+		    		Log.printLine("NewAvailableMips:"+newAvailableMips);
+		    		if(usedMips <= this.getTotalMips() && oldTotalMips!=this.getTotalMips()) {
+		    			this.getVmScheduler().setAvailableMips(newAvailableMips);
+		    			Log.printLine("Host#"+this.getId()+" After,Available Mips:"+this.getAvailableMips());
+		    		}else{
+		    			if(usedMips>this.getTotalMips()){
+		    				for(int i=0; i<getPeList().size(); i++) {
+			    				getPeList().get(i).setFrequency(frequencies[i]);
+			    			}
+		    			}
+		    			Log.printLine("Host#"+this.getId()+" Decreasing failed: now max avaiable mips="+(this.getTotalMaxMips()-this.getTotalMips()+this.getAvailableMips()));
+		    			break;
+		    		}
+				}
+			}
+		}
 	
 		/**
 		 * DVFS method

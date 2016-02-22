@@ -42,6 +42,7 @@ import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.xml.DvfsDatas;
 
 import scheduling.base_approach.BasePowerVmAllocation;
+import scheduling.base_approach.FFPowerVmAllocation;
 import scheduling.our_approach.AllocationMapping;
 import scheduling.our_approach.InitialVmAllocationPolicy;
 import scheduling.our_approach.NormalVmAllocationPolicy;
@@ -314,6 +315,8 @@ public class SchedulingHelper {
 			vmAllocationPolicy = new InitialVmAllocationPolicy(hostList, mapping);
 		} else if(vmAllocationPolicyName.equals("base")) {
 			vmAllocationPolicy = new BasePowerVmAllocation(hostList);
+		} else if (vmAllocationPolicyName.equals("ff")) {
+			vmAllocationPolicy = new FFPowerVmAllocation(hostList);
 		} else {
 			System.out.println("Unknown VM allocation policy: " + vmAllocationPolicyName);
 			System.exit(0);

@@ -333,9 +333,19 @@ public class Pe {
             setMips(newMips);
         }
 		
-		public boolean increastFrequency() {
+		public boolean increaseFrequency() {
 			if(getIndexFreq() < nbFreq - 1) {
 				incrIndexFreq();
+				double newMips = getPercentStep() / 100 * peProvisioner.getMaxMips();
+		        setMips(newMips);
+				return true;
+			}
+			return false;
+		}
+		
+		public boolean decreaseFrequency() {
+			if(getIndexFreq() > 0) {
+				decrIndexFreq();
 				double newMips = getPercentStep() / 100 * peProvisioner.getMaxMips();
 		        setMips(newMips);
 				return true;

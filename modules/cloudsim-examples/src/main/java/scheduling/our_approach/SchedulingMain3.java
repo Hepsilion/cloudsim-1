@@ -71,7 +71,7 @@ public class SchedulingMain3 {
 			SchedulingHelper.outputResultToResultFile("Final", originOutput, result_output, mapping, 1);
 			
 			originOutput.close();
-			File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.our_log_file+num_all_cloudlets+".txt");
+			File file = new File(SchedulingConstants.OutputFolder + "/" + SchedulingConstants.our_log_file+num_all_cloudlets+".txt");
 			if(file.exists()){
 				file.delete();
 			}

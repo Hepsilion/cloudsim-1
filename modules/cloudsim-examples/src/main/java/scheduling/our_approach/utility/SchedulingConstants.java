@@ -14,12 +14,12 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES = 1;
 	
-	public final static int NUMBER_OF_CASE = 1;
-	public final static int NUMBER_OF_CLOUDLETS = 340;
+	public final static int NUMBER_OF_CASE = 15;
+	public final static int NUMBER_OF_CLOUDLETS = 60;
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	//1000  200
-	public final static int VM_MIPS_MAX = 1000;
+	public final static int VM_MIPS_MAX = 2000;
 	public final static int VM_MIPS_MIN = 200; 
 	public final static int VM_MIPS_MEAN = 1000;
 	public final static int VM_MIPS_DEV = 500;
@@ -30,9 +30,14 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*8;
 	public final static int CLOUDLET_EXECUTION_TIME_DEV = 500;
 	
-	public final static int DefautFrequency = 1;     //Base 5;     Our 1
-	public final static boolean ENABLE_DVFS = true;  //Base false; Our true
+	public final static int DefautFrequency = 1;     //FF 5;     Base 5;     Our 1
+	public final static boolean ENABLE_DVFS = true;  //FF false; Base false; Our true
 	public final static boolean ENABLE_ONOFF = true;
+	
+	//*****************************FF************************************//
+	public final static String ff_vmAllocationPolicy = "ff";
+	public final static String ff_log_File = "log/FF_f"+SchedulingConstants.DefautFrequency+"_Log";
+	public final static String ff_result_File = "result/FF_f"+SchedulingConstants.DefautFrequency;
 	
 	//*****************************Base************************************//
 	public final static String base_log_File = "log/Base_f"+SchedulingConstants.DefautFrequency+"_Log";
