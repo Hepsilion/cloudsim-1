@@ -14,12 +14,12 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES = 1;
 	
-	public final static int NUMBER_OF_CASE = 15;
-	public final static int NUMBER_OF_CLOUDLETS = 60;
+	public final static int NUMBER_OF_CASE = 10;
+	public final static int NUMBER_OF_CLOUDLETS = 50;
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	//1000  200
-	public final static int VM_MIPS_MAX = 2000;
+	public final static int VM_MIPS_MAX = 2500;
 	public final static int VM_MIPS_MIN = 200; 
 	public final static int VM_MIPS_MEAN = 1000;
 	public final static int VM_MIPS_DEV = 500;
