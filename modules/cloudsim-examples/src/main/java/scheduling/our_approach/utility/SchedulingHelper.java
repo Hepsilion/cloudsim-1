@@ -447,6 +447,7 @@ public class SchedulingHelper {
 		Log.printLine(ith+ " Allocation:\n"+mapping);
 		Log.printLine(String.format("Clouelet Acceptance Rate = %.5f%%", mapping.getTask_acceptance_rate() * 100));
 		Log.printLine(String.format("Energy consumption = %.5f kwh", mapping.getEnergy()/3600/1000));
+		Log.printLine(String.format("Energy Efficiency: %.5f", mapping.getNumInstruction()/mapping.getEnergy()));
 		Log.printLine("Num of Instructions = " + mapping.getNumInstruction());
 		Log.printLine(String.format("Allocation Fitness = %.5f", mapping.getFitness()));
 		
@@ -500,6 +501,7 @@ public class SchedulingHelper {
 		Log.printLine(String.format("Clouelet Acceptance Rate: %.5f%%", acceptance_rate * 100));
 		Log.printLine(String.format("Deadline Missing Rate: %.4f%%", declined_cloudlet_num*1.0/cloudlets.size()*100));
 		Log.printLine(String.format("Energy consumption: %.5f Ws", datacenter.getPower()));
+		Log.printLine(String.format("Energy Efficiency: %.5f", 1.0*numInstructions/datacenter.getPower()));
 		Log.printLine(String.format("Allocation Fitness: %.5f", fitness));
 		
 		Log.printLine();

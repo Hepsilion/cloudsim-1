@@ -30,8 +30,8 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*8;
 	public final static int CLOUDLET_EXECUTION_TIME_DEV = 500;
 	
-	public final static int DefautFrequency = 1;     //FF 5;     Base 5;     Ours 1
-	public final static boolean ENABLE_DVFS = true;  //FF false; Base false; Ours true
+	public final static int DefautFrequency = 5;     //FF 5;     Base 5;     Ours 1
+	public final static boolean ENABLE_DVFS = false;  //FF false; Base false; Ours true
 	public final static boolean ENABLE_ONOFF = true;
 	
 	//*****************************FF************************************//
