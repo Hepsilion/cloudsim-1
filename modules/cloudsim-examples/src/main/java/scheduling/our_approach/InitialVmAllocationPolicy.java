@@ -27,7 +27,7 @@ public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
 		return result;
 	}
 	
-	public PowerHost findHostForVm(Vm vm) {
+	public PowerHost findHostForVm2(Vm vm) {
 		PowerHost allocatedHost = null;
 		for (PowerHost host : this.<PowerHost> getHostList()) {
             double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
@@ -48,7 +48,7 @@ public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
 		return super.findHostForVm(vm);
 	}
 
-	public PowerHost findHostForVm2(Vm vm) {
+	public PowerHost findHostForVm(Vm vm) {
         List<PowerHost> suitableHosts = new ArrayList<PowerHost>();
         for (PowerHost host : this.<PowerHost> getHostList()) {
             double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
