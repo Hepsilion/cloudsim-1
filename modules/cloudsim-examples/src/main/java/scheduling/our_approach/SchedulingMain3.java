@@ -26,6 +26,8 @@ public class SchedulingMain3 {
 			
 			AllocationMapping mapping = new AllocationMapping(num_all_cloudlets);
 			
+			SchedulingHelper.outputToResultFile(originOutput, result_output, "Our Example start time: " + System.currentTimeMillis());
+			
 			List<Vm> vmList = new ArrayList<Vm>();
 			List<Cloudlet> cloudletList = new ArrayList<Cloudlet>();
 			List<PowerHost> hostList = new ArrayList<PowerHost>();
@@ -75,6 +77,7 @@ public class SchedulingMain3 {
 			if(file.exists()){
 				file.delete();
 			}
+			SchedulingHelper.outputToResultFile(originOutput, result_output, "Our Example finish time: " + System.currentTimeMillis());
 		}
 	}
 }

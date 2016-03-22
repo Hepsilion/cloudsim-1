@@ -51,7 +51,7 @@ public class FFExample {
     		OutputStream origional_output = Log.getOutput();
             Log.setOutput(os);
         	
-        	Log.printLine("FF Example start time: " + new Date().toString());
+        	Log.printLine("FF Example start time: " + System.currentTimeMillis());
             Log.setOutput(origional_output);
     		Log.printLine("FF Example Simulation started!");
     		try {
@@ -78,7 +78,7 @@ public class FFExample {
     			CloudSim.stopSimulation();
 
     			Log.setOutput(os);
-    			Log.printLine("FF Example end time: " + new Date().toString());
+    			Log.printLine("FF Example end time: " + System.currentTimeMillis());
     			SchedulingHelper.printResults(datacenter, null, vmlist, cloudletList, received_cloudlets, lastClock, SchedulingConstants.OUTPUT_CSV);
     			Log.setOutput(origional_output);
     			

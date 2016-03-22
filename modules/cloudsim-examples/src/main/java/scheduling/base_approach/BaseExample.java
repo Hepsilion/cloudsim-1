@@ -51,7 +51,7 @@ public class BaseExample {
     		OutputStream origional_output = Log.getOutput();
             Log.setOutput(os);
         	
-        	Log.printLine("Base Example start time: " + new Date().toString());
+        	Log.printLine("Base Example start time: " + System.currentTimeMillis());
             Log.setOutput(origional_output);
     		Log.printLine("Base Example Simulation started!");
     		try {
@@ -78,7 +78,7 @@ public class BaseExample {
     			CloudSim.stopSimulation();
 
     			Log.setOutput(os);
-    			Log.printLine("Base Example end time: " + new Date().toString());
+    			Log.printLine("Base Example end time: " + System.currentTimeMillis());
     			SchedulingHelper.printResults(datacenter, null, vmlist, cloudletList, received_cloudlets, lastClock, SchedulingConstants.OUTPUT_CSV);
     			Log.setOutput(origional_output);
     			
