@@ -20,7 +20,7 @@ import scheduling.our_approach.utility.SchedulingDatacenter;
 import scheduling.our_approach.utility.SchedulingDatacenterBroker;
 import scheduling.our_approach.utility.SchedulingHelper;
 
-public class FFExample {
+public class Base_MBFD_Example {
 	/** The broker. */
 	protected static SchedulingDatacenterBroker broker;
 	/** The cloudlet list. */
@@ -38,8 +38,8 @@ public class FFExample {
         for(int i=0; i<=SchedulingConstants.NUMBER_OF_CASE; i++) {
         	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*10;
         	System.out.println("#Cloudlet="+temp_numCloudlets);
-        	String resultFile = SchedulingConstants.ff_result_File + "_"+ temp_numCloudlets;
-        	String logFile = SchedulingConstants.ff_log_File+ "_"+ temp_numCloudlets;
+        	String resultFile = SchedulingConstants.base_result_File + "_"+ temp_numCloudlets;
+        	String logFile = SchedulingConstants.base_log_File+ "_"+ temp_numCloudlets;
     		try {
     			SchedulingHelper.initOutput(logFile, resultFile, null);
     			os = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + resultFile + ".txt");
@@ -51,9 +51,9 @@ public class FFExample {
     		OutputStream origional_output = Log.getOutput();
             Log.setOutput(os);
         	
-        	Log.printLine("FF Example start time: " + System.currentTimeMillis());
+        	Log.printLine("Base Example start time: " + System.currentTimeMillis());
             Log.setOutput(origional_output);
-    		Log.printLine("FF Example Simulation started!");
+    		Log.printLine("Base Example Simulation started!");
     		try {
     			CloudSim.init(1, Calendar.getInstance(), false);
 
@@ -64,7 +64,7 @@ public class FFExample {
     			cloudletList = SchedulingHelper.createSchedulingCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", SchedulingDatacenter.class, hostList, SchedulingConstants.ff_vmAllocationPolicy, null);
+    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", SchedulingDatacenter.class, hostList, SchedulingConstants.base_vmAllocationPolicy, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);
@@ -78,18 +78,18 @@ public class FFExample {
     			CloudSim.stopSimulation();
 
     			Log.setOutput(os);
-    			Log.printLine("FF Example end time: " + System.currentTimeMillis());
+    			Log.printLine("Base Example end time: " + System.currentTimeMillis());
     			SchedulingHelper.printResults(datacenter, null, vmlist, cloudletList, received_cloudlets, lastClock, SchedulingConstants.OUTPUT_CSV);
     			Log.setOutput(origional_output);
     			
-    			Log.printLine("FF Example Simulation finished!");
+    			Log.printLine("Base Example Simulation finished!");
     		} catch (Exception e) {
     			e.printStackTrace();
     			Log.printLine("Unwanted errors happen");
     		}
     		
     		origional_output.close();
-    		File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.ff_log_File+"_"+temp_numCloudlets+".txt");
+    		File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.base_log_File+"_"+temp_numCloudlets+".txt");
     		if(file.exists())
     			file.delete();
         }

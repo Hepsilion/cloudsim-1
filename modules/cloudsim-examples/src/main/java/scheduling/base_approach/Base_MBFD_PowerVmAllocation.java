@@ -8,8 +8,8 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
 
-public class BasePowerVmAllocation extends PowerVmAllocationPolicyAbstract{
-	public BasePowerVmAllocation(List<? extends Host> list) {
+public class Base_MBFD_PowerVmAllocation extends PowerVmAllocationPolicyAbstract{
+	public Base_MBFD_PowerVmAllocation(List<? extends Host> list) {
 		super(list);
 	}
 

@@ -8,9 +8,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
 
-public class FFPowerVmAllocation extends PowerVmAllocationPolicyAbstract{
+public class Base_FF_PowerVmAllocation extends PowerVmAllocationPolicyAbstract{
 
-	public FFPowerVmAllocation(List<? extends Host> list) {
+	public Base_FF_PowerVmAllocation(List<? extends Host> list) {
 		super(list);
 	}
 

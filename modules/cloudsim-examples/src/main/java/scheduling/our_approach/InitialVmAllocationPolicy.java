@@ -10,6 +10,8 @@ import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyAbstract;
 import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 
+import scheduling.our_approach.utility.SchedulingConstants;
+
 public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
 	private AllocationMapping mapping;
 	
@@ -26,60 +28,60 @@ public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
 		}
 		return result;
 	}
-	
-	public PowerHost findHostForVm2(Vm vm) {
-		PowerHost allocatedHost = null;
-		for (PowerHost host : this.<PowerHost> getHostList()) {
-            double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
-            if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
-            		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
-            		&& host.getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
-    				&& host.getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw())){
-            	allocatedHost = host;
-            	break;
-            }
-        }
-		
-		if(allocatedHost!=null){
-        	if(!allocatedHost.isSuitableForVm(vm))
-        		allocatedHost.MakeSuitableHostForVm(vm);
-			return allocatedHost;
-        }
-		return super.findHostForVm(vm);
-	}
 
 	public PowerHost findHostForVm(Vm vm) {
-        List<PowerHost> suitableHosts = new ArrayList<PowerHost>();
-        for (PowerHost host : this.<PowerHost> getHostList()) {
-            double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
-            if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
-            		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
-            		&& host.getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
-    				&& host.getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw())){
-            	suitableHosts.add(host);
-            }
-        }
+		if(SchedulingConstants.our_initial_vmAllocationPolicy_method.equals("MBFD")){
+			List<PowerHost> suitableHosts = new ArrayList<PowerHost>();
+	        for (PowerHost host : this.<PowerHost> getHostList()) {
+	            double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
+	            if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
+	            		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
+	            		&& host.getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
+	    				&& host.getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw())){
+	            	suitableHosts.add(host);
+	            }
+	        }
+	        
+	        double minPower = Double.MAX_VALUE;
+	        PowerHost allocatedHost = null;
+	        for(PowerHost host : suitableHosts) {
+	            try {
+	            	double powerBeforeAllocation = getPowerBeforeAllocation(host);
+	                double powerAfterAllocation = getPowerAfterAllocation(host, vm);
+	                double powerDiff = powerAfterAllocation - powerBeforeAllocation;
+	                if (powerDiff < minPower) {
+	                    minPower = powerDiff;
+	                    allocatedHost = host;
+	                }
+	            } catch (Exception e) {
+	            }
+	        }
+	        
+	        if(allocatedHost!=null){
+	        	if(!allocatedHost.isSuitableForVm(vm))
+	        		allocatedHost.MakeSuitableHostForVm(vm);
+				return allocatedHost;
+	        }
+		}else if(SchedulingConstants.our_initial_vmAllocationPolicy_method.equals("FF")){
+			PowerHost allocatedHost = null;
+			for (PowerHost host : this.<PowerHost> getHostList()) {
+	            double maxAvailableMips = host.getTotalMaxMips()-(host.getTotalMips()-host.getAvailableMips());
+	            if(host.getVmScheduler().getMaxPeCapacity()>=vm.getCurrentRequestedMaxMips()
+	            		&& maxAvailableMips>=vm.getCurrentRequestedTotalMips()
+	            		&& host.getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) 
+	    				&& host.getBwProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedBw())){
+	            	allocatedHost = host;
+	            	break;
+	            }
+	        }
+			
+			if(allocatedHost!=null){
+	        	if(!allocatedHost.isSuitableForVm(vm))
+	        		allocatedHost.MakeSuitableHostForVm(vm);
+				return allocatedHost;
+	        }
+		}
         
-        double minPower = Double.MAX_VALUE;
-        PowerHost allocatedHost = null;
-        for(PowerHost host : suitableHosts) {
-            try {
-            	double powerBeforeAllocation = getPowerBeforeAllocation(host);
-                double powerAfterAllocation = getPowerAfterAllocation(host, vm);
-                double powerDiff = powerAfterAllocation - powerBeforeAllocation;
-                if (powerDiff < minPower) {
-                    minPower = powerDiff;
-                    allocatedHost = host;
-                }
-            } catch (Exception e) {
-            }
-        }
-        
-        if(allocatedHost!=null){
-        	if(!allocatedHost.isSuitableForVm(vm))
-        		allocatedHost.MakeSuitableHostForVm(vm);
-			return allocatedHost;
-        }
 		return super.findHostForVm(vm);
 	}
 	

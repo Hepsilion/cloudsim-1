@@ -19,8 +19,8 @@ public class SchedulingConstants {
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	//1000  200
-	public final static int VM_MIPS_MAX = 1500;
-	public final static int VM_MIPS_MIN = 1000; 
+	public final static int VM_MIPS_MAX = 1000;
+	public final static int VM_MIPS_MIN = 500; 
 	public final static int VM_MIPS_MEAN = 1000;
 	public final static int VM_MIPS_DEV = 500;
 	
@@ -36,27 +36,28 @@ public class SchedulingConstants {
 	
 	//*****************************FF************************************//
 	public final static String ff_vmAllocationPolicy = "ff";
-	public final static String ff_log_File = "log/FF_f"+SchedulingConstants.DefautFrequency+"_Log";
-	public final static String ff_result_File = "result/FF_f"+SchedulingConstants.DefautFrequency;
+	public final static String ff_log_File = "log/Base_FF_f"+SchedulingConstants.DefautFrequency+"_Log";
+	public final static String ff_result_File = "result/Base_FF_f"+SchedulingConstants.DefautFrequency;
 	
-	//*****************************Base************************************//
-	public final static String base_log_File = "log/Base_f"+SchedulingConstants.DefautFrequency+"_Log";
-	public final static String base_result_File = "result/Base_f"+SchedulingConstants.DefautFrequency;
-	public final static String base_vmAllocationPolicy = "base";
+	//*****************************MBFD************************************//
+	public final static String base_log_File = "log/Base_MBFD_f"+SchedulingConstants.DefautFrequency+"_Log";
+	public final static String base_result_File = "result/Base_MBFD_f"+SchedulingConstants.DefautFrequency;
+	public final static String base_vmAllocationPolicy = "mbfd";
 	
-	//*****************************Our************************************//
+	//*****************************XXXX-DVFS-Ours************************************//
 	//5 20 5
 	//5 10 10
 	public final static int NUMBER_OF_ITERATIONS = 5;
 	public final static int NUMBER_OF_PROCESSORS = 10;
 	public final static int NUMBER_OF_ITERATION_PER_PROCESSOR = 10;
 	
-	public final static String our_log_file = "log/Our_Log";
-	public final static String our_result_file = "result/Our_Result";
-	public final static String our_result_temp_file = "result/Our_temp_Result";
-	
 	public final static String our_normal_vmAllocationPolicy = "normal";
 	public final static String our_initial_vmAllocationPolicy = "init";
+	public final static String our_initial_vmAllocationPolicy_method = "MBFD";
+	
+	public final static String our_log_file = "log/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_Log";
+	public final static String our_result_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_Result";
+	public final static String our_result_temp_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_Temp_Result";
 	
 	/*
 	 * VM instance types:
