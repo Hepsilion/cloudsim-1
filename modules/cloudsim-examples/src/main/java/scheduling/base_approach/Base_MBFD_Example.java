@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
