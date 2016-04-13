@@ -1,7 +1,5 @@
 package scheduling.our_approach.utility;
 
-import java.util.Random;
-
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
@@ -13,9 +11,9 @@ public class NormalDistr implements ContinuousDistribution{
 		this.numGen = new NormalDistribution(mean, dev);
 	}
 	
-	public NormalDistr(Random seed, double mean, double dev) {
+	public NormalDistr(int seed, double mean, double dev) {
 		this(mean, dev);
-		numGen.reseedRandomGenerator(seed.nextLong());
+		numGen.reseedRandomGenerator(seed);
 	}
 
 	@Override
@@ -24,9 +22,9 @@ public class NormalDistr implements ContinuousDistribution{
 	}
 	
 	public static void main(String[] args) {
-//		int[] execution_time = SchedulingHelper.getExecutionTime(50, 3600*15,  250);
-//		for(int i=0; i<50; i++){
-//			System.out.println(execution_time[i]);
-//		}
+		NormalDistribution nd = new NormalDistribution(10, 5);
+		for(int i=0; i<50; i++){
+			System.out.println((int)nd.sample());
+		}
 	}
 }

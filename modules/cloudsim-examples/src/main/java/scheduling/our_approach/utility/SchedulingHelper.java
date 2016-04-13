@@ -41,13 +41,12 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.xml.DvfsDatas;
 
-import scheduling.base_approach.Base_MBFD_PowerVmAllocation;
 import scheduling.base_approach.Base_FF_PowerVmAllocation;
+import scheduling.base_approach.Base_MBFD_PowerVmAllocation;
 import scheduling.our_approach.AllocationMapping;
 import scheduling.our_approach.InitialVmAllocationPolicy;
 import scheduling.our_approach.NormalVmAllocationPolicy;
 import scheduling.our_approach.SchedulingHost;
-
 
 public class SchedulingHelper {
 	public static void simulation(List<Cloudlet> cloudletList, List<PowerHost> hostList, List<Vm> vmlist, AllocationMapping mapping, String vmAllocationPolicy) {
@@ -120,9 +119,14 @@ public class SchedulingHelper {
 	
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
+		
 		//Parameters for example in paper
-		//int[] MIPSs = {800, 600, 600, 400, 700, 500, 600, 500, 800, 700};
-		int[] MIPSs = getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
+		int[] MIPSs=new int[vmsNumber];
+		if(SchedulingConstants.DISTRIBUTION.equals("Uniformly"))
+			MIPSs= getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
+		else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion"))
+			MIPSs = getRandomGaussianMIPS(vmsNumber, SchedulingConstants.VM_MIPS_MEAN, SchedulingConstants.VM_MIPS_DEV);
+		
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / SchedulingConstants.VM_TYPES);
 			vms.add(new SchedulingVm(
@@ -141,6 +145,7 @@ public class SchedulingHelper {
 		return vms;
 	}
 	
+	//Uniformly Distribution
 	public static int[] getRandomMIPSs(int vmNum, int min, int max) {
 		Random rand = new Random(200);
 		int[] MIPSs = new int[vmNum];
@@ -148,6 +153,21 @@ public class SchedulingHelper {
 			MIPSs[i] = rand.nextInt(max)%(max-min+1)+min;
 		}
 		return MIPSs;
+	}
+	
+	//Gaussian Distribution
+	public static int[] getRandomGaussianMIPS(int vmNum, int mean, int dev) {
+		NormalDistr rand = new NormalDistr(200, mean, dev);
+		int[] MIPS = new int[vmNum];
+		int temp;
+		for(int i=0; i<vmNum; i++){
+			temp=(int) rand.sample();
+			if(temp<0)
+				MIPS[i]=temp*(-1);
+			else
+				MIPS[i]=temp;
+		}
+		return MIPS;
 	}
 	
 	public static List<Cloudlet> createSchedulingCloudlet(int userId, List<Vm> vmlist, int num_cloudlets) {
@@ -161,8 +181,15 @@ public class SchedulingHelper {
 		//int[] startTime = {0, 1, 1, 2, 3, 4, 4, 5, 5, 7};
 		//int[] execution_time = {8, 8, 7, 9, 8, 10, 8, 9, 8, 8};
 		
-		int[] startTime = getRandomIntegers(num_cloudlets, 0, 3600*24);
-		int[] execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
+		int[] startTime = new int[num_cloudlets];
+		int[] execution_time = new int[num_cloudlets];
+		if(SchedulingConstants.DISTRIBUTION.equals("Uniformly")){
+			startTime = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MIN, SchedulingConstants.CLOUDLET_START_TIME_MAX);
+			execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
+		}else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion")){
+			startTime = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MEAN, SchedulingConstants.CLOUDLET_START_TIME_DEV);
+			execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
+		}
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		SchedulingCloudlet cloudlet= null;
@@ -190,15 +217,7 @@ public class SchedulingHelper {
 		return cloudlets;
 	}
 	
-	public static int[] getExecutionTime(int length, int mean, int dev){
-		NormalDistr md = new NormalDistr(mean, dev);
-		int[] numbers = new int[length];
-		for (int i = 0; i < length; i++) {
-			numbers[i] = (int) md.sample();
-		}
-		return numbers;
-	}
-	
+	//Uniformly Distribution
 	public static int[] getRandomIntegers(int length, int min, int max) {
 		Random rand = new Random(SchedulingConstants.RANDOM_SEED);
 		int[] numbers = new int[length];
@@ -208,6 +227,21 @@ public class SchedulingHelper {
 			//System.out.print(numbers[i]+" ");
 		}
 		//System.out.println();
+		return numbers;
+	}
+	
+	//Gaussian Distribution
+	public static int[] getRandomGaussianIntegers(int length, int mean, int dev) {
+		NormalDistr rand = new NormalDistr(SchedulingConstants.RANDOM_SEED, mean, dev);
+		int[] numbers = new int[length];
+		int temp;
+		for(int i=0; i<length; i++){
+			temp = (int) rand.sample();
+			if(temp<0)
+				numbers[i]=temp*(-1);
+			else
+				numbers[i]=temp;
+		}
 		return numbers;
 	}
 	

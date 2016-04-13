@@ -14,21 +14,26 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES = 1;
 	
-	public final static int NUMBER_OF_CASE = 20;
-	public final static int NUMBER_OF_CLOUDLETS = 50;
+	public final static int NUMBER_OF_CASE = 15;
+	public final static int NUMBER_OF_CLOUDLETS = 10;
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
-	//1000  200
-	public final static int VM_MIPS_MAX = 1000;
-	public final static int VM_MIPS_MIN = 500; 
-	public final static int VM_MIPS_MEAN = 1000;
-	public final static int VM_MIPS_DEV = 500;
-	
-	//14-16
-	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;
+	//1000  2000
+	public final static String DISTRIBUTION="Gaussion"; 
+	//Uniformly
+	public final static int VM_MIPS_MAX = 2000;
+	public final static int VM_MIPS_MIN = 500;
+	public final static int CLOUDLET_START_TIME_MAX=3600*24;
+	public final static int CLOUDLET_START_TIME_MIN=3600*0;
+	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;//14-16
 	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
-	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*8;
-	public final static int CLOUDLET_EXECUTION_TIME_DEV = 500;
+	//Gaussion
+	public final static int VM_MIPS_MEAN = 1250;
+	public final static int VM_MIPS_DEV = 500;
+	public final static int CLOUDLET_START_TIME_MEAN=3600*12;
+	public final static int CLOUDLET_START_TIME_DEV=3600*4;
+	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*15;
+	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*5;
 	
 	public final static int DefautFrequency = 1;     //FF 5;     Base 5;     Ours 1
 	public final static boolean ENABLE_DVFS = true;  //FF false; Base false; Ours true
@@ -44,7 +49,7 @@ public class SchedulingConstants {
 	public final static String base_result_File = "result/Base_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
 	public final static String base_vmAllocationPolicy = "mbfd";
 	
-	//*****************************XXXX-DVFS-Ours************************************//
+	//*****************************DVFS-XXXX-EX************************************//
 	//5 20 5
 	//5 10 10
 	public final static int NUMBER_OF_ITERATIONS = 5;
@@ -53,7 +58,7 @@ public class SchedulingConstants {
 	
 	public final static String our_normal_vmAllocationPolicy = "normal";
 	public final static String our_initial_vmAllocationPolicy = "init";
-	public final static String our_initial_vmAllocationPolicy_method = "MBFD";
+	public final static String our_initial_vmAllocationPolicy_method = "FF";
 	
 	public final static String our_log_file = "log/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
 	public final static String our_result_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Result";
