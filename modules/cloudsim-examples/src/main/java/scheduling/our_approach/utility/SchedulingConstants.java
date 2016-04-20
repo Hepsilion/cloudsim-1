@@ -2,7 +2,7 @@ package scheduling.our_approach.utility;
 
 public class SchedulingConstants {
 	public final static boolean ENABLE_OUTPUT = true;
-	public final static boolean OUTPUT_TO_FILE = true;
+	public final static boolean OUTPUT_TO_FILE = false;
 	public final static boolean OUTPUT_CSV    = false;
 	public final static String OutputFolder = "output";
 	
@@ -29,7 +29,7 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
 	//Gaussion
 	public final static int VM_MIPS_MEAN = 1250;
-	public final static int VM_MIPS_DEV = 500;
+	public final static int VM_MIPS_DEV = 100;
 	public final static int CLOUDLET_START_TIME_MEAN=3600*12;
 	public final static int CLOUDLET_START_TIME_DEV=3600*4;
 	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*15;
@@ -58,7 +58,7 @@ public class SchedulingConstants {
 	
 	public final static String our_normal_vmAllocationPolicy = "normal";
 	public final static String our_initial_vmAllocationPolicy = "init";
-	public final static String our_initial_vmAllocationPolicy_method = "FF";
+	public final static String our_initial_vmAllocationPolicy_method = "MBFD";
 	
 	public final static String our_log_file = "log/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
 	public final static String our_result_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Result";

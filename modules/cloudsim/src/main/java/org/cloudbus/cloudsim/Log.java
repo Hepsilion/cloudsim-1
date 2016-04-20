@@ -40,6 +40,7 @@ public class Log {
 	public static void print(String message) {
 		if (!isDisabled()) {
 			try {
+				if(getOutput().equals(System.out));else//TODO 仅仅在计算时间时使用，增加这个，如果输出到控制台，不让它输出，其他时候注释掉
 				getOutput().write(message.getBytes());
 			} catch (IOException e) {
 				e.printStackTrace();
