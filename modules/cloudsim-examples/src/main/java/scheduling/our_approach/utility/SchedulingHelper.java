@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
 import org.cloudbus.cloudsim.Datacenter;
@@ -187,7 +188,7 @@ public class SchedulingHelper {
 			startTime = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MIN, SchedulingConstants.CLOUDLET_START_TIME_MAX);
 			execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
 		}else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion")){
-			startTime = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MEAN, SchedulingConstants.CLOUDLET_START_TIME_DEV);
+			startTime = getArrivalTime(200, num_cloudlets);
 			execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
 		}
 
@@ -215,6 +216,17 @@ public class SchedulingHelper {
 		}
 
 		return cloudlets;
+	}
+	
+	public static int[] getArrivalTime(int seed, int num){
+		double lambda=num*1.0/24/3600;
+		Random rand=new Random(seed);
+		int[] times=new int[num];
+		times[0]=(int) (-Math.log(rand.nextDouble())/lambda);
+		for(int i=1; i<num; i++){
+			times[i]= times[i-1]+(int)(-Math.log(rand.nextDouble())/lambda);
+		}
+		return times;
 	}
 	
 	//Uniformly Distribution

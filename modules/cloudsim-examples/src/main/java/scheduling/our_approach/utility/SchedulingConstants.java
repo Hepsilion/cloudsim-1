@@ -14,8 +14,8 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_LENGTH	= 200* (int) SIMULATION_LIMIT;
 	public final static int CLOUDLET_PES = 1;
 	
-	public final static int NUMBER_OF_CASE = 15;
-	public final static int NUMBER_OF_CLOUDLETS = 10;
+	public final static int NUMBER_OF_CASE = 1;
+	public final static int NUMBER_OF_CLOUDLETS = 100;
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	//1000  2000
@@ -28,15 +28,13 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;//14-16
 	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
 	//Gaussion
-	public final static int VM_MIPS_MEAN = 1250;
+	public final static int VM_MIPS_MEAN = 1500;
 	public final static int VM_MIPS_DEV = 100;
-	public final static int CLOUDLET_START_TIME_MEAN=3600*12;
-	public final static int CLOUDLET_START_TIME_DEV=3600*4;
-	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*15;
-	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*5;
+	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*10;
+	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*2;
 	
-	public final static int DefautFrequency = 1;     //FF 5;     Base 5;     Ours 1
-	public final static boolean ENABLE_DVFS = true;  //FF false; Base false; Ours true
+	public final static int DefautFrequency = 5;     //FF 5;     Base 5;     Ours 1
+	public final static boolean ENABLE_DVFS = false;  //FF false; Base false; Ours true
 	public final static boolean ENABLE_ONOFF = true;
 	
 	//*****************************FF************************************//
