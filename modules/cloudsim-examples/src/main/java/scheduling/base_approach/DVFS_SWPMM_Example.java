@@ -19,7 +19,7 @@ import scheduling.our_approach.utility.SchedulingDatacenter;
 import scheduling.our_approach.utility.SchedulingDatacenterBroker;
 import scheduling.our_approach.utility.SchedulingHelper;
 
-public class Base_FF_Example {
+public class DVFS_SWPMM_Example {
 	/** The broker. */
 	protected static SchedulingDatacenterBroker broker;
 	/** The cloudlet list. */
@@ -37,8 +37,8 @@ public class Base_FF_Example {
         for(int i=0; i<SchedulingConstants.NUMBER_OF_CASE; i++) {
         	int temp_numCloudlets = SchedulingConstants.NUMBER_OF_CLOUDLETS + i*10;
         	System.out.println("#Cloudlet="+temp_numCloudlets);
-        	String resultFile = SchedulingConstants.ff_result_File + "_"+ temp_numCloudlets;
-        	String logFile = SchedulingConstants.ff_log_File+ "_"+ temp_numCloudlets;
+        	String resultFile = SchedulingConstants.swpmm_result_File + "_"+ temp_numCloudlets;
+        	String logFile = SchedulingConstants.swpmm_log_File+ "_"+ temp_numCloudlets;
     		try {
     			SchedulingHelper.initOutput(logFile, resultFile, null);
     			os = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + resultFile + ".txt");
@@ -63,7 +63,7 @@ public class Base_FF_Example {
     			cloudletList = SchedulingHelper.createSchedulingCloudlet(brokerId, vmlist, temp_numCloudlets);
     			hostList = SchedulingHelper.createHostList(SchedulingConstants.NUMBER_OF_HOSTS);
 
-    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", SchedulingDatacenter.class, hostList, SchedulingConstants.ff_vmAllocationPolicy, null);
+    			datacenter = (PowerDatacenter) SchedulingHelper.createDatacenter("Datacenter", SchedulingDatacenter.class, hostList, SchedulingConstants.swpmm_vmAllocationPolicy, null);
     			datacenter.setDisableMigrations(true);
     			broker.submitVmList(vmlist);
     			broker.submitCloudletList(cloudletList);
@@ -88,7 +88,7 @@ public class Base_FF_Example {
     		}
     		
     		origional_output.close();
-    		File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.ff_log_File+"_"+temp_numCloudlets+".txt");
+    		File file = new File(SchedulingConstants.OutputFolder + "/" +SchedulingConstants.swpmm_log_File+"_"+temp_numCloudlets+".txt");
     		if(file.exists())
     			file.delete();
         }

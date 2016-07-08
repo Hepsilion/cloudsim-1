@@ -15,7 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
 import org.cloudbus.cloudsim.Datacenter;
@@ -36,6 +35,9 @@ import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyDVFSMinimumUsedHost;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicySimpleWattPerMipsMetric;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR;
 import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -44,6 +46,8 @@ import org.cloudbus.cloudsim.xml.DvfsDatas;
 
 import scheduling.base_approach.Base_FF_PowerVmAllocation;
 import scheduling.base_approach.Base_MBFD_PowerVmAllocation;
+import scheduling.base_approach.DVFS_FF_PowerVMAllocation;
+import scheduling.base_approach.DVFS_MBFD_PowerVMAllocation;
 import scheduling.our_approach.AllocationMapping;
 import scheduling.our_approach.InitialVmAllocationPolicy;
 import scheduling.our_approach.NormalVmAllocationPolicy;
@@ -120,14 +124,16 @@ public class SchedulingHelper {
 	
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
-		
-		//Parameters for example in paper
+			
 		int[] MIPSs=new int[vmsNumber];
 		if(SchedulingConstants.DISTRIBUTION.equals("Uniformly"))
 			MIPSs= getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
 		else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion"))
 			MIPSs = getRandomGaussianMIPS(vmsNumber, SchedulingConstants.VM_MIPS_MEAN, SchedulingConstants.VM_MIPS_DEV);
 		
+		//Parameters for example in paper
+		//int[] MIPSs={600,600,600,500,500};
+			
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / SchedulingConstants.VM_TYPES);
 			vms.add(new SchedulingVm(
@@ -177,10 +183,6 @@ public class SchedulingHelper {
 		long fileSize = 300;
 		long outputSize = 300;
 		UtilizationModel utilizationModel = new UtilizationModelFull();
-
-		//Parameters for example in paper
-		//int[] startTime = {0, 1, 1, 2, 3, 4, 4, 5, 5, 7};
-		//int[] execution_time = {8, 8, 7, 9, 8, 10, 8, 9, 8, 8};
 		
 		int[] startTime = new int[num_cloudlets];
 		int[] execution_time = new int[num_cloudlets];
@@ -191,6 +193,10 @@ public class SchedulingHelper {
 			startTime = getArrivalTime(200, num_cloudlets);
 			execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
 		}
+		
+		//Parameters for example in paper
+		//int[] startTime = {1, 1, 1, 2, 2};
+		//int[] execution_time = {2, 2, 3, 2, 3};
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		SchedulingCloudlet cloudlet= null;
@@ -361,8 +367,16 @@ public class SchedulingHelper {
 			vmAllocationPolicy = new InitialVmAllocationPolicy(hostList, mapping);
 		} else if(vmAllocationPolicyName.equals("mbfd")) {
 			vmAllocationPolicy = new Base_MBFD_PowerVmAllocation(hostList);
+		} else if (vmAllocationPolicyName.equals("dvfs_mbfd")) {
+			vmAllocationPolicy = new DVFS_MBFD_PowerVMAllocation(hostList);
 		} else if (vmAllocationPolicyName.equals("ff")) {
 			vmAllocationPolicy = new Base_FF_PowerVmAllocation(hostList);
+		} else if (vmAllocationPolicyName.equals("dvfs_ff")) {
+			vmAllocationPolicy = new DVFS_FF_PowerVMAllocation(hostList);
+		} else if (vmAllocationPolicyName.equals("mu")) {
+			vmAllocationPolicy = new PowerVmAllocationPolicyDVFSMinimumUsedHost(hostList);
+		} else if (vmAllocationPolicyName.equals("swpmm")) {
+			vmAllocationPolicy = new PowerVmAllocationPolicySimpleWattPerMipsMetric(hostList);
 		} else {
 			System.out.println("Unknown VM allocation policy: " + vmAllocationPolicyName);
 			System.exit(0);

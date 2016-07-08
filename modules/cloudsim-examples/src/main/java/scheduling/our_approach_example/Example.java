@@ -17,7 +17,7 @@ import scheduling.our_approach.utility.SchedulingHelper;
 
 public class Example {
 	public static void main(String[] args) throws IOException {
-		int num_all_cloudlets = 10;
+		int num_all_cloudlets = 5;
 		
 		SchedulingHelper.initOutput(SchedulingConstants.our_log_file+num_all_cloudlets, SchedulingConstants.our_result_file+num_all_cloudlets, SchedulingConstants.our_result_temp_file+num_all_cloudlets);
 		OutputStream result_output = SchedulingHelper.getOutputStream(SchedulingConstants.our_result_file+num_all_cloudlets);

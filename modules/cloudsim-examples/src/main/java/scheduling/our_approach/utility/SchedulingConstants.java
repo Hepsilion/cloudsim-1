@@ -15,7 +15,7 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_PES = 1;
 	
 	public final static int NUMBER_OF_CASE = 1;
-	public final static int NUMBER_OF_CLOUDLETS = 100;
+	public final static int NUMBER_OF_CLOUDLETS = 150;//10
 	public final static int NUMBER_OF_HOSTS = 50;//50
 	
 	//1000  2000
@@ -28,24 +28,14 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;//14-16
 	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
 	//Gaussion
-	public final static int VM_MIPS_MEAN = 1500;
-	public final static int VM_MIPS_DEV = 100;
+	public final static int VM_MIPS_MEAN = 1000; //1500 1000
+	public final static int VM_MIPS_DEV = 300;   //100 300 500
 	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*10;
 	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*2;
 	
-	public final static int DefautFrequency = 5;     //FF 5;     Base 5;     Ours 1
-	public final static boolean ENABLE_DVFS = false;  //FF false; Base false; Ours true
+	public final static int DefautFrequency = 5;       //FF 5;     Base 5;     Ours 1
+	public final static boolean ENABLE_DVFS = true;   //FF false; Base false; Ours true
 	public final static boolean ENABLE_ONOFF = true;
-	
-	//*****************************FF************************************//
-	public final static String ff_vmAllocationPolicy = "ff";
-	public final static String ff_log_File = "log/Base_FF_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
-	public final static String ff_result_File = "result/Base_FF_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
-	
-	//*****************************MBFD************************************//
-	public final static String base_log_File = "log/Base_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
-	public final static String base_result_File = "result/Base_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
-	public final static String base_vmAllocationPolicy = "mbfd";
 	
 	//*****************************DVFS-XXXX-EX************************************//
 	//5 20 5
@@ -56,11 +46,41 @@ public class SchedulingConstants {
 	
 	public final static String our_normal_vmAllocationPolicy = "normal";
 	public final static String our_initial_vmAllocationPolicy = "init";
-	public final static String our_initial_vmAllocationPolicy_method = "MBFD";
+	public final static String our_initial_vmAllocationPolicy_method = "FF";   //FF or MBFD
 	
 	public final static String our_log_file = "log/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
 	public final static String our_result_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Result";
 	public final static String our_result_temp_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Temp_Result";
+	
+	//*****************************No DVFS FF************************************//
+	public final static String ff_vmAllocationPolicy = "ff";
+	public final static String ff_log_File = "log/Base_FF_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
+	public final static String ff_result_File = "result/Base_FF_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
+	
+	//*****************************DVFS FF************************************//
+	public final static String dvfs_ff_vmAllocationPolicy = "dvfs_ff";
+	public final static String dvfs_ff_log_File = "log/DVFS_FF_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
+	public final static String dvfs_ff_result_File = "result/DVFS_FF_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
+	
+	//*****************************No DVFS MBFD************************************//
+	public final static String base_vmAllocationPolicy = "mbfd";
+	public final static String base_log_File = "log/Base_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
+	public final static String base_result_File = "result/Base_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
+	
+	//*****************************DVFS MBFD************************************//
+	public final static String dvfs_mbfd_vmAllocationPolicy = "dvfs_mbfd";
+	public final static String dvfs_mbfd_log_File = "log/DVFS_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
+	public final static String dvfs_mbfd_result_File = "result/DVFS_MBFD_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
+	
+	//*****************************Minimum Used Host(DVFS)************************************//
+	public final static String mu_vmAllocationPolicy = "mu";
+	public final static String mu_log_File = "log/Base_MU_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
+	public final static String mu_result_File = "result/Base_MU_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
+	
+	//*****************************Minimum Used Host(DVFS)************************************//
+	public final static String swpmm_vmAllocationPolicy = "swpmm";
+	public final static String swpmm_log_File = "log/Base_SWPMM_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
+	public final static String swpmm_result_File = "result/Base_SWPMM_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
 	
 	/*
 	 * VM instance types:
