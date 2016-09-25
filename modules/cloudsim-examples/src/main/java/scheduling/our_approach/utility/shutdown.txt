@@ -1,0 +1,100 @@
+last time:0.0,	current time:1562.0
+Host 0:shutdown
+Host 1:shutdown
+Host 2:shutdown
+Host 3:shutdown
+last time:1562.0,	current time:11317.0
+Host 0:
+Host 1:shutdown
+Host 2:shutdown
+Host 3:shutdown
+last time:11317.0,	current time:14236.0
+Host 0:
+Host 1:shutdown
+Host 2:shutdown
+Host 3:shutdown
+last time:14236.0,	current time:24516.0
+Host 0:
+Host 1:
+Host 2:shutdown
+Host 3:shutdown
+last time:24516.0,	current time:42151.0
+Host 0:
+Host 1:
+Host 2:shutdown
+Host 3:shutdown
+last time:42151.0,	current time:46458.0
+Host 0:
+Host 1:
+Host 2:shutdown
+Host 3:shutdown
+last time:46458.0,	current time:53008.0
+Host 0:
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:53008.0,	current time:53522.0
+Host 0:
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:53522.0,	current time:59388.0
+Host 0:
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:59388.0,	current time:60712.0
+Host 0:
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:60712.0,	current time:65829.0
+Host 0:
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:65829.0,	current time:71671.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:71671.0,	current time:77825.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:77825.0,	current time:84593.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:84593.0,	current time:98701.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:98701.0,	current time:100110.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:100110.0,	current time:106013.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:106013.0,	current time:111576.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:111576.0,	current time:114224.0
+Host 0:shutdown
+Host 1:
+Host 2:
+Host 3:shutdown
+last time:114224.0,	current time:140383.0
+Host 0:shutdown
+Host 1:
+Host 2:shutdown
+Host 3:shutdown

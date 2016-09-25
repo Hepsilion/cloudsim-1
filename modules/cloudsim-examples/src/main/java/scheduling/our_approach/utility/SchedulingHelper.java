@@ -37,7 +37,12 @@ import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyDVFSMinimumUsedHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicySimpleWattPerMipsMetric;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR;
+import org.cloudbus.cloudsim.power.lists.PowerVmList;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerHpProLiantMl110G3PentiumD930;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3250XeonX3470;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3250XeonX3480;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3550XeonX5670;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3550XeonX5675;
 import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
@@ -139,7 +144,7 @@ public class SchedulingHelper {
 			vms.add(new SchedulingVm(
 					i, 
 					brokerId, 
-					MIPSs[i],//SchedulingConstants.VM_MIPS[vmType],//
+					MIPSs[i],
 					SchedulingConstants.VM_PES[vmType],
 					SchedulingConstants.VM_RAM[vmType], 
 					SchedulingConstants.VM_BW, 
@@ -177,6 +182,22 @@ public class SchedulingHelper {
 		return MIPS;
 	}
 	
+	public static double[] getRandomUtils(int num, double mean, double dev){
+		NormalDistr rand = new NormalDistr(200, mean, dev);
+		double[] utils = new double[num];
+		double temp;
+		for(int i=0; i<num; i++){
+			temp=rand.sample();
+			if(temp<0)
+				utils[i]=temp*(-1);
+			else
+				utils[i]=temp;
+		}
+		return utils;
+	}
+	
+	
+	
 	public static List<Cloudlet> createSchedulingCloudlet(int userId, List<Vm> vmlist, int num_cloudlets) {
 		List<Cloudlet> cloudlets = new LinkedList<Cloudlet>();
 
@@ -186,13 +207,13 @@ public class SchedulingHelper {
 		
 		int[] startTime = new int[num_cloudlets];
 		int[] execution_time = new int[num_cloudlets];
-		if(SchedulingConstants.DISTRIBUTION.equals("Uniformly")){
-			startTime = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MIN, SchedulingConstants.CLOUDLET_START_TIME_MAX);
+		//if(SchedulingConstants.DISTRIBUTION.equals("Uniformly")){
+			//startTime = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MIN, SchedulingConstants.CLOUDLET_START_TIME_MAX);
 			execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
-		}else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion")){
+		//}else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion")){
 			startTime = getArrivalTime(200, num_cloudlets);
-			execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
-		}
+		//	execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
+		//}
 		
 		//Parameters for example in paper
 		//int[] startTime = {1, 1, 1, 2, 2};
@@ -225,7 +246,7 @@ public class SchedulingHelper {
 	}
 	
 	public static int[] getArrivalTime(int seed, int num){
-		double lambda=num*1.0/24/3600;
+		double lambda=num*1.0/24/3600;//3600
 		Random rand=new Random(seed);
 		int[] times=new int[num];
 		times[0]=(int) (-Math.log(rand.nextDouble())/lambda);
@@ -315,7 +336,12 @@ public class SchedulingHelper {
 					SchedulingConstants.HOST_STORAGE, 
 					peList,
 					new VmSchedulerTimeShared(peList),
-					new PowerModelSpecPower_BAZAR_ME(peList),
+					//i%2==0?new PowerModelSpecPowerIbmX3550XeonX5670():new PowerModelSpecPowerIbmX3250XeonX3470(),
+					//i%2==0? new PowerModelSpecPowerIbmX3250XeonX3480():new PowerModelSpecPowerIbmX3250XeonX3470(),
+					//new PowerModelSpecPowerIbmX3250XeonX3480(),
+					new PowerModelSpecPowerIbmX3250XeonX3480(),
+					//new Compute1PowerModel(),
+					//i%2==0?new Compute1PowerModel():new ControllerPowerModel(),
 					SchedulingConstants.ENABLE_ONOFF, 
 					SchedulingConstants.ENABLE_DVFS);
 			hostList.add(host);
@@ -511,6 +537,272 @@ public class SchedulingHelper {
 		Log.printLine("Num of Instructions = " + mapping.getNumInstruction());
 		Log.printLine(String.format("Allocation Fitness = %.5f", mapping.getFitness()));
 		
+		Log.setOutput(originOutput);
+	}
+	
+	public static void outputToPthreadCode(OutputStream originOutput, String pthread_code, List<Cloudlet> cloudlets, List<Vm> vms, AllocationMapping mapping){
+		OutputStream mpi_output = null;
+		
+		try {
+			mpi_output = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + pthread_code + ".c");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();System.out.println(111);
+		}
+		Log.setOutput(mpi_output);
+		
+		String code="";
+		code+="#include<stdio.h>\n";
+		code+="#include<pthread.h>\n";
+		code+="#include<stdlib.h>\n";
+		code+="#include<sys/time.h>\n";
+		code+="\n";
+		code+="int thread_count;\n";
+		code+="\n";
+		code+="struct thread_param{\n";
+		code+="	long rank;\n";
+		code+="	int run_time, sleep_time;\n";
+		code+="	long start_time, exec_time;\n";
+		code+="};\n";
+		code+="\n";
+		code+="void *func(void* argv){\n";
+		code+="	struct thread_param *params=(struct thread_param*)argv;\n";
+		code+="	long my_rank=(*params).rank;\n";
+		code+="	int run_time=(*params).run_time;\n";
+		code+="	int sleep_time=(*params).sleep_time;\n";
+		code+="	long start_time=(*params).start_time;\n";
+		code+="	long exec_time=(*params).exec_time;\n";
+		code+="	long cycle=exec_time*100;\n";
+		code+="\n";
+		code+="	printf(\"process %d sleeps at time %ld\\n\", myid, clock());\n";
+		code+="	usleep(start_time*1000000);\n";
+		code+="	printf(\"Thread %ld of %d starts.\\n\", my_rank, thread_count);\n";
+		code+="	clock_t start, end;\n";
+		code+="	int i;\n";
+		code+="	for(i=0; i<cycle; i++){\n";
+		code+="		start=end=clock();\n";
+		code+="		while(end-start<=run_time){\n";
+		code+="			end=clock();\n";
+		code+="		}\n";
+		code+="		usleep(sleep_time);\n";
+		code+="	}\n";
+		code+="	printf(\"Thread %ld of %d ends.\\n\", my_rank, thread_count);\n";
+		code+="\n";
+		code+="	return NULL;\n";
+		code+="}\n";
+		code+="\n";
+		code+="int main(int argc, char* argv[]){\n";
+		code+="	int hid=atoi(argv[1]);\n";
+		code+="\n";
+		code+="	long thread;\n";
+		code+="	pthread_t* thread_handles;\n";
+		code+="	struct thread_param* thread_params;\n";
+		code+="\n";
+		
+		for(int hid=0; hid<SchedulingConstants.NUMBER_OF_HOSTS; hid++){
+			ArrayList<Integer> tasks=new ArrayList<Integer>();
+			int task_num=cloudlets.size();
+			for(int tid=0; tid<task_num; tid++){
+				if(mapping.getHostOfVm(tid)==hid)
+					tasks.add(tid);
+			}
+			
+			if(hid==0){
+				code+="	if(hid==0){\n";
+			}else if(hid!=SchedulingConstants.NUMBER_OF_HOSTS-1){
+				code+="else if(hid=="+hid+"){\n";
+			}else{
+				code+="else{\n";
+			}
+			
+			if(tasks.size()>0){
+				int run_time=0, sleep_time=0;
+				long start_time=0, exec_time=0;
+				
+				code+="		thread_count="+tasks.size()+";\n";
+				code+="		thread_params=malloc(thread_count*sizeof(struct thread_param));\n";
+				code+="    	for(thread=0; thread<thread_count; thread++){\n";
+				code+="			thread_params[thread].rank=thread;\n";
+				
+				for(int i=0; i<tasks.size(); i++){
+					run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid%2]*10000);
+					sleep_time=100000-run_time;
+					start_time=(int)cloudlets.get(tasks.get(i)).getExecStartTime();
+					exec_time=(long)(cloudlets.get(tasks.get(i)).getFinishTime()-cloudlets.get(tasks.get(i)).getExecStartTime());
+					
+					if(i==0){
+						code+="			if(thread==0){\n";
+					}else if(i!=tasks.size()-1){
+						code+="else if(thread=="+i+"){\n";
+					}else{
+						code+="else{\n";
+					}
+					code+="				thread_params[thread].run_time="+run_time+";\n";
+					code+="				thread_params[thread].sleep_time="+sleep_time+";\n";
+					code+="				thread_params[thread].start_time="+start_time+";\n";
+					code+="				thread_params[thread].exec_time="+exec_time+";\n";
+					code+="			}";
+				}
+				code+="\n";
+				code+="		}\n";
+			}
+			code+="	}";
+		}	
+		code+="\n";
+		code+="\n";
+		code+="	struct timeval proc_start_time, proc_end_time;\n";
+		code+="	gettimeofday(&proc_start_time, NULL);\n";
+		code+="	printf(\"current time: %ld.%ld\\n\", proc_start_time.tv_sec, proc_start_time.tv_usec);\n";
+		code+="\n";
+		code+="	thread_handles=malloc(thread_count*sizeof(pthread_t));\n";
+		code+="	for(thread=0; thread<thread_count; thread++)\n";
+		code+="		pthread_create(&thread_handles[thread], NULL, func, &thread_params[thread]);\n";
+		code+="\n";
+		code+="	for(thread=0; thread<thread_count; thread++)\n";
+		code+="		pthread_join(thread_handles[thread], NULL);\n";
+		code+="\n";
+		code+="	gettimeofday(&proc_end_time, NULL);\n";
+		code+="	printf(\"current time: %ld.%ld\\n\", proc_end_time.tv_sec, proc_end_time.tv_usec);\n";
+		code+="\n";
+		code+="	free(thread_params);\n";
+		code+="	free(thread_handles);\n";
+		code+="\n";
+		code+="	return 0;\n";
+		code+="}\n";
+		
+		Log.print(code);
+		Log.setOutput(originOutput);
+		try {
+			mpi_output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Log.setOutput(originOutput);
+	}
+	
+	public static void outputToMPICode(OutputStream originOutput, String mpi_code, List<Cloudlet> cloudlets, List<Vm> vms, AllocationMapping mapping){
+		OutputStream mpi_output = null;
+		
+		String code="";	
+		code+="#include<stdio.h>\n";
+		code+="#include<mpi.h>\n";
+		code+="#include<unistd.h>\n";
+		code+="#include<stdlib.h>\n";
+		code+="#include<sys/time.h>\n";
+		code+="#include<time.h>\n";
+		code+="\n";
+		code+="void func(int myid, long run_time, int sleep_time, long start_time, long exec_time){\n";
+		code+="	clock_t start, end;\n";
+		code+="	long i, num=exec_time*100;\n";
+		code+="	struct timeval cur_time;\n";
+		code+="\n";
+		code+="	usleep(start_time*1000000);\n";
+		code+="	gettimeofday(&cur_time, NULL);";
+		code+="	printf(\"process %d begins at time %ld.%ld\\n\", myid, cur_time.tv_sec, cur_time.tv_usec);\n";
+		code+="	for(i=0; i<num; i++){\n";
+		code+="		start=end=clock();\n";
+		code+="		while((end-start)<=run_time){\n";
+		code+="			end=clock();\n";
+		code+="		}\n";
+		code+="		usleep(sleep_time);\n";
+		code+="	}\n";
+		code+="	gettimeofday(&cur_time, NULL);";
+		code+="	printf(\"process %d ends at time %ld.%ld\\n\", myid, cur_time.tv_sec, cur_time.tv_usec);\n";
+		code+="}\n";
+		code+="\n";
+		code+="int main(int argc, char** argv) {\n";
+		code+="	int hid=atoi(argv[1]);\n";
+		code+="\n";
+		code+="	int myid, numprocs, namelen;\n";
+		code+="	char processor_name[MPI_MAX_PROCESSOR_NAME];\n";
+		code+="\n";
+		code+="	struct timeval proc_start_time, proc_end_time;\n";
+		code+="	gettimeofday(&proc_start_time, NULL);\n";
+		code+="	printf(\"Program now starts: %ld.%ld\\n\", proc_start_time.tv_sec, proc_start_time.tv_usec);\n";
+		code+="\n";
+		code+="	MPI_Init(NULL, NULL);\n";
+		code+="	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);\n";
+		code+="	MPI_Comm_rank(MPI_COMM_WORLD, &myid);\n";
+		code+="	MPI_Get_processor_name(processor_name, &namelen);\n";
+		code+="	printf(\"Process %d of %d is on %s\\n\", myid, numprocs, processor_name);\n";
+		code+="\n";
+		
+		
+		for(int hid=0; hid<SchedulingConstants.NUMBER_OF_HOSTS; hid++){
+			ArrayList<Integer> tasks=new ArrayList<Integer>();
+			int task_num=cloudlets.size();
+			for(int tid=0; tid<task_num; tid++){
+				if(mapping.getHostOfVm(tid)==hid)
+					tasks.add(tid);
+			}
+			
+			long max_time=0, time;
+			int num_task=tasks.size();
+			for(int i=0; i<num_task; i++){
+				time=(long) cloudlets.get(tasks.get(i)).getFinishTime();
+				max_time=max_time<time?time:max_time;
+			}
+			
+			if(hid==0){
+				code+="	if(hid==0){\n";
+			}else if(hid!=SchedulingConstants.NUMBER_OF_HOSTS-1){
+				code+="else if(hid=="+hid+"){\n";
+			}else{
+				code+="else{\n";
+			}
+			
+			if(tasks.size()>0){
+				try {
+					mpi_output = new FileOutputStream(SchedulingConstants.OutputFolder+"/" + mpi_code + ".c");
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();System.out.println(111);
+				}
+				Log.setOutput(mpi_output);
+				
+				int run_time=0, sleep_time=0;
+				long start_time=0, exec_time=0, finish_time=0;
+				
+
+				for(int i=0; i<tasks.size(); i++){
+					//run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid%2]*(hid%2==0?15:5)*10000);  //HOST_MIPS[hid%2]*15*10000
+					run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid%2]*15*10000);  //HOST_MIPS[hid%2]*15*10000
+					sleep_time=10000-run_time;
+					start_time=(int)cloudlets.get(tasks.get(i)).getExecStartTime();
+					exec_time=(long)(cloudlets.get(tasks.get(i)).getFinishTime()-cloudlets.get(tasks.get(i)).getExecStartTime());
+					finish_time=(long) cloudlets.get(tasks.get(i)).getFinishTime();
+					
+					if(i==0){
+						code+="		if(myid==0){\n";
+					}else if(i!=tasks.size()-1){
+						code+="else if(myid=="+i+"){\n";
+					}else{
+						code+="else{\n";
+					}
+					code+="			func(myid, "+run_time+", "+sleep_time+", "+start_time+", "+exec_time+");\t//cloudlet"+tasks.get(i)+"\n";
+					code+="			usleep("+(max_time-finish_time)*1000000+");\n";
+					code+="		}";
+				}
+				code+="\n";
+			}
+			code+="	}";
+		}
+		code+="\n";
+		
+		code+="\n";
+		code+="	MPI_Finalize();\n";
+		code+="	gettimeofday(&proc_end_time, NULL);\n";
+		code+="	printf(\"Program now ends: %ld.%ld\\n\", proc_end_time.tv_sec, proc_end_time.tv_usec);\n";
+		code+="\n";
+		code+="	return 0;\n";
+		code+="}";
+		
+		Log.print(code);
+		Log.setOutput(originOutput);
+		try {
+			mpi_output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		Log.setOutput(originOutput);
 	}
 	

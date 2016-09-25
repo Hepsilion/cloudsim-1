@@ -2,7 +2,7 @@ package scheduling.our_approach.utility;
 
 public class SchedulingConstants {
 	public final static boolean ENABLE_OUTPUT = true;
-	public final static boolean OUTPUT_TO_FILE = false;
+	public final static boolean OUTPUT_TO_FILE = true;
 	public final static boolean OUTPUT_CSV    = false;
 	public final static String OutputFolder = "output";
 	
@@ -15,26 +15,26 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_PES = 1;
 	
 	public final static int NUMBER_OF_CASE = 1;
-	public final static int NUMBER_OF_CLOUDLETS = 150;//10
-	public final static int NUMBER_OF_HOSTS = 50;//50
+	public final static int NUMBER_OF_CLOUDLETS = 30;//10
+	public final static int NUMBER_OF_HOSTS = 30;//50
 	
 	//1000  2000
-	public final static String DISTRIBUTION="Gaussion"; 
+	public final static String DISTRIBUTION="Uniformly"; 
 	//Uniformly
-	public final static int VM_MIPS_MAX = 2000;
-	public final static int VM_MIPS_MIN = 500;
-	public final static int CLOUDLET_START_TIME_MAX=3600*24;
-	public final static int CLOUDLET_START_TIME_MIN=3600*0;
-	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;//14-16
+	public final static int VM_MIPS_MAX = 3000;
+	public final static int VM_MIPS_MIN = 1000;
+	public final static int CLOUDLET_START_TIME_MAX=3600*24;  //3600*0-24
+	public final static int CLOUDLET_START_TIME_MIN=3600*0;   
+	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;  //3600*14-16
 	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
 	//Gaussion
-	public final static int VM_MIPS_MEAN = 1000; //1500 1000
-	public final static int VM_MIPS_DEV = 300;   //100 300 500
-	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*10;
-	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*2;
+	public final static int VM_MIPS_MEAN = 1250; //1500 1000
+	public final static int VM_MIPS_DEV = 500;   //100 300 500
+	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*12;  //3600*14
+	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*2;    //3600*2
 	
 	public final static int DefautFrequency = 5;       //FF 5;     Base 5;     Ours 1
-	public final static boolean ENABLE_DVFS = true;   //FF false; Base false; Ours true
+	public final static boolean ENABLE_DVFS = false;   //FF false; Base false; Ours true
 	public final static boolean ENABLE_ONOFF = true;
 	
 	//*****************************DVFS-XXXX-EX************************************//
@@ -46,7 +46,7 @@ public class SchedulingConstants {
 	
 	public final static String our_normal_vmAllocationPolicy = "normal";
 	public final static String our_initial_vmAllocationPolicy = "init";
-	public final static String our_initial_vmAllocationPolicy_method = "FF";   //FF or MBFD
+	public final static String our_initial_vmAllocationPolicy_method = "MBFD";   //FF or MBFD
 	
 	public final static String our_log_file = "log/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
 	public final static String our_result_file = "result/DVFS_"+our_initial_vmAllocationPolicy_method+"_EX_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Result";
@@ -82,6 +82,13 @@ public class SchedulingConstants {
 	public final static String swpmm_log_File = "log/Base_SWPMM_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX+"_Log";
 	public final static String swpmm_result_File = "result/Base_SWPMM_f"+SchedulingConstants.DefautFrequency+"_"+VM_MIPS_MIN+"_"+VM_MIPS_MAX;
 	
+	public final static String pthread_code="pthread_energy";
+	public final static String pthread_code_our="pthread_energy_our";
+	public final static String mpi_code="mpi_energy";
+	public final static String mpi_code_our="mpi_energy_our";
+	
+	
+	
 	/*
 	 * VM instance types:
 	 *   High-Memory Extra Large Instance: 3.25 EC2 Compute Units, 8.55 GB // too much MIPS
@@ -105,7 +112,7 @@ public class SchedulingConstants {
 	 *   We increase the memory size to enable over-subscription (x4)
 	 */
 	public final static int HOST_TYPES	 = 2;
-	public final static int[] HOST_MIPS	 = { 1860, 2660 };
+	public final static int[] HOST_MIPS	 = { 3067*4, 3067*4};//1860 2660  //6600*5
 	public final static int[] HOST_PES	 = { 1, 1 };
 	public final static int[] HOST_RAM	 = {100000000, 100000000};//{ 4096, 4096 };
 	public final static int HOST_BW		 = 100000000; // 1 Gbit/s

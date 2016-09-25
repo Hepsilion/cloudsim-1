@@ -83,7 +83,7 @@ public class PowerDatacenter extends Datacenter {
 	 * @pre $none
 	 * @post $none
 	 */
-	@Override
+	//@Override
 	protected void updateCloudletProcessing() {
 		if (getCloudletSubmitted() == -1 || getCloudletSubmitted() == CloudSim.clock()) {
 			CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.VM_DATACENTER_EVENT));
@@ -189,13 +189,13 @@ public class PowerDatacenter extends Datacenter {
 					host.getId(),
 					host.getUtilizationOfCpu() * 100);
 		}
-
+		
 		if (timeDiff > 0) {
 			Log.formatLine(
 					"\nEnergy consumption for the last time frame from %.2f to %.2f:",
 					getLastProcessTime(),
 					currentTime);
-
+			//System.out.println("last time:"+getLastProcessTime()+",\tcurrent time:"+currentTime);
 			for (PowerHost host : this.<PowerHost> getHostList()) {
 				double previousUtilizationOfCpu = host.getPreviousUtilizationOfCpu();
 				double utilizationOfCpu = host.getUtilizationOfCpu();
@@ -203,6 +203,11 @@ public class PowerDatacenter extends Datacenter {
 						previousUtilizationOfCpu,
 						utilizationOfCpu,
 						timeDiff);
+				//if(previousUtilizationOfCpu==0)
+				//	System.out.println("Host "+host.getId()+":shutdown");
+				//else
+				//	System.out.println("Host "+host.getId()+":");
+				//System.out.println("Host "+host.getId()+"----last utilization: "+previousUtilizationOfCpu+",\tcurrent utilization: "+utilizationOfCpu);
 				timeFrameDatacenterEnergy += timeFrameHostEnergy;
 
 				Log.printLine();

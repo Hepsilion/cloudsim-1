@@ -31,8 +31,12 @@ public class SchedulingMain3 {
 			List<Vm> vmList = new ArrayList<Vm>();
 			List<Cloudlet> cloudletList = new ArrayList<Cloudlet>();
 			List<PowerHost> hostList = new ArrayList<PowerHost>();
+			//System.out.println("Record for other method begins.");
 			SchedulingHelper.simulation(cloudletList, hostList, vmList, mapping, SchedulingConstants.our_initial_vmAllocationPolicy);
 			SchedulingHelper.outputResultToResultFile("Initial", originOutput, result_output, mapping, 1);
+			SchedulingHelper.outputToMPICode(originOutput, SchedulingConstants.mpi_code, cloudletList, vmList, mapping);
+			//SchedulingHelper.outputToPthreadCode(originOutput, SchedulingConstants.pthread_code, cloudletList, vmList, mapping);
+			//System.out.println("Record for other method ends.");
 			
 			OverallExchangeProcessor[] processors = null;
 			int numProcessor = SchedulingConstants.NUMBER_OF_PROCESSORS;
@@ -69,8 +73,12 @@ public class SchedulingMain3 {
 			}
 			
 			tempCloudlets=SchedulingHelper.getCopyOfCloudlets(cloudletList);
+			//System.out.println("Record for our method begins.");
 			SchedulingHelper.simulation(tempCloudlets, hostList, vmList, mapping, SchedulingConstants.our_normal_vmAllocationPolicy);
 			SchedulingHelper.outputResultToResultFile("Final", originOutput, result_output, mapping, 1);
+			SchedulingHelper.outputToMPICode(originOutput, SchedulingConstants.mpi_code_our, cloudletList, vmList, mapping);
+			//SchedulingHelper.outputToPthreadCode(originOutput, SchedulingConstants.pthread_code_our, cloudletList, vmList, mapping);
+			//System.out.println("Record for our method ends.");
 			
 			originOutput.close();
 			File file = new File(SchedulingConstants.OutputFolder + "/" + SchedulingConstants.our_log_file+num_all_cloudlets+".txt");

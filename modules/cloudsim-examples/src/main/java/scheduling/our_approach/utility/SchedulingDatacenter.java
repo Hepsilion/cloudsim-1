@@ -29,7 +29,7 @@ public class SchedulingDatacenter extends PowerDatacenter {
     	Log.printLine(this.getName()+" compute resource usage and energy before VM#"+vm.getId()+" is created");
     	//TODO 修改以支持节约仿真时间
     	this.updateCloudletProcessing();
-        
+    	
         boolean result = getVmAllocationPolicy().allocateHostForVm(vm);
 
         if (ack) {
@@ -98,9 +98,8 @@ public class SchedulingDatacenter extends PowerDatacenter {
 		//TODO 修改以支持节约仿真时间，这样在虚拟机创建之后和销毁之后，可以更新主机的CPU利用率
 		//if (currentTime > getLastProcessTime()) { 
 			Log.printLine(currentTime + " ");
-
+			
 			double minTime = updateCloudetProcessingWithoutSchedulingFutureEventsForce();
-
 			if (!isDisableMigrations()) {
 				List<Map<String, Object>> migrationMap = getVmAllocationPolicy().optimizeAllocation(getVmList());
 

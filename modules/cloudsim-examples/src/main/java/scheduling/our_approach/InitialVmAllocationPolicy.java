@@ -90,7 +90,8 @@ public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
     	double pePotentialUtilization = hostUtilizationMips / host.getTotalMaxMips();
     	double power = 0;
     	try {
-    		power = ((PowerModelSpecPower_BAZAR_ME)host.getPowerModel()).getPower(pePotentialUtilization, 4);
+    		//power = ((PowerModelSpecPower_BAZAR_ME)host.getPowerModel()).getPower(pePotentialUtilization, 4);
+    		power = host.getPowerModel().getPower(pePotentialUtilization);
     	} catch(Exception e) {
     		e.printStackTrace();
             System.exit(0);
@@ -101,7 +102,8 @@ public class InitialVmAllocationPolicy extends PowerVmAllocationPolicyAbstract{
     protected double getPowerAfterAllocation(PowerHost host, Vm vm) {
         double power = 0;
         try {
-            power = ((PowerModelSpecPower_BAZAR_ME)host.getPowerModel()).getPower(getMaxUtilizationAfterAllocation(host, vm), 4);
+            //power = ((PowerModelSpecPower_BAZAR_ME)host.getPowerModel()).getPower(getMaxUtilizationAfterAllocation(host, vm), 4);
+        	power = host.getPowerModel().getPower(getMaxUtilizationAfterAllocation(host, vm));
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);

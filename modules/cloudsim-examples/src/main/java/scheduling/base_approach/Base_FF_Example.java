@@ -74,6 +74,7 @@ public class Base_FF_Example {
     			List<Cloudlet> received_cloudlets = broker.getCloudletReceivedList();
     			Log.printLine("Received " + received_cloudlets.size() + " cloudlets");
     			System.out.println(received_cloudlets.size());
+    			
     			CloudSim.stopSimulation();
 
     			Log.setOutput(os);
