@@ -38,12 +38,6 @@ import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyDVFSMinimumUsedHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicySimpleWattPerMipsMetric;
 import org.cloudbus.cloudsim.power.lists.PowerVmList;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerHpProLiantMl110G3PentiumD930;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3250XeonX3470;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3250XeonX3480;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3550XeonX5670;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3550XeonX5675;
-import org.cloudbus.cloudsim.power.models.PowerModelSpecPower_BAZAR_ME;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -130,14 +124,15 @@ public class SchedulingHelper {
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
 			
-		int[] MIPSs=new int[vmsNumber];
-		if(SchedulingConstants.DISTRIBUTION.equals("Uniformly"))
-			MIPSs= getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
-		else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion"))
-			MIPSs = getRandomGaussianMIPS(vmsNumber, SchedulingConstants.VM_MIPS_MEAN, SchedulingConstants.VM_MIPS_DEV);
+		//int[] MIPSs=new int[vmsNumber];
+		//if(SchedulingConstants.DISTRIBUTION.equals("Uniformly"))
+		//	MIPSs= getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
+		//else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion"))
+		//	MIPSs = getRandomGaussianMIPS(vmsNumber, SchedulingConstants.VM_MIPS_MEAN, SchedulingConstants.VM_MIPS_DEV);
 		
 		//Parameters for example in paper
-		//int[] MIPSs={600,600,600,500,500};
+		//int[] MIPSs={780,700,610,980,570,670,860,510,680,800}; first time
+		int[] MIPSs={1280, 1300, 1000, 1020, 960, 1000};
 			
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / SchedulingConstants.VM_TYPES);
@@ -205,19 +200,23 @@ public class SchedulingHelper {
 		long outputSize = 300;
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 		
-		int[] startTime = new int[num_cloudlets];
-		int[] execution_time = new int[num_cloudlets];
+		//int[] startTime = new int[num_cloudlets];
+		//int[] execution_time = new int[num_cloudlets];
 		//if(SchedulingConstants.DISTRIBUTION.equals("Uniformly")){
 			//startTime = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MIN, SchedulingConstants.CLOUDLET_START_TIME_MAX);
-			execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
+		//	execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
 		//}else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion")){
-			startTime = getArrivalTime(200, num_cloudlets);
+		//	startTime = getArrivalTime(200, num_cloudlets);
 		//	execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
 		//}
 		
 		//Parameters for example in paper
-		//int[] startTime = {1, 1, 1, 2, 2};
-		//int[] execution_time = {2, 2, 3, 2, 3};
+		//first time
+		//int[] startTime =      { 0, 0, 1, 2, 4, 5, 7, 8,10,12};
+		//int[] execution_time = { 6,10, 8, 9,10, 8, 9, 6, 7, 9};
+		
+		int[] startTime =      {0, 2, 4, 7, 9,10};
+		int[] execution_time = {8, 8, 6, 6, 7, 8};
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		SchedulingCloudlet cloudlet= null;
@@ -246,7 +245,7 @@ public class SchedulingHelper {
 	}
 	
 	public static int[] getArrivalTime(int seed, int num){
-		double lambda=num*1.0/24/3600;//3600
+		double lambda=num*1.0/24/36;//3600
 		Random rand=new Random(seed);
 		int[] times=new int[num];
 		times[0]=(int) (-Math.log(rand.nextDouble())/lambda);
@@ -319,7 +318,7 @@ public class SchedulingHelper {
 			ConfigDvfs.setHashMapUserSpace(tmp_HM_UserSpace);
 			ConfigDvfs.setHashMapMy(tmp_HM_My);
 
-			int hostType = (i+1) % SchedulingConstants.HOST_TYPES;
+			int hostType = i % SchedulingConstants.HOST_TYPES;
 			List<Pe> peList = new ArrayList<Pe>();
 			for (int j = 0; j < SchedulingConstants.HOST_PES[hostType]; j++) {
 				peList.add(new Pe(
@@ -336,12 +335,7 @@ public class SchedulingHelper {
 					SchedulingConstants.HOST_STORAGE, 
 					peList,
 					new VmSchedulerTimeShared(peList),
-					//i%2==0?new PowerModelSpecPowerIbmX3550XeonX5670():new PowerModelSpecPowerIbmX3250XeonX3470(),
-					//i%2==0? new PowerModelSpecPowerIbmX3250XeonX3480():new PowerModelSpecPowerIbmX3250XeonX3470(),
-					//new PowerModelSpecPowerIbmX3250XeonX3480(),
-					new PowerModelSpecPowerIbmX3250XeonX3480(),
-					//new Compute1PowerModel(),
-					//i%2==0?new Compute1PowerModel():new ControllerPowerModel(),
+					SchedulingConstants.HOST_POWER[hostType],
 					SchedulingConstants.ENABLE_ONOFF, 
 					SchedulingConstants.ENABLE_DVFS);
 			hostList.add(host);
@@ -764,8 +758,8 @@ public class SchedulingHelper {
 				
 
 				for(int i=0; i<tasks.size(); i++){
-					//run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid%2]*(hid%2==0?15:5)*10000);  //HOST_MIPS[hid%2]*15*10000
-					run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid%2]*15*10000);  //HOST_MIPS[hid%2]*15*10000
+					run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid==3?0:1]*(hid==3?15:3)*10000);  //HOST_MIPS[hid%2]*15*10000
+					//run_time=(int) (PowerVmList.getById(vms, tasks.get(i)).getMaxMips()/SchedulingConstants.HOST_MIPS[hid%2]*15*10000);  //HOST_MIPS[hid%2]*15*10000
 					sleep_time=10000-run_time;
 					start_time=(int)cloudlets.get(tasks.get(i)).getExecStartTime();
 					exec_time=(long)(cloudlets.get(tasks.get(i)).getFinishTime()-cloudlets.get(tasks.get(i)).getExecStartTime());
@@ -838,7 +832,7 @@ public class SchedulingHelper {
 		}
 		double fitness=1.0*numInstructions/datacenter.getPower();
 		if(cloudlets.size()>0) {
-			fitness = fitness*Math.pow(1.0*received_cloudlets.size()/cloudlets.size(), 3);
+			fitness = fitness*Math.pow(1.0*received_cloudlets.size()/cloudlets.size(), 20);
 		}
 		//double fitness = received_cloudlets.size()/(datacenter.getPower()/1000/3600);
 		if(mapping!=null){

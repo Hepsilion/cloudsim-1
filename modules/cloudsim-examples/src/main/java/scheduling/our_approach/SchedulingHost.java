@@ -54,16 +54,19 @@ public class SchedulingHost {
 	public SchedulingCloudlet getMinIntersectCloudletOnHost() {
 		SchedulingCloudlet cloudlet = null;
 		double minIntersectionTime = Double.MAX_VALUE;
-		if(this.getCloudlets().size()==1)
+		if(this.getCloudlets().size()==0)
+			return cloudlet;
+		else if(this.getCloudlets().size()==1)
 			return this.getCloudlets().get(0);
 		else{
 			for(SchedulingCloudlet c1 : this.getCloudlets()) {
 				double intersectionTime = 0;
 				for(SchedulingCloudlet c2 : this.getCloudlets()) {
-					if(c1 == c2) {
+					if(c1.getCloudletId() == c2.getCloudletId()) {
 						continue;
 					} else {
 						intersectionTime+=c1.getIntersectionTime(c2);
+						//System.out.println("Host"+this.getHost().getId()+"---"+c1.getCloudletId()+":"+c2.getCloudletId()+"---"+c1.getIntersectionTime(c2));
 					}
 				}
 				if(minIntersectionTime>intersectionTime) {
@@ -72,6 +75,7 @@ public class SchedulingHost {
 				}
 			}
 		}
+		//System.out.println(this.getHost().getId()+"---"+cloudlet.getCloudletId()+":"+minIntersectionTime);
 		return cloudlet;
 	}
 	

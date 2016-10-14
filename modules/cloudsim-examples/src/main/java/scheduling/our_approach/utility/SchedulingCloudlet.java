@@ -43,6 +43,7 @@ public class SchedulingCloudlet extends Cloudlet {
 
 	public double getIntersectionTime(SchedulingCloudlet cloudlet) {
 		int kind = this.intersected(cloudlet);
+		//System.out.println(this.getCloudletId()+":"+cloudlet.getCloudletId()+"---"+kind);
 		if(kind==1) {
 			return this.getDeadline()-this.getStartTime();
 		}else if(kind==2) {
@@ -77,9 +78,9 @@ public class SchedulingCloudlet extends Cloudlet {
 	 * @return
 	 */
 	public int intersected(SchedulingCloudlet cloudlet){
-		if(this.getStartTime()>cloudlet.getStartTime() && this.getDeadline()<cloudlet.getDeadline())
+		if(this.getStartTime()>=cloudlet.getStartTime() && this.getDeadline()<=cloudlet.getDeadline())
 			return 1;
-		else if(this.getStartTime()<cloudlet.getStartTime() && this.getDeadline()>cloudlet.getDeadline())
+		else if(this.getStartTime()<=cloudlet.getStartTime() && this.getDeadline()>=cloudlet.getDeadline())
 			return 2;
 		else if(this.getStartTime()<cloudlet.getStartTime() && this.getDeadline()<cloudlet.getDeadline() && this.getDeadline()>cloudlet.getStartTime())
 			return 3;

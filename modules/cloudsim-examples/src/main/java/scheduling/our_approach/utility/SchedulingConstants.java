@@ -1,5 +1,12 @@
 package scheduling.our_approach.utility;
 
+import org.cloudbus.cloudsim.power.models.PowerModel;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerHpProLiantMl110G4Xeon3040;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerHpProLiantMl110G5Xeon3075;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3250XeonX3470;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3550XeonX5670;
+import org.cloudbus.cloudsim.power.models.PowerModelSpecPowerIbmX3550XeonX5675;
+
 public class SchedulingConstants {
 	public final static boolean ENABLE_OUTPUT = true;
 	public final static boolean OUTPUT_TO_FILE = true;
@@ -15,22 +22,22 @@ public class SchedulingConstants {
 	public final static int CLOUDLET_PES = 1;
 	
 	public final static int NUMBER_OF_CASE = 1;
-	public final static int NUMBER_OF_CLOUDLETS = 30;//10
-	public final static int NUMBER_OF_HOSTS = 30;//50
+	public final static int NUMBER_OF_CLOUDLETS = 6;//10
+	public final static int NUMBER_OF_HOSTS = 2;//50
 	
 	//1000  2000
-	public final static String DISTRIBUTION="Uniformly"; 
+	public final static String DISTRIBUTION="Gaussion"; 
 	//Uniformly
-	public final static int VM_MIPS_MAX = 3000;
-	public final static int VM_MIPS_MIN = 1000;
-	public final static int CLOUDLET_START_TIME_MAX=3600*24;  //3600*0-24
-	public final static int CLOUDLET_START_TIME_MIN=3600*0;   
-	public final static int CLOUDLET_EXECUTION_TIME_MAX = 3600*16;  //3600*14-16
-	public final static int CLOUDLET_EXECUTION_TIME_MIN = 3600*14;
+	public final static int VM_MIPS_MAX = 2000;
+	public final static int VM_MIPS_MIN = 500;
+	public final static int CLOUDLET_START_TIME_MAX=36*24;  //3600*0-24
+	public final static int CLOUDLET_START_TIME_MIN=36*0;   
+	public final static int CLOUDLET_EXECUTION_TIME_MAX = 36*18;  //3600*14-16
+	public final static int CLOUDLET_EXECUTION_TIME_MIN = 36*12;
 	//Gaussion
-	public final static int VM_MIPS_MEAN = 1250; //1500 1000
-	public final static int VM_MIPS_DEV = 500;   //100 300 500
-	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*12;  //3600*14
+	public final static int VM_MIPS_MEAN = 5000; //1500 1000
+	public final static int VM_MIPS_DEV = 1000;   //100 300 500
+	public final static int CLOUDLET_EXECUTION_TIME_MEAN = 3600*30;  //3600*14
 	public final static int CLOUDLET_EXECUTION_TIME_DEV = 3600*2;    //3600*2
 	
 	public final static int DefautFrequency = 5;       //FF 5;     Base 5;     Ours 1
@@ -112,9 +119,14 @@ public class SchedulingConstants {
 	 *   We increase the memory size to enable over-subscription (x4)
 	 */
 	public final static int HOST_TYPES	 = 2;
-	public final static int[] HOST_MIPS	 = { 3067*4, 3067*4};//1860 2660  //6600*5
+	public final static int[] HOST_MIPS	 = {1860*2, 2660*2};//1860 2660  //6600*5
 	public final static int[] HOST_PES	 = { 1, 1 };
 	public final static int[] HOST_RAM	 = {100000000, 100000000};//{ 4096, 4096 };
 	public final static int HOST_BW		 = 100000000; // 1 Gbit/s
 	public final static int HOST_STORAGE = 100000000; // 1 GB
+	
+	public final static PowerModel[] HOST_POWER = {
+		new PowerModelSpecPowerHpProLiantMl110G4Xeon3040(),
+		new PowerModelSpecPowerHpProLiantMl110G5Xeon3075()
+	};
 }

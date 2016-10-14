@@ -100,7 +100,7 @@ public class LocalExchangeProcessor{
 	 * @param host2
 	 * @param kind
 	 */
-	private void generateOffSpring1(SchedulingHost host1, SchedulingHost host2, int kind) {
+	private void generateOffSpring(SchedulingHost host1, SchedulingHost host2, int kind) {
 		//System.out.println("A----B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
 		if(kind==1) {
 			//just keep the orginal parents
@@ -143,7 +143,7 @@ public class LocalExchangeProcessor{
 	 * @param host2
 	 * @param kind
 	 */
-	private void generateOffSpring(SchedulingHost host1, SchedulingHost host2, int kind) {
+	private void generateOffSpring1(SchedulingHost host1, SchedulingHost host2, int kind) {
 		//System.out.println("A----B   #1="+host1.getCloudlets().size()+" : #2="+host2.getCloudlets().size());
 		if(kind==1) {
 			//just keep the orginal parents

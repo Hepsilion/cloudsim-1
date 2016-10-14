@@ -128,6 +128,7 @@ public class PowerHost extends HostDynamicWorkload {
 			}
 		double fromPower = getPower(fromUtilization);
 		double toPower = getPower(toUtilization);
+		//System.out.println("Host "+this.getId()+"  Power-------------------------------------"+(fromPower + (toPower - fromPower) / 2));
 		return (fromPower + (toPower - fromPower) / 2) * time;
 	}
 

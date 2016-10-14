@@ -8,7 +8,7 @@ import java.io.IOException;
 public class ComputeShutdownTime {
 	public static void main(String[] args){
 		long[] shutdown_time=new long[SchedulingConstants.NUMBER_OF_HOSTS];
-		String file="E:\\Workspace\\Github\\cloudsim\\modules\\cloudsim-examples\\output\\shutdown.txt";
+		String file="C:\\Users\\Hepsilion\\Desktop\\Tonight\\MBFD\\shutdown_other.txt";
 		String line=null;
 		long seg_start=0, seg_end=0;
 		try {
