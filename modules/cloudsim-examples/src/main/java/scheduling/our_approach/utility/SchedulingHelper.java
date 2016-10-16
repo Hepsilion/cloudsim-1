@@ -124,15 +124,14 @@ public class SchedulingHelper {
 	public static List<Vm> createVmList(int brokerId, int vmsNumber) {
 		List<Vm> vms = new ArrayList<Vm>();
 			
-		//int[] MIPSs=new int[vmsNumber];
+		int[] MIPSs=new int[vmsNumber];
 		//if(SchedulingConstants.DISTRIBUTION.equals("Uniformly"))
 		//	MIPSs= getRandomMIPSs(vmsNumber, SchedulingConstants.VM_MIPS_MIN, SchedulingConstants.VM_MIPS_MAX);
 		//else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion"))
-		//	MIPSs = getRandomGaussianMIPS(vmsNumber, SchedulingConstants.VM_MIPS_MEAN, SchedulingConstants.VM_MIPS_DEV);
+			MIPSs = getRandomGaussianMIPS(vmsNumber, SchedulingConstants.VM_MIPS_MEAN, SchedulingConstants.VM_MIPS_DEV);
 		
 		//Parameters for example in paper
-		//int[] MIPSs={780,700,610,980,570,670,860,510,680,800}; first time
-		int[] MIPSs={1280, 1300, 1000, 1020, 960, 1000};
+		//int[] MIPSs={1280, 1300, 1000, 1020, 960, 1000};
 			
 		for (int i = 0; i < vmsNumber; i++) {
 			int vmType = i / (int) Math.ceil((double) vmsNumber / SchedulingConstants.VM_TYPES);
@@ -200,23 +199,19 @@ public class SchedulingHelper {
 		long outputSize = 300;
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 		
-		//int[] startTime = new int[num_cloudlets];
-		//int[] execution_time = new int[num_cloudlets];
+		int[] startTime = new int[num_cloudlets];
+		int[] execution_time = new int[num_cloudlets];
 		//if(SchedulingConstants.DISTRIBUTION.equals("Uniformly")){
 			//startTime = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_START_TIME_MIN, SchedulingConstants.CLOUDLET_START_TIME_MAX);
-		//	execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
+			execution_time = getRandomIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MIN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_MAX);
 		//}else if(SchedulingConstants.DISTRIBUTION.equals("Gaussion")){
-		//	startTime = getArrivalTime(200, num_cloudlets);
+			startTime = getArrivalTime(200, num_cloudlets);
 		//	execution_time = getRandomGaussianIntegers(num_cloudlets, SchedulingConstants.CLOUDLET_EXECUTION_TIME_MEAN,  SchedulingConstants.CLOUDLET_EXECUTION_TIME_DEV);
 		//}
 		
 		//Parameters for example in paper
-		//first time
-		//int[] startTime =      { 0, 0, 1, 2, 4, 5, 7, 8,10,12};
-		//int[] execution_time = { 6,10, 8, 9,10, 8, 9, 6, 7, 9};
-		
-		int[] startTime =      {0, 2, 4, 7, 9,10};
-		int[] execution_time = {8, 8, 6, 6, 7, 8};
+		//int[] startTime =      {0, 2, 4, 7, 9,10};
+		//int[] execution_time = {8, 8, 5, 6, 7, 8};
 
 		Log.printLine("My all cloudlets time information is as follow :");
 		SchedulingCloudlet cloudlet= null;
@@ -245,7 +240,7 @@ public class SchedulingHelper {
 	}
 	
 	public static int[] getArrivalTime(int seed, int num){
-		double lambda=num*1.0/24/36;//3600
+		double lambda=num*1.0/24/3600;
 		Random rand=new Random(seed);
 		int[] times=new int[num];
 		times[0]=(int) (-Math.log(rand.nextDouble())/lambda);
